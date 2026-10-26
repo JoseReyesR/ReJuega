@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
@@ -25,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,9 +53,11 @@ import pe.rejuega.app.utils.UiState
 @Composable
 fun HomeScreen(
     viewModel: CampaignViewModel,
-    // (nuevo) Lambda que se ejecutará cuando el usuario toque una campaña.
-    // (nuevo) En el Paso 5 la conectaremos con la navegación a la pantalla de detalle.
-    onCampaignClick: (Campaign) -> Unit = {}
+    // (modificado) Antes tenía un lambda vacío por defecto.
+    // (modificado) Ahora se pasa la acción real desde AppNavigation.
+    onCampaignClick: (Campaign) -> Unit,
+    // (nuevo) Acción para abrir la pantalla de trazabilidad (HU-06).
+    onTraceabilityClick: () -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -80,11 +84,22 @@ fun HomeScreen(
                         )
                     }
                 },
+
                 // (nuevo) Colores de la barra superior: Usamos el color primario (Verde Esperanza).
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                ),
+                actions = {
+                    IconButton(onClick = onTraceabilityClick) {
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = "Ver trazabilidad de mis donaciones",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+
             )
         }
     ) { paddingValues ->

@@ -21,7 +21,15 @@ import pe.rejuega.app.ui.viewmodel.CampaignViewModelFactory
 import pe.rejuega.app.ui.viewmodel.JugueteViewModel
 import pe.rejuega.app.ui.viewmodel.JugueteViewModelFactory
 
+
+
 // (modificado) Composable principal de navegación.
+
+// (modificado) Archivo: AppNavigation.kt - imports
+// (nuevo) Pantalla y ViewModel de trazabilidad.
+import pe.rejuega.app.ui.screens.TraceabilityScreen
+import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
+import pe.rejuega.app.ui.viewmodel.TraceabilityViewModelFactory
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -38,11 +46,15 @@ fun AppNavigation(
                 factory = CampaignViewModelFactory(appContainer.campaignRepository)
             )
 
+            // (modificado) Archivo: AppNavigation.kt - composable(Routes.HOME)
             HomeScreen(
                 viewModel = campaignViewModel,
                 onCampaignClick = { campaign ->
-                    // (modificado) Ahora sí navegamos al detalle con el ID de la campaña.
                     navController.navigate(Routes.campaignDetail(campaign.id))
+                },
+                // (nuevo) Conecta el ícono de historial con la nueva pantalla.
+                onTraceabilityClick = {
+                    navController.navigate(Routes.TRACEABILITY)
                 }
             )
         }
@@ -105,6 +117,23 @@ fun AppNavigation(
                 },
                 onSaved = {
                     // (nuevo) Después de guardar, regresamos a la pantalla anterior.
+                    navController.popBackStack()
+                }
+            )
+        }
+        // (nuevo) Destino: trazabilidad de donaciones (HU-06).
+        composable(Routes.TRACEABILITY) {
+
+            // (nuevo) Creamos el ViewModel inyectando el repositorio de juguetes.
+            val traceabilityViewModel: TraceabilityViewModel = viewModel(
+                factory = TraceabilityViewModelFactory(appContainer.jugueteRepository)
+            )
+
+            // (nuevo) Renderizamos la pantalla.
+            TraceabilityScreen(
+                viewModel = traceabilityViewModel,
+                onBackClick = {
+                    // (nuevo) Regresamos al Home sin duplicar la pantalla en la pila.
                     navController.popBackStack()
                 }
             )
