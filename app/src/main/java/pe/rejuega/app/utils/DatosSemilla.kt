@@ -1,15 +1,17 @@
 // (modificado) Archivo: DatosSemilla.kt
 // (modificado) Descripción: Datos hardcodeados para probar la UI y poblar Room inicialmente.
-// (modificado) Motivo: Alineación con los nombres de entidades (Español + Campaign).
+// (modificado) Cambio: Se agrega lista de juguetes de prueba para la campaña 1.
 package pe.rejuega.app.utils
 
 import pe.rejuega.app.data.local.Campaign
+import pe.rejuega.app.data.local.Juguete
 import pe.rejuega.app.data.local.MaterialEco
 import pe.rejuega.app.data.local.PuntoEntrega
 
+// (modificado) Objeto singleton con datos de prueba.
 object DatosSemilla {
 
-    // (modificado) Lista de campañas de prueba (Alineado a ODS 12)
+    // (modificado) Lista de campañas de prueba.
     val listaCampaigns = listOf(
         Campaign(
             id = 1,
@@ -31,7 +33,7 @@ object DatosSemilla {
         )
     )
 
-    // (modificado) Lista de puntos de entrega físicos (Para el Mapa de Google Maps)
+    // (modificado) Lista de puntos de entrega físicos.
     val listaPuntosEntrega = listOf(
         PuntoEntrega(
             id = 1,
@@ -53,19 +55,51 @@ object DatosSemilla {
         )
     )
 
-    // (modificado) Datos de impacto ambiental (Simula lo que luego vendrá de MockAPI.io)
+    // (modificado) Lista de materiales ecológicos.
     val listaMaterialesEco = listOf(
         MaterialEco(
             id = "plastico",
             tipoMaterial = "Plástico (ABS/Polietileno)",
             co2AhorradoKg = 2.5,
-            descripcionImpacto = "Reutilizar este juguete evita la emisión de 2.5 kg de CO2 equivalents a la fabricación de uno nuevo."
+            descripcionImpacto = "Reutilizar este juguete evita la emisión de 2.5 kg de CO2 equivalente a la fabricación de uno nuevo."
         ),
         MaterialEco(
             id = "madera",
             tipoMaterial = "Madera y textiles",
             co2AhorradoKg = 1.8,
             descripcionImpacto = "La madera procesada requiere mucha energía. ¡Gracias por salvar árboles y reducir huella!"
+        )
+    )
+
+    // (nuevo) Lista de juguetes hardcodeados para probar la base de datos local.
+    // (nuevo) Estos juguetes pertenecen a la campaña 1.
+    val listaJuguetes = listOf(
+        Juguete(
+            id = 1,
+            campaignId = 1,
+            nombre = "Carrito de madera",
+            descripcion = "Carrito artesanal de madera en buen estado. Sin piezas sueltas.",
+            estado = "Buen Estado",
+            fotoUrl = "https://images.unsplash.com/photo-1509470475797-537576c435a5",
+            estadoTrazabilidad = "Pendiente"
+        ),
+        Juguete(
+            id = 2,
+            campaignId = 1,
+            nombre = "Muñeco de peluche",
+            descripcion = "Peluche limpio, sin roturas y recién lavado.",
+            estado = "Nuevo",
+            fotoUrl = "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4",
+            estadoTrazabilidad = "En Revision"
+        ),
+        Juguete(
+            id = 3,
+            campaignId = 1,
+            nombre = "Bloques de construcción",
+            descripcion = "Set completo de bloques plásticos. Incluye caja original.",
+            estado = "Buen Estado",
+            fotoUrl = "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9",
+            estadoTrazabilidad = "Aprobado"
         )
     )
 }

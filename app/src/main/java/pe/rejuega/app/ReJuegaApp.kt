@@ -1,32 +1,55 @@
-// (nuevo) Archivo: ReJuegaApp.kt
-// (nuevo) Descripción: Clase Application que se ejecuta una sola vez cuando la app arranca.
-// (nuevo) Sirve para inicializar dependencias globales (Base de datos, Repositories).
-// (nuevo) Nota: Debe ser registrada en el AndroidManifest.xml para que Android la reconozca.
+// (modificado) Archivo: ReJuegaApp.kt
+// (modificado) Descripción: Clase Application que inicializa dependencias y datos semilla.
+// (modificado) Cambio: Se agrega JugueteRepository y lanzamiento de inicialización asíncrona.
 package pe.rejuega.app
 
 import android.app.Application
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import pe.rejuega.app.data.local.ReJuegaDatabase
 import pe.rejuega.app.data.repository.CampaignRepository
+import pe.rejuega.app.data.repository.JugueteRepository
 import pe.rejuega.app.di.AppContainer
 
-// (nuevo) La clase Application es el punto de entrada global de la app.
-// (nuevo) Android la crea ANTES de cualquier Activity o pantalla.
+// (modificado) Clase Application personalizada.
 class ReJuegaApp : Application() {
 
-    // (nuevo) Contenedor que guardará todas nuestras dependencias (Repositories, DAOs, etc.)
+    // (modificado) Contenedor global de dependencias.
     lateinit var container: AppContainer
 
-    // (nuevo) Este método se llama automáticamente cuando la app arranca por primera vez.
+    // (nuevo) Scope de corrutinas para tareas de inicialización de la app.
+    private val applicationScope = CoroutineScope(SupervisorJob())
+
     override fun onCreate() {
         super.onCreate()
 
-        // (nuevo) 1. Inicializamos la base de datos Room usando el contexto de la aplicación.
+        // (modificado) Inicializamos la base de datos Room.
         val database = ReJuegaDatabase.getDatabase(this)
 
-        // (nuevo) 2. Creamos el Repository pasándole el DAO de campañas.
+        // (modificado) Creamos repositorios.
         val campaignRepository = CampaignRepository(database.campaignDao())
+        val jugueteRepository = JugueteRepository(database.jugueteDao())
 
-        // (nuevo) 3. Guardamos el Repository en el contenedor para acceder desde cualquier ViewModel.
-        container = AppContainer(campaignRepository = campaignRepository)
+        // (modificado) Guardamos dependencias en el contenedor.
+        container = AppContainer(
+            campaignRepository = campaignRepository,
+            jugueteRepository = jugueteRepository
+        )
+
+        // (nuevo) Insertamos datos hardcodeados al iniciar la app.
+        inicializarDatosSemilla()
+    }
+
+    // (nuevo) Función para cargar datos semilla en segundo plano.
+    private fun inicializarDatosSemilla() {
+        applicationScope.launch {
+            try {
+                container.campaignRepository.inicializarDatosSemilla()
+                container.jugueteRepository.inicializarDatosSemilla()
+            } catch (e: Exception) {
+                println("Error inicializando datos semilla: ${e.message}")
+            }
+        }
     }
 }

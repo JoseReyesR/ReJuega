@@ -1,18 +1,16 @@
-// (nuevo) Archivo: AppContainer.kt
-// (nuevo) Descripción: Contenedor simple de dependencias (Inyección de Dependencias manual).
-// (nuevo) Motivo: Evitamos usar Hilt/Dagger por ahora para mantener el proyecto simple y académico.
-// (nuevo) En este contenedor guardamos los Repositories que usarán los ViewModels.
+// (modificado) Archivo: AppContainer.kt
+// (modificado) Descripción: Contenedor simple de dependencias.
+// (modificado) Cambio: Se agrega JugueteRepository.
 package pe.rejuega.app.di
 
 import pe.rejuega.app.data.repository.CampaignRepository
+import pe.rejuega.app.data.repository.JugueteRepository
 
-// (nuevo) Clase que agrupa todas las dependencias que la app necesita.
-// (nuevo) Se instancia una sola vez en la clase Application (ReJuegaApp).
+// (modificado) Contenedor manual de dependencias para mantener el proyecto simple.
 class AppContainer(
-    // (nuevo) Repository de campañas: será usado por el ViewModel de la pantalla Home.
-    val campaignRepository: CampaignRepository
-    // (nuevo) Aquí agregaremos más repositories en futuros pasos:
-    // val jugueteRepository: JugueteRepository,
-    // val puntoEntregaRepository: PuntoEntregaRepository,
-    // val materialEcoRepository: MaterialEcoRepository
+    // (modificado) Repositorio de campañas.
+    val campaignRepository: CampaignRepository,
+
+    // (nuevo) Repositorio de juguetes.
+    val jugueteRepository: JugueteRepository
 )

@@ -1,56 +1,113 @@
-// (nuevo) Archivo: AppNavigation.kt
-// (nuevo) Descripción: NavHost que define todas las pantallas de la app y cómo navegar entre ellas.
-// (nuevo) Usa la librería Navigation Compose (agregada en el Paso 2).
-// (nuevo) Por ahora solo está implementada la pantalla Home. Las demás se agregarán en futuros pasos.
+// (modificado) Archivo: AppNavigation.kt
+// (modificado) Descripción: NavHost principal de la app.
+// (modificado) Cambio: Se conectan Home, Detalle de campaña y Registro de juguete.
 package pe.rejuega.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import pe.rejuega.app.di.AppContainer
+import pe.rejuega.app.ui.screens.CampaignDetailScreen
 import pe.rejuega.app.ui.screens.HomeScreen
+import pe.rejuega.app.ui.screens.RegisterToyScreen
+import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModel
+import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModelFactory
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
+import pe.rejuega.app.ui.viewmodel.CampaignViewModelFactory
+import pe.rejuega.app.ui.viewmodel.JugueteViewModel
+import pe.rejuega.app.ui.viewmodel.JugueteViewModelFactory
 
-// (nuevo) Composable principal de navegación.
-// (nuevo) Recibe el NavHostController (que gestiona la pila de pantallas) y el ViewModel de campañas.
+// (modificado) Composable principal de navegación.
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    campaignViewModel: CampaignViewModel
+    appContainer: AppContainer
 ) {
-    // (nuevo) NavHost es el contenedor de todas las pantallas (destinos) de la app.
-    // (nuevo) startDestination indica cuál es la primera pantalla que se muestra al abrir la app.
     NavHost(
         navController = navController,
-        // (nuevo) Por ahora, la app arranca directamente en Home.
-        // (nuevo) En el Sprint 5 (Firebase Auth), cambiaremos esto para arrancar en LOGIN.
         startDestination = Routes.HOME
     ) {
 
-        // (nuevo) Destino: Pantalla Home (lista de campañas).
-        // (nuevo) La ruta está definida en Routes.HOME ("home").
+        // (modificado) Pantalla Home.
         composable(Routes.HOME) {
-            // (nuevo) Renderizamos la pantalla Home pasando el ViewModel.
+            val campaignViewModel: CampaignViewModel = viewModel(
+                factory = CampaignViewModelFactory(appContainer.campaignRepository)
+            )
+
             HomeScreen(
                 viewModel = campaignViewModel,
-                // (nuevo) Lambda que se ejecuta cuando el usuario toca una campaña.
-                // (nuevo) Por ahora no navega a ningún lado (la implementaremos en el Paso 5).
-                // (nuevo) En el Paso 5, esta lambda llamará a navController.navigate(Routes.campaignDetail(id))
                 onCampaignClick = { campaign ->
-                    // (nuevo) TODO: Implementar navegación al detalle en el Paso 5.
-                    // (nuevo) Por ahora solo imprimimos en el log para verificar que el clic funciona.
-                    println("Campaña seleccionada: ${campaign.titulo}")
+                    // (modificado) Ahora sí navegamos al detalle con el ID de la campaña.
+                    navController.navigate(Routes.campaignDetail(campaign.id))
                 }
             )
         }
 
-        // (nuevo) En futuros pasos agregaremos más destinos aquí:
-        // composable(Routes.LOGIN) { LoginScreen() }
-        // composable(Routes.CAMPAIGN_DETAIL) { CampaignDetailScreen() }
-        // composable(Routes.REGISTER_TOY) { RegisterToyScreen() }
-        // composable(Routes.TRACEABILITY) { TraceabilityScreen() }
-        // composable(Routes.GALLERY) { GalleryScreen() }
-        // composable(Routes.PROFILE) { ProfileScreen() }
-        // composable(Routes.ADMIN_PANEL) { AdminPanelScreen() }
+        // (modificado) Pantalla Detalle de campaña.
+        composable(
+            route = Routes.CAMPAIGN_DETAIL,
+            arguments = listOf(
+                navArgument("campaignId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+
+            // (modificado) Recuperamos el ID de campaña recibido como argumento.
+            val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+
+            val detailViewModel: CampaignDetailViewModel = viewModel(
+                factory = CampaignDetailViewModelFactory(
+                    appContainer.campaignRepository,
+                    campaignId
+                )
+            )
+
+            CampaignDetailScreen(
+                viewModel = detailViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onDonateClick = {
+                    navController.navigate(Routes.registerToy(campaignId))
+                }
+            )
+        }
+
+        // (nuevo) Pantalla Registro de juguete.
+        composable(
+            route = Routes.REGISTER_TOY,
+            arguments = listOf(
+                navArgument("campaignId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+
+            // (nuevo) Recuperamos el ID de campaña para asociar el juguete.
+            val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+
+            val jugueteViewModel: JugueteViewModel = viewModel(
+                factory = JugueteViewModelFactory(
+                    appContainer.jugueteRepository,
+                    campaignId
+                )
+            )
+
+            RegisterToyScreen(
+                viewModel = jugueteViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onSaved = {
+                    // (nuevo) Después de guardar, regresamos a la pantalla anterior.
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }

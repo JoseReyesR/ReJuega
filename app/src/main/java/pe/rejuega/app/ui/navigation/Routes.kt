@@ -1,40 +1,42 @@
-// (nuevo) Archivo: Routes.kt
-// (nuevo) Descripción: Definición centralizada de las rutas de navegación de la app.
-// (nuevo) Cada constante representa una pantalla. Se usarán en el NavHost.
-// (nuevo) Corresponde a la arquitectura MVVM: La navegación es parte de la capa UI.
+// (modificado) Archivo: Routes.kt
+// (modificado) Descripción: Rutas de navegación de la app ReJuega.
+// (modificado) Cambio: Se agrega parámetro campaignId a la ruta de registro de juguetes.
 package pe.rejuega.app.ui.navigation
 
-// (nuevo) Objeto que agrupa todas las rutas de la app como constantes de texto.
-// (nuevo) Usar constantes evita errores tipográficos y facilita el mantenimiento.
+// (modificado) Objeto central con todas las rutas de la aplicación.
 object Routes {
-    // (nuevo) Pantalla de Login (Sprint 5 - Firebase Auth)
+
+    // (modificado) Pantalla de Login. Se usará en Sprint 5 con Firebase Auth.
     const val LOGIN = "login"
 
-    // (nuevo) Pantalla Home: Lista de campañas activas (Sprint 2)
+    // (modificado) Pantalla Home: lista de campañas.
     const val HOME = "home"
 
-    // (nuevo) Pantalla Detalle de Campaña: Información completa de una campaña (Sprint 2)
-    // (nuevo) El parámetro {campaignId} se reemplazará con el ID real de la campaña al navegar.
+    // (modificado) Detalle de campaña. Recibe el ID de la campaña como parámetro.
     const val CAMPAIGN_DETAIL = "campaign_detail/{campaignId}"
 
-    // (nuevo) Pantalla de Registro de Juguete: Formulario para proponer una donación (Sprint 2)
-    const val REGISTER_TOY = "register_toy"
+    // (modificado) Registro de juguete. Ahora recibe el ID de la campaña seleccionada.
+    const val REGISTER_TOY = "register_toy/{campaignId}"
 
-    // (nuevo) Pantalla de Trazabilidad: Historial de estados de mis donaciones (Sprint 5)
+    // (modificado) Pantalla de trazabilidad. Se implementará más adelante.
     const val TRACEABILITY = "traceability"
 
-    // (nuevo) Pantalla de Galería: Evidencias fotográficas de entregas (Sprint 5)
+    // (modificado) Galería de evidencias. Se implementará más adelante.
     const val GALLERY = "gallery"
 
-    // (nuevo) Pantalla de Perfil: Datos del usuario y huella ecológica acumulada (Sprint 4)
+    // (modificado) Perfil del usuario. Se implementará más adelante.
     const val PROFILE = "profile"
 
-    // (nuevo) Pantalla de Panel de Administración: Solo visible para rol Administrador (Sprint 5)
+    // (modificado) Panel de administración. Se implementará más adelante.
     const val ADMIN_PANEL = "admin_panel"
 
-    // (nuevo) Función auxiliar para construir la ruta de detalle con el ID real.
-    // (nuevo) Ejemplo: campaignDetail(5) retorna "campaign_detail/5"
+    // (modificado) Función auxiliar para construir la ruta de detalle de campaña.
     fun campaignDetail(campaignId: Long): String {
         return "campaign_detail/$campaignId"
+    }
+
+    // (nuevo) Función auxiliar para construir la ruta de registro de juguete.
+    fun registerToy(campaignId: Long): String {
+        return "register_toy/$campaignId"
     }
 }
