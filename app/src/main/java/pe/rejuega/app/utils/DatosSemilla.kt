@@ -73,7 +73,12 @@ object DatosSemilla {
 
     // (nuevo) Lista de juguetes hardcodeados para probar la base de datos local.
     // (nuevo) Estos juguetes pertenecen a la campaña 1.
+    // (modificado) Archivo: DatosSemilla.kt - bloque listaJuguetes
+// (modificado) Motivo: Cubrir los 4 estados de trazabilidad para pruebas visuales.
+// (modificado) Se agrega una donación de la campaña 2 para probar la relación campaignId.
     val listaJuguetes = listOf(
+
+        // (modificado) Juguete 1: recién registrado, aún no lo ve la ONG.
         Juguete(
             id = 1,
             campaignId = 1,
@@ -83,6 +88,8 @@ object DatosSemilla {
             fotoUrl = "https://images.unsplash.com/photo-1509470475797-537576c435a5",
             estadoTrazabilidad = "Pendiente"
         ),
+
+        // (modificado) Juguete 2: la ONG ya lo está revisando.
         Juguete(
             id = 2,
             campaignId = 1,
@@ -92,6 +99,8 @@ object DatosSemilla {
             fotoUrl = "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4",
             estadoTrazabilidad = "En Revision"
         ),
+
+        // (modificado) Juguete 3: aprobado, falta llevarlo al punto de entrega.
         Juguete(
             id = 3,
             campaignId = 1,
@@ -100,6 +109,28 @@ object DatosSemilla {
             estado = "Buen Estado",
             fotoUrl = "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9",
             estadoTrazabilidad = "Aprobado"
+        ),
+
+        // (nuevo) Juguete 4: ciclo completo, ya fue entregado a un niño.
+        Juguete(
+            id = 4,
+            campaignId = 1,
+            nombre = "Pelota de fútbol infantil",
+            descripcion = "Pelota inflada y sin pinchazos. Lista para jugar.",
+            estado = "Buen Estado",
+            fotoUrl = "https://images.unsplash.com/photo-1575361204480-aadea25e6e68",
+            estadoTrazabilidad = "Entregado"
+        ),
+
+        // (nuevo) Juguete 5: pertenece a la segunda campaña (ReJuega en tu Colegio).
+        Juguete(
+            id = 5,
+            campaignId = 2,
+            nombre = "Caja de colores y cuadernos",
+            descripcion = "Material escolar y juego creativo en buen estado.",
+            estado = "Nuevo",
+            fotoUrl = "https://images.unsplash.com/photo-1513364776144-60967b0f800f",
+            estadoTrazabilidad = "Pendiente"
         )
     )
 }

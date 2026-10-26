@@ -81,4 +81,8 @@ dependencies {
     // (nuevo) La usaremos para mostrar las fotos de las campañas y juguetes
     implementation("io.coil-kt:coil-compose:2.5.0")
 
+    // (nuevo) Paquete completo de íconos Material (History, DateRange, VerifiedUser, etc.)
+    // (nuevo) Sin esta dependencia aparece: Unresolved reference: DateRange / History
+    implementation("androidx.compose.material:material-icons-extended:1.7.4")
+
 }

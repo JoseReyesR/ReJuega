@@ -17,6 +17,12 @@ interface JugueteDao {
     @Query("SELECT * FROM juguetes ORDER BY id DESC")
     fun obtenerJuguetes(): Flow<List<Juguete>>
 
+    // (modificado) Archivo: JugueteDao.kt - dentro de la interfaz
+// (nuevo) Busca un juguete por su ID para validar la transición de estado (RB-02).
+// (nuevo) Es suspend porque la consulta a SQLite se ejecuta fuera del hilo principal (RB-07).
+    @Query("SELECT * FROM juguetes WHERE id = :id LIMIT 1")
+    suspend fun obtenerJuguetePorId(id: Long): Juguete?
+
     // (modificado) Obtiene los juguetes asociados a una campaña específica.
     @Query("SELECT * FROM juguetes WHERE campaignId = :campaignId")
     fun obtenerJuguetesPorCampaign(campaignId: Long): Flow<List<Juguete>>
@@ -34,4 +40,6 @@ interface JugueteDao {
     // (nuevo) Se usa IGNORE para no sobrescribir juguetes si ya existen con el mismo ID.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertarJuguetesSeed(juguetes: List<Juguete>)
+
+
 }

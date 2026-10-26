@@ -11,7 +11,10 @@ import androidx.room.RoomDatabase
 // (modificado) Se listan las entidades con sus nombres finales
 @Database(
     entities = [Campaign::class, Juguete::class, PuntoEntrega::class, MaterialEco::class],
-    version = 3, // (modificado) Subimos la versión a 3 porque cambió la estructura/nombres
+    // (modificado) Versión 4: se actualizaron los datos semilla de trazabilidad.
+// (modificado) Atencion: borrará los juguetes registrados manualmente en el emulador.
+// (modificado) En producción se usará una migración real con Migrations().
+    version = 4, // (modificado) Subimos la versión a 3 porque cambió la estructura/nombres
     exportSchema = false
 )
 abstract class ReJuegaDatabase : RoomDatabase() {
