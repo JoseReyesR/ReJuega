@@ -46,6 +46,8 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
@@ -74,4 +76,9 @@ dependencies {
 
     // (nuevo) Corrutinas: Para operaciones asíncronas (Red y BD) sin congelar la app
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // (nuevo) Coil: Librería para cargar imágenes desde URL en Jetpack Compose
+    // (nuevo) La usaremos para mostrar las fotos de las campañas y juguetes
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
 }
