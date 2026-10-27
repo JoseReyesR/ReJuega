@@ -6,6 +6,10 @@ package pe.rejuega.app.data.remote
 import retrofit2.http.GET
 import retrofit2.http.Path
 
+// (nuevo) Import necesario para enviar datos en el cuerpo de la petición HTTP.
+import retrofit2.http.Body
+import retrofit2.http.POST
+
 // (nuevo) Interfaz que Retrofit usa para generar automáticamente el cliente HTTP.
 interface MaterialJugueteService {
 
@@ -21,4 +25,10 @@ interface MaterialJugueteService {
     // (nuevo) Útil para mostrar el detalle de impacto de un juguete específico.
     @GET("materiales_juguetes/{id}")
     suspend fun obtenerMaterialPorId(@Path("id") id: String): MaterialJugueteDto
+
+    // (nuevo) Registra el impacto ecológico acumulado del usuario en MockAPI.
+    // (nuevo) @POST define que es una petición HTTP POST.
+    // (nuevo) @Body indica que el objeto ImpactoDonacionDto se enviará como JSON en el cuerpo.
+    @POST("impacto_donaciones")
+    suspend fun registrarImpacto(@Body impacto: ImpactoDonacionDto): ImpactoDonacionDto
 }

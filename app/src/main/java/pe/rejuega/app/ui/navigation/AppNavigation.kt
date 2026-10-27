@@ -34,6 +34,10 @@ import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
 import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModel
 import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModelFactory
 import pe.rejuega.app.data.repository.MaterialEcoRepository
+// (modificado) Archivo: AppNavigation.kt - imports
+import pe.rejuega.app.ui.screens.PerfilScreen
+import pe.rejuega.app.ui.viewmodel.PerfilViewModel
+import pe.rejuega.app.ui.viewmodel.PerfilViewModelFactory
 
 
 // (modificado) Composable principal de navegación.
@@ -108,6 +112,10 @@ fun AppNavigation(
                 // (nuevo) Conecta el ícono de impacto con la nueva pantalla.
                 onImpactoClick = {
                     navController.navigate(Routes.IMPACTO_AMBIENTAL)
+                },
+                // (nuevo) Conecta el ícono de perfil con la nueva pantalla.
+                onPerfilClick = {
+                    navController.navigate(Routes.PERFIL)
                 }
             )
         }
@@ -206,5 +214,29 @@ fun AppNavigation(
             )
         }
 
+
+
+        // (nuevo) Destino: Pantalla de Perfil (HU-12).
+        composable(Routes.PERFIL) {
+
+            // (nuevo) Obtenemos el UID del usuario actual de Firebase para pasarlo al ViewModel.
+            val uidUsuario = FirebaseAuth.getInstance().currentUser?.uid ?: "usuario_anonimo"
+
+            // (nuevo) Creamos el ViewModel inyectando los repositorios y el UID.
+            val perfilViewModel: PerfilViewModel = viewModel(
+                factory = PerfilViewModelFactory(
+                    jugueteRepository = appContainer.jugueteRepository,
+                    materialEcoRepository = pe.rejuega.app.data.repository.MaterialEcoRepository(),
+                    uidUsuario = uidUsuario
+                )
+            )
+
+            PerfilScreen(
+                viewModel = perfilViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }

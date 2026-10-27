@@ -33,6 +33,10 @@ object Routes {
     // (nuevo) Pantalla de impacto ambiental (HU-11, ODS 12).
     const val IMPACTO_AMBIENTAL = "impacto_ambiental"
 
+    // (modificado) Archivo: Routes.kt - dentro del objeto Routes
+    // (nuevo) Pantalla de Perfil e Impacto Acumulado (HU-12).
+    const val PERFIL = "perfil"
+
     // (modificado) Función auxiliar para construir la ruta de detalle de campaña.
     fun campaignDetail(campaignId: Long): String {
         return "campaign_detail/$campaignId"

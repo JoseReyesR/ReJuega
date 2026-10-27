@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import pe.rejuega.app.data.local.Campaign
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
 import pe.rejuega.app.utils.UiState
+import androidx.compose.material.icons.filled.Person
 
 // (nuevo) Anotación requerida para usar TopAppBar con Material 3
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +61,9 @@ fun HomeScreen(
     onTraceabilityClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     // (nuevo) Acción para abrir la pantalla de impacto ambiental.
-    onImpactoClick: () -> Unit = {}
+    onImpactoClick: () -> Unit = {},
+    // (nuevo) Acción para abrir la pantalla de Perfil.
+    onPerfilClick: () -> Unit = {}
 
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
@@ -112,7 +115,14 @@ fun HomeScreen(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-
+                    // ... (nuevo) Agregar antes del IconButton de ExitToApp ...
+                    IconButton(onClick = onPerfilClick) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Ver mi perfil y huella ecológica",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                     IconButton(onClick = onLogoutClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

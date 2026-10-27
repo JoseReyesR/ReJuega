@@ -9,6 +9,8 @@ import pe.rejuega.app.data.remote.MaterialJugueteDto
 import pe.rejuega.app.data.remote.RetrofitClient
 import retrofit2.HttpException
 import java.io.IOException
+// (nuevo) Import necesario para el DTO de impacto.
+import pe.rejuega.app.data.remote.ImpactoDonacionDto
 
 // (nuevo) Repositorio que consume el recurso materiales_juguetes de MockAPI.
 class MaterialEcoRepository {
@@ -48,6 +50,41 @@ class MaterialEcoRepository {
             Result.success(material)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+
+    // (nuevo) Envía el impacto acumulado del usuario a MockAPI mediante POST.
+    // (nuevo) Retorna un Result que encapsula el éxito o el fallo de la operación.
+    suspend fun registrarImpactoAcumulado(
+        uidUsuario: String,
+        co2Total: Double,
+        fecha: String
+    ): Result<ImpactoDonacionDto> {
+        return try {
+            // (nuevo) Creamos el DTO con los datos del usuario.
+            val impactoDto = ImpactoDonacionDto(
+                uidUsuario = uidUsuario,
+                co2TotalKg = co2Total,
+                fechaRegistro = fecha
+            )
+
+            // (nuevo) Ejecutamos la llamada suspendida a la API.
+            val respuesta = service.registrarImpacto(impactoDto)
+
+            // (nuevo) Si llega aquí, la API respondió con éxito (código 200 o 201).
+            Result.success(respuesta)
+        } catch (e: IOException) {
+            // (nuevo) Error de conectividad: sin internet, timeout, DNS, modo avión.
+            // (nuevo) Lanzamos una excepción personalizada con mensaje amigable.
+            Result.failure(Exception("Sin conexión a internet. Verifica tu red e intenta de nuevo."))
+        } catch (e: HttpException) {
+            // (nuevo) Error HTTP: el servidor respondió pero con un código de error (4xx, 5xx).
+            // (nuevo) Ejemplo: 400 Bad Request, 500 Internal Server Error.
+            Result.failure(Exception("Error del servidor (${e.code()}). Intenta más tarde."))
+        } catch (e: Exception) {
+            // (nuevo) Cualquier otro error inesperado (ej. error de parseo JSON).
+            Result.failure(Exception("Error inesperado al registrar el impacto."))
         }
     }
 }
