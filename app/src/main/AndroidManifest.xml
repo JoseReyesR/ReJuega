@@ -4,8 +4,9 @@
 
     <!-- (nuevo) Permiso para acceder a Internet (necesario para Coil y Firebase) -->
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <!-- (nuevo) Permitir tráfico de red  -->
     <application
+        android:usesCleartextTraffic="true"
         android:name=".ReJuegaApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

@@ -112,4 +112,13 @@ dependencies {
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 
+
+    // (nuevo) Retrofit: Cliente HTTP para consumir APIs REST
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+    // (nuevo) Converter Gson: Convierte JSON a objetos Kotlin automáticamente
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // (nuevo) OkHttp Logging Interceptor: Muestra las peticiones HTTP en Logcat para depurar
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }
