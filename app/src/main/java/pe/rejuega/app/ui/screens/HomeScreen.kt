@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
+// (nuevo) Ícono de hoja para impacto ambiental.
+import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,7 +58,10 @@ fun HomeScreen(
     viewModel: CampaignViewModel,
     onCampaignClick: (Campaign) -> Unit,
     onTraceabilityClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    // (nuevo) Acción para abrir la pantalla de impacto ambiental.
+    onImpactoClick: () -> Unit = {}
+
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -96,6 +101,14 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Default.History,
                             contentDescription = "Ver trazabilidad de mis donaciones",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    // (nuevo) Botón para acceder a la pantalla de impacto ambiental.
+                    IconButton(onClick = onImpactoClick) {
+                        Icon(
+                            imageVector = Icons.Default.Eco,
+                            contentDescription = "Ver impacto ambiental",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }

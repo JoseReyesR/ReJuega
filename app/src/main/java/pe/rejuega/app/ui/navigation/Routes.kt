@@ -30,6 +30,9 @@ object Routes {
     // (modificado) Panel de administración. Se implementará más adelante.
     const val ADMIN_PANEL = "admin_panel"
 
+    // (nuevo) Pantalla de impacto ambiental (HU-11, ODS 12).
+    const val IMPACTO_AMBIENTAL = "impacto_ambiental"
+
     // (modificado) Función auxiliar para construir la ruta de detalle de campaña.
     fun campaignDetail(campaignId: Long): String {
         return "campaign_detail/$campaignId"

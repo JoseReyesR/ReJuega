@@ -29,6 +29,13 @@ import pe.rejuega.app.ui.viewmodel.JugueteViewModelFactory
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModelFactory
 
+// (nuevo) Pantalla y ViewModel de impacto ambiental.
+import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
+import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModel
+import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModelFactory
+import pe.rejuega.app.data.repository.MaterialEcoRepository
+
+
 // (modificado) Composable principal de navegación.
 @Composable
 fun AppNavigation(
@@ -97,6 +104,10 @@ fun AppNavigation(
                             inclusive = true
                         }
                     }
+                },
+                // (nuevo) Conecta el ícono de impacto con la nueva pantalla.
+                onImpactoClick = {
+                    navController.navigate(Routes.IMPACTO_AMBIENTAL)
                 }
             )
         }
@@ -175,5 +186,25 @@ fun AppNavigation(
                 }
             )
         }
+        // (nuevo) Destino: Pantalla de impacto ambiental (HU-11, ODS 12).
+        composable(Routes.IMPACTO_AMBIENTAL) {
+
+            // (nuevo) Creamos el repositorio de materiales ecológicos.
+            val materialEcoRepository = MaterialEcoRepository()
+
+            // (nuevo) Creamos el ViewModel inyectando el repositorio.
+            val impactoViewModel: ImpactoAmbientalViewModel = viewModel(
+                factory = ImpactoAmbientalViewModelFactory(materialEcoRepository)
+            )
+
+            // (nuevo) Renderizamos la pantalla.
+            ImpactoAmbientalScreen(
+                viewModel = impactoViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
     }
 }
