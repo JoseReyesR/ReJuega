@@ -1,65 +1,107 @@
 // (modificado) Archivo: AppNavigation.kt
-// (modificado) Descripción: NavHost principal de la app.
-// (modificado) Cambio: Se conectan Home, Detalle de campaña y Registro de juguete.
+// (modificado) Descripción: NavHost principal de ReJuega.
+// (modificado) Cambio: Se agrega Login, sesión inicial y cierre de sesión.
 package pe.rejuega.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import pe.rejuega.app.di.AppContainer
 import pe.rejuega.app.ui.screens.CampaignDetailScreen
 import pe.rejuega.app.ui.screens.HomeScreen
+import pe.rejuega.app.ui.screens.LoginScreen
 import pe.rejuega.app.ui.screens.RegisterToyScreen
+import pe.rejuega.app.ui.screens.TraceabilityScreen
+import pe.rejuega.app.ui.viewmodel.AuthViewModel
+import pe.rejuega.app.ui.viewmodel.AuthViewModelFactory
 import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModelFactory
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignViewModelFactory
 import pe.rejuega.app.ui.viewmodel.JugueteViewModel
 import pe.rejuega.app.ui.viewmodel.JugueteViewModelFactory
-
-
-
-// (modificado) Composable principal de navegación.
-
-// (modificado) Archivo: AppNavigation.kt - imports
-// (nuevo) Pantalla y ViewModel de trazabilidad.
-import pe.rejuega.app.ui.screens.TraceabilityScreen
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModelFactory
+
+// (modificado) Composable principal de navegación.
 @Composable
 fun AppNavigation(
     navController: NavHostController,
     appContainer: AppContainer
 ) {
+
+    // (nuevo) Verificamos si Firebase ya tiene una sesión activa.
+    val existeSesion = remember {
+        FirebaseAuth.getInstance().currentUser != null
+    }
+
+    // (nuevo) Definimos la pantalla inicial según el estado de sesión.
+    val startDestination = if (existeSesion) {
+        Routes.HOME
+    } else {
+        Routes.LOGIN
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Routes.HOME
+        startDestination = startDestination
     ) {
 
-        // (modificado) Pantalla Home.
+        // (nuevo) Destino: Login.
+        composable(Routes.LOGIN) {
+
+            val authViewModel: AuthViewModel = viewModel(
+                factory = AuthViewModelFactory(appContainer.authRepository)
+            )
+
+            LoginScreen(
+                viewModel = authViewModel,
+                onAuthenticated = {
+                    // (nuevo) Después de autenticarse, vamos al Home.
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
+        // (modificado) Destino: Home.
         composable(Routes.HOME) {
+
             val campaignViewModel: CampaignViewModel = viewModel(
                 factory = CampaignViewModelFactory(appContainer.campaignRepository)
             )
 
-            // (modificado) Archivo: AppNavigation.kt - composable(Routes.HOME)
             HomeScreen(
                 viewModel = campaignViewModel,
                 onCampaignClick = { campaign ->
                     navController.navigate(Routes.campaignDetail(campaign.id))
                 },
-                // (nuevo) Conecta el ícono de historial con la nueva pantalla.
                 onTraceabilityClick = {
                     navController.navigate(Routes.TRACEABILITY)
+                },
+                // (nuevo) Cierre de sesión.
+                onLogoutClick = {
+                    appContainer.authRepository.cerrarSesion()
+
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.HOME) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
 
-        // (modificado) Pantalla Detalle de campaña.
+        // (modificado) Destino: Detalle de campaña.
         composable(
             route = Routes.CAMPAIGN_DETAIL,
             arguments = listOf(
@@ -69,7 +111,6 @@ fun AppNavigation(
             )
         ) { backStackEntry ->
 
-            // (modificado) Recuperamos el ID de campaña recibido como argumento.
             val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
 
             val detailViewModel: CampaignDetailViewModel = viewModel(
@@ -90,7 +131,7 @@ fun AppNavigation(
             )
         }
 
-        // (nuevo) Pantalla Registro de juguete.
+        // (modificado) Destino: Registro de juguete.
         composable(
             route = Routes.REGISTER_TOY,
             arguments = listOf(
@@ -100,7 +141,6 @@ fun AppNavigation(
             )
         ) { backStackEntry ->
 
-            // (nuevo) Recuperamos el ID de campaña para asociar el juguete.
             val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
 
             val jugueteViewModel: JugueteViewModel = viewModel(
@@ -116,24 +156,21 @@ fun AppNavigation(
                     navController.popBackStack()
                 },
                 onSaved = {
-                    // (nuevo) Después de guardar, regresamos a la pantalla anterior.
                     navController.popBackStack()
                 }
             )
         }
-        // (nuevo) Destino: trazabilidad de donaciones (HU-06).
+
+        // (modificado) Destino: Trazabilidad.
         composable(Routes.TRACEABILITY) {
 
-            // (nuevo) Creamos el ViewModel inyectando el repositorio de juguetes.
             val traceabilityViewModel: TraceabilityViewModel = viewModel(
                 factory = TraceabilityViewModelFactory(appContainer.jugueteRepository)
             )
 
-            // (nuevo) Renderizamos la pantalla.
             TraceabilityScreen(
                 viewModel = traceabilityViewModel,
                 onBackClick = {
-                    // (nuevo) Regresamos al Home sin duplicar la pantalla en la pila.
                     navController.popBackStack()
                 }
             )

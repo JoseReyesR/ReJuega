@@ -27,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,16 +49,14 @@ import pe.rejuega.app.utils.UiState
 
 // (nuevo) Anotación requerida para usar TopAppBar con Material 3
 @OptIn(ExperimentalMaterial3Api::class)
-// (nuevo) Composable principal de la pantalla Home.
-// (nuevo) Recibe el ViewModel y una función lambda para navegar al detalle de una campaña.
+// (modificado) Archivo: HomeScreen.kt - firma de HomeScreen
+// (nuevo) Se agrega onLogoutClick para cerrar sesión.
 @Composable
 fun HomeScreen(
     viewModel: CampaignViewModel,
-    // (modificado) Antes tenía un lambda vacío por defecto.
-    // (modificado) Ahora se pasa la acción real desde AppNavigation.
     onCampaignClick: (Campaign) -> Unit,
-    // (nuevo) Acción para abrir la pantalla de trazabilidad (HU-06).
-    onTraceabilityClick: () -> Unit = {}
+    onTraceabilityClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -90,11 +89,21 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
+                // (modificado) Archivo: HomeScreen.kt - actions del TopAppBar
+                // (nuevo) Se agrega botón de cierre de sesión.
                 actions = {
                     IconButton(onClick = onTraceabilityClick) {
                         Icon(
                             imageVector = Icons.Default.History,
                             contentDescription = "Ver trazabilidad de mis donaciones",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
+                    IconButton(onClick = onLogoutClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Cerrar sesión",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
