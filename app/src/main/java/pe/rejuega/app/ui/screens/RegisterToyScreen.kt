@@ -59,7 +59,9 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import pe.rejuega.app.ui.viewmodel.JugueteViewModel
 import pe.rejuega.app.utils.ImageUtils
-
+// (nuevo) Imports necesarios para el AlertDialog de confirmación.
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
 // (modificado) OptIn necesario para TopAppBar de Material 3.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,12 +137,7 @@ fun RegisterToyScreen(
         }
     }
 
-    // (modificado) Cuando el guardado sea exitoso, regresamos a la pantalla anterior.
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
-            onSaved()
-        }
-    }
+
 
     // (modificado) Estructura base de la pantalla.
     Scaffold(
@@ -384,5 +381,56 @@ fun RegisterToyScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    // (nuevo) AlertDialog de confirmación tras registrar exitosamente.
+    // Motivo: el usuario necesita ver un mensaje de éxito antes de salir.
+
+    if (uiState.isSuccess) {
+        AlertDialog(
+            // (nuevo) No permitimos cerrar el diálogo tocando fuera de él.
+            // (nuevo) El usuario DEBE presionar "Entendido" para continuar.
+            onDismissRequest = { },
+
+            // (nuevo) Ícono de verificación para reforzar el mensaje de éxito.
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Éxito",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+
+            // (nuevo) Título del diálogo.
+            title = {
+                Text(
+                    text = "¡Donación registrada!",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+
+            // (nuevo) Mensaje explicativo para el usuario.
+            // (nuevo) Se menciona el siguiente paso en el flujo de trazabilidad.
+            text = {
+                Text(
+                    text = "Tu juguete fue enviado correctamente a la ONG para su revisión.\n\n" +
+                            "Puedes seguir su estado desde la pantalla de trazabilidad."
+                )
+            },
+
+            // (nuevo) Botón de confirmación.
+            // (nuevo) Al presionarlo, se ejecuta onSaved() que navega de vuelta.
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // (nuevo) Aquí SÍ se navega de vuelta, pero solo después
+                        // (nuevo) de que el usuario haya visto y aceptado el mensaje.
+                        onSaved()
+                    }
+                ) {
+                    Text("Entendido")
+                }
+            }
+        )
     }
 }
