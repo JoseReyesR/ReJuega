@@ -53,4 +53,32 @@ object RetrofitClient {
     fun getMaterialJugueteService(): MaterialJugueteService {
         return retrofit.create(MaterialJugueteService::class.java)
     }
+
+    // (modificado) Archivo: RetrofitClient.kt - dentro del objeto RetrofitClient
+// (modificado) Cambio: Se agrega configuración para Cloudinary además de MockAPI.
+
+    // =====================================================================
+    // (nuevo) CONFIGURACIÓN PARA CLOUDINARY
+    // =====================================================================
+
+    // (nuevo) URL base de la API de Cloudinary.
+    // (nuevo) Es diferente a la de MockAPI, por eso creamos otra instancia de Retrofit.
+    private const val CLOUDINARY_BASE_URL = "https://api.cloudinary.com/"
+
+    // (nuevo) Instancia de Retrofit específica para Cloudinary.
+    // (nuevo) Reutilizamos el mismo okHttpClient (con logging y timeouts).
+    // (nuevo) by lazy significa que solo se crea cuando se usa por primera vez.
+    private val cloudinaryRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(CLOUDINARY_BASE_URL)
+            .client(okHttpClient) // (nuevo) Mismo cliente con logging y timeouts
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    // (nuevo) Método público para obtener el servicio de Cloudinary.
+    // (nuevo) El Repository lo llamará para subir imágenes.
+    fun getCloudinaryService(): CloudinaryService {
+        return cloudinaryRetrofit.create(CloudinaryService::class.java)
+    }
 }

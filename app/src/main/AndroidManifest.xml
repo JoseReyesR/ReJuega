@@ -5,6 +5,16 @@
     <!-- (nuevo) Permiso para acceder a Internet (necesario para Coil y Firebase) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- (nuevo) Permitir tráfico de red  -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- (nuevo) Permiso de cámara para tomar fotos de juguetes (HU-05, RN-06) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- (nuevo) Indicamos que la app usa cámara pero no es obligatoria para instalar. -->
+    <!-- (nuevo) Así la app puede instalarse en dispositivos sin cámara (ej. algunos emuladores). -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <application
         android:usesCleartextTraffic="true"
         android:name=".ReJuegaApp"
@@ -30,6 +40,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- (nuevo) FileProvider necesario para que la cámara del sistema guarde -->
+        <!-- (nuevo) la foto en un archivo temporal de nuestra app de forma segura. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

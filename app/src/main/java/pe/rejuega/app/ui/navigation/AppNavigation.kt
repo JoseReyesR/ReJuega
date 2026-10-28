@@ -39,8 +39,13 @@ import pe.rejuega.app.ui.screens.PerfilScreen
 import pe.rejuega.app.ui.viewmodel.PerfilViewModel
 import pe.rejuega.app.ui.viewmodel.PerfilViewModelFactory
 
+// (nuevo) Imports necesarios para el nuevo factory del JugueteViewModel.
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
+
 
 // (modificado) Composable principal de navegación.
+
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -161,16 +166,24 @@ fun AppNavigation(
         ) { backStackEntry ->
 
             val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            // (nuevo) Obtenemos el contexto de la aplicación para el AndroidViewModel.
+            val context = LocalContext.current
+            val application = context.applicationContext as Application
+            // (nuevo) Obtenemos el UID del usuario autenticado en Firebase.
+            // (nuevo) Este UID se guardará junto con la donación en Firestore.
+            val uidUsuario = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
             val jugueteViewModel: JugueteViewModel = viewModel(
                 factory = JugueteViewModelFactory(
-                    appContainer.jugueteRepository,
-                    campaignId
+                    application = application,
+                    donationRepository = appContainer.donationRepository,
+                    campaignId = campaignId
                 )
             )
 
             RegisterToyScreen(
                 viewModel = jugueteViewModel,
+                uidUsuario = uidUsuario,
                 onBackClick = {
                     navController.popBackStack()
                 },

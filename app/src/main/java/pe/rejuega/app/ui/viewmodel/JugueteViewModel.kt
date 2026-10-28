@@ -1,11 +1,12 @@
-// (nuevo) Archivo: JugueteViewModel.kt
-// (nuevo) Descripción: ViewModel para registrar una propuesta de juguete.
-// (nuevo) Valida la regla de negocio RB-01:
-// (nuevo) - El juguete debe estar en estado "Nuevo" o "Buen Estado".
-// (nuevo) - Debe incluir al menos una fotografía.
+// (modificado) Archivo: JugueteViewModel.kt
+// (modificado) Cambio: Ahora extiende de AndroidViewModel para tener acceso al Context.
+// (modificado) Cambio: Usa DonationRepository para subir a Cloudinary + Firestore + Room.
+// (modificado) Motivo: Implementar el registro real de juguetes con foto en la nube.
 package pe.rejuega.app.ui.viewmodel
 
+import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,10 +15,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pe.rejuega.app.data.local.Juguete
-import pe.rejuega.app.data.repository.JugueteRepository
+import pe.rejuega.app.data.remote.DonationRepository
 
-// (nuevo) Estado de la interfaz del formulario de registro de juguete.
+// (modificado) Estado de la interfaz del formulario de registro.
+// (modificado) Se mantiene igual que antes. No cambia la estructura.
 data class RegisterToyUiState(
     val nombre: String = "",
     val descripcion: String = "",
@@ -28,67 +29,67 @@ data class RegisterToyUiState(
     val isSuccess: Boolean = false
 )
 
-// (nuevo) ViewModel para el registro de juguetes.
+// (modificado) Ahora hereda de AndroidViewModel en lugar de ViewModel.
+// (modificado) AndroidViewModel proporciona acceso al Context de la aplicación,
+// (modificado) necesario para comprimir imágenes y crear URIs temporales.
 class JugueteViewModel(
-    private val jugueteRepository: JugueteRepository,
+    application: Application,
+    private val donationRepository: DonationRepository,
     private val campaignId: Long
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
-    // (nuevo) Estado inicial del formulario.
+    // (modificado) Estado interno del formulario.
     private val _uiState = MutableStateFlow(RegisterToyUiState())
 
-    // (nuevo) Estado público observado por la pantalla.
+    // (modificado) Estado público de solo lectura para la pantalla.
     val uiState: StateFlow<RegisterToyUiState> = _uiState.asStateFlow()
 
-    // (nuevo) Actualiza el nombre cuando el usuario escribe.
+    // (modificado) Actualiza el nombre cuando el usuario escribe.
     fun onNombreChange(nuevoNombre: String) {
-        _uiState.update {
-            it.copy(nombre = nuevoNombre, error = null)
-        }
+        _uiState.update { it.copy(nombre = nuevoNombre, error = null) }
     }
 
-    // (nuevo) Actualiza la descripción cuando el usuario escribe.
+    // (modificado) Actualiza la descripción cuando el usuario escribe.
     fun onDescripcionChange(nuevaDescripcion: String) {
-        _uiState.update {
-            it.copy(descripcion = nuevaDescripcion, error = null)
-        }
+        _uiState.update { it.copy(descripcion = nuevaDescripcion, error = null) }
     }
 
-    // (nuevo) Actualiza el estado del juguete.
+    // (modificado) Actualiza el estado del juguete (Nuevo / Buen Estado).
     fun onEstadoChange(nuevoEstado: String) {
-        _uiState.update {
-            it.copy(estado = nuevoEstado, error = null)
-        }
+        _uiState.update { it.copy(estado = nuevoEstado, error = null) }
     }
 
-    // (nuevo) Guarda la URI de la imagen seleccionada por el usuario.
+    // (modificado) Guarda la URI de la foto seleccionada o tomada.
+    // (modificado) Se llama desde la pantalla cuando el usuario elige una imagen.
     fun onFotoSeleccionada(uri: Uri?) {
-        _uiState.update {
-            it.copy(fotoUri = uri, error = null)
-        }
+        _uiState.update { it.copy(fotoUri = uri, error = null) }
     }
 
-    // (nuevo) Valida y registra el juguete en la base de datos local.
-    fun registrarJuguete() {
+    // =====================================================================
+    // (modificado) MÉTODO PRINCIPAL: REGISTRAR JUGUETE
+    // =====================================================================
+    // (modificado) Valida los campos (RB-01) y llama al DonationRepository.
+    // (modificado) El Repository hace la compresión, subida y guardado.
+    // (modificado) Parámetro:
+    // (modificado)   uidUsuario - UID del usuario autenticado en Firebase.
+    // =====================================================================
+    fun registrarJuguete(uidUsuario: String) {
         val estadoActual = _uiState.value
 
-        // (nuevo) Validación: nombre obligatorio.
+        // (modificado) VALIDACIÓN 1: Nombre obligatorio.
         if (estadoActual.nombre.isBlank()) {
-            _uiState.update {
-                it.copy(error = "Ingresa el nombre del juguete.")
-            }
+            _uiState.update { it.copy(error = "Ingresa el nombre del juguete.") }
             return
         }
 
-        // (nuevo) Validación: descripción obligatoria.
+        // (modificado) VALIDACIÓN 2: Descripción obligatoria.
         if (estadoActual.descripcion.isBlank()) {
-            _uiState.update {
-                it.copy(error = "Ingresa una descripción breve del juguete.")
-            }
+            _uiState.update { it.copy(error = "Ingresa una descripción breve del juguete.") }
             return
         }
 
-        // (nuevo) Validación RB-01: estado permitido.
+        // (modificado) VALIDACIÓN 3: Estado permitido (RB-01).
+        // (modificado) Solo se permiten "Nuevo" o "Buen Estado".
         if (estadoActual.estado != "Nuevo" && estadoActual.estado != "Buen Estado") {
             _uiState.update {
                 it.copy(error = "El juguete solo puede estar en estado Nuevo o Buen Estado.")
@@ -96,44 +97,43 @@ class JugueteViewModel(
             return
         }
 
-        // (nuevo) Validación RB-01: fotografía obligatoria.
+        // (modificado) VALIDACIÓN 4: Fotografía obligatoria (RB-01).
         if (estadoActual.fotoUri == null) {
             _uiState.update {
-                it.copy(error = "Debes seleccionar al menos una fotografía del juguete.")
+                it.copy(error = "Debes seleccionar o tomar al menos una fotografía del juguete.")
             }
             return
         }
 
-        // (nuevo) Si pasa las validaciones, iniciamos el guardado.
+        // (modificado) Si pasa todas las validaciones, iniciamos el registro.
         viewModelScope.launch {
             try {
-                _uiState.update {
-                    it.copy(isLoading = true, error = null)
-                }
+                // (modificado) Indicamos que estamos cargando.
+                _uiState.update { it.copy(isLoading = true, error = null) }
 
-                // (nuevo) Creamos el objeto Juguete que se guardará en Room.
-                val juguete = Juguete(
+                // (modificado) Llamamos al Repository que hace todo el flujo:
+                // (modificado) comprimir → subir a Cloudinary → Firestore → Room.
+                donationRepository.registrarPropuesta(
+                    context = getApplication<Application>().applicationContext,
+                    uid = uidUsuario,
                     campaignId = campaignId,
-                    nombre = estadoActual.nombre.trim(),
-                    descripcion = estadoActual.descripcion.trim(),
+                    nombre = estadoActual.nombre,
+                    descripcion = estadoActual.descripcion,
                     estado = estadoActual.estado,
-                    fotoUrl = estadoActual.fotoUri.toString(),
-                    estadoTrazabilidad = "Pendiente"
+                    fotoUri = estadoActual.fotoUri!!
                 )
 
-                // (nuevo) Insertamos el juguete mediante el repositorio.
-                jugueteRepository.insertarJuguete(juguete)
+                // (modificado) Si todo sale bien, marcamos éxito.
+                // (modificado) La pantalla observará isSuccess para navegar de regreso.
+                _uiState.update { it.copy(isLoading = false, isSuccess = true) }
 
-                // (nuevo) Marcamos éxito para que la pantalla pueda regresar.
-                _uiState.update {
-                    it.copy(isLoading = false, isSuccess = true)
-                }
             } catch (e: Exception) {
-                // (nuevo) Si ocurre un error, se muestra un mensaje amigable.
+                // (modificado) Si algo falla (sin internet, error de Cloudinary, etc.),
+                // (modificado) mostramos un mensaje de error amigable.
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "No se pudo registrar el juguete: ${e.message}"
+                        error = "Error al registrar la donación: ${e.message}"
                     )
                 }
             }
@@ -141,16 +141,19 @@ class JugueteViewModel(
     }
 }
 
-// (nuevo) Factory para crear el ViewModel con dependencias y campaignId.
+// (modificado) Factory para crear el ViewModel con sus dependencias.
+// (modificado) Recibe Application, DonationRepository y campaignId.
 class JugueteViewModelFactory(
-    private val jugueteRepository: JugueteRepository,
+    private val application: Application,
+    private val donationRepository: DonationRepository,
     private val campaignId: Long
 ) : ViewModelProvider.Factory {
 
+    // (modificado) Android llama a este método cuando necesita crear el ViewModel.
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(JugueteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return JugueteViewModel(jugueteRepository, campaignId) as T
+            return JugueteViewModel(application, donationRepository, campaignId) as T
         }
         throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

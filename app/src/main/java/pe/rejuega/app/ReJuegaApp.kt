@@ -12,6 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import pe.rejuega.app.data.local.ReJuegaDatabase
 import pe.rejuega.app.data.remote.AuthRepository
+import pe.rejuega.app.data.remote.DonationRepository
 import pe.rejuega.app.data.repository.CampaignRepository
 import pe.rejuega.app.data.repository.JugueteRepository
 import pe.rejuega.app.di.AppContainer
@@ -49,11 +50,19 @@ class ReJuegaApp : Application() {
             firestore = firebaseFirestore
         )
 
+        // (nuevo) Repositorio de donaciones.
+        val donationRepository = DonationRepository(
+            firestore = firebaseFirestore,
+            jugueteDao = database.jugueteDao()
+        )
+
         // (modificado) Guardamos todas las dependencias.
         container = AppContainer(
             campaignRepository = campaignRepository,
             jugueteRepository = jugueteRepository,
-            authRepository = authRepository
+            authRepository = authRepository,
+            // (nuevo) Agregamos el nuevo repositorio de donaciones.
+            donationRepository = donationRepository
         )
 
         // (modificado) Insertamos datos semilla locales.

@@ -121,4 +121,14 @@ dependencies {
 
     // (nuevo) OkHttp Logging Interceptor: Muestra las peticiones HTTP en Logcat para depurar
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // ==========================================================
+    // (nuevo) DEPENDENCIAS PARA SUBIR IMÁGENES A CLOUDINARY
+    // ==========================================================
+
+    // (nuevo) OkHttp: Cliente HTTP que usa Retrofit por debajo.
+    // (nuevo) Lo necesitamos para crear el cuerpo "multipart" de la imagen.
+    // (nuevo) Ya viene incluido con Retrofit, pero lo declaramos explícito
+    // (nuevo) para usar las clases MultipartBody y RequestBody.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
