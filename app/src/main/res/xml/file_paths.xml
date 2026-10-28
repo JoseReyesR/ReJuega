@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- (nuevo) Descripción: Define las rutas de archivos que el FileProvider puede compartir. -->
+<!-- (nuevo) Usamos cache-path porque las fotos de cámara se guardan temporalmente en caché. -->
+<paths>
+    <!-- (nuevo) Permite acceder a archivos en el directorio de caché interna de la app. -->
+    <!-- (nuevo) El atributo "path=." significa la raíz del directorio cacheDir. -->
+    <cache-path
+        name="cache"
+        path="." />
+</paths>

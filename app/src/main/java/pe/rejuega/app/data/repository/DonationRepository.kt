@@ -76,7 +76,14 @@ class DonationRepository(
         estado: String,
         fotoUri: Uri
     ): String {
+        // (nuevo) VALIDACIÓN PREVIA: verificar que exista un usuario autenticado.
+        // (nuevo) Motivo: las reglas de Firestore exigen que el campo uid coincida
+        //  con request.auth.uid. Si el uid viene vacio, la subida a Cloudinary
+        //  se haria en vano y luego Firestore rechazaria el documento.
 
+        if (uid.isBlank()) {
+            throw IOException("No hay un usuario autenticado. Cierra sesión y vuelve a iniciar sesión.")
+        }
         // (nuevo) PASO 1: Comprimir la imagen localmente (RB-09).
         // (nuevo) Si retorna null, significa que la imagen no se pudo procesar.
         val imageBytes = ImageUtils.compressImage(context, fotoUri)
