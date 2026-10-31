@@ -10,11 +10,16 @@ import androidx.room.RoomDatabase
 
 // (modificado) Se listan las entidades con sus nombres finales
 @Database(
-    entities = [Campaign::class, Juguete::class, PuntoEntrega::class, MaterialEco::class],
-    // (modificado) Versión 4: se actualizaron los datos semilla de trazabilidad.
-// (modificado) Atencion: borrará los juguetes registrados manualmente en el emulador.
-// (modificado) En producción se usará una migración real con Migrations().
-    version = 4, // (modificado) Subimos la versión a 3 porque cambió la estructura/nombres
+    entities = [
+        Campaign::class,
+        Juguete::class,
+        PuntoEntrega::class,
+        MaterialEco::class,
+        // (nuevo) Nueva entidad para eventos de recojo por campaña.
+        PickupEvent::class],
+    // (modificado) Versión 5:  se agregó la tabla pickup_events.
+
+    version = 5, // (modificado) Subimos la versión a 5 porque cambió la estructura/nombres
     exportSchema = false
 )
 abstract class ReJuegaDatabase : RoomDatabase() {
@@ -26,6 +31,8 @@ abstract class ReJuegaDatabase : RoomDatabase() {
     abstract fun puntoEntregaDao(): PuntoEntregaDao
     abstract fun materialEcoDao(): MaterialEcoDao
 
+    // (nuevo) DAO para eventos de recojo. Se agrega junto a los DAOs existentes.
+    abstract fun pickupEventDao(): PickupEventDao
     companion object {
         @Volatile
         private var INSTANCE: ReJuegaDatabase? = null
