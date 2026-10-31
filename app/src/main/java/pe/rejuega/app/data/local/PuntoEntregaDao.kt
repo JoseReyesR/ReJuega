@@ -22,4 +22,9 @@ interface PuntoEntregaDao {
     // (nuevo) Desactiva un punto de entrega (baja lógica) sin eliminarlo de la base de datos
     @Query("UPDATE puntos_entrega SET activo = 0 WHERE id = :id")
     suspend fun desactivarPuntoEntrega(id: Long)
+
+    // (nuevo) Inserta varios puntos de entrega de prueba (datos semilla).
+    // (nuevo) IGNORE evita duplicados si ya existen con el mismo ID.
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertarPuntosEntregaSeed(puntosEntrega: List<PuntoEntrega>)
 }

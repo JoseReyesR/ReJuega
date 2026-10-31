@@ -9,6 +9,9 @@ import pe.rejuega.app.data.local.MaterialEco
 import pe.rejuega.app.data.local.PuntoEntrega
 
 // (modificado) Objeto singleton con datos de prueba.
+
+// (nuevo) Import para la nueva entidad PickupEvent.
+import pe.rejuega.app.data.local.PickupEvent
 object DatosSemilla {
 
     // (modificado) Lista de campañas de prueba.
@@ -131,6 +134,50 @@ object DatosSemilla {
             estado = "Nuevo",
             fotoUrl = "https://images.unsplash.com/photo-1513364776144-60967b0f800f",
             estadoTrazabilidad = "Pendiente"
+        )
+    )
+
+    // (nuevo) Lista de eventos de recojo masivo de prueba (HU-14).
+// (nuevo) Cada evento está asociado a una campaña existente mediante campaignId.
+    val listaPickupEvents = listOf(
+        // (nuevo) Evento de recojo para la campaña 1 (Navidad Circular 2026).
+        PickupEvent(
+            id = 1,
+            campaignId = 1,
+            nombre = "Recojo masivo Navidad Circular",
+            lugar = "Parque Central de Trujillo",
+            direccion = "Jr. Pizarro 500, Trujillo",
+            fecha = "2026-12-15",
+            hora = "10:00",
+            latitud = -8.1120,
+            longitud = -79.0280,
+            activo = true
+        ),
+        // (nuevo) Segundo evento de recojo para la campaña 1.
+        PickupEvent(
+            id = 2,
+            campaignId = 1,
+            nombre = "Recojo en Mercado Mayorista",
+            lugar = "Mercado Mayorista de Trujillo",
+            direccion = "Av. España 2000, Trujillo",
+            fecha = "2026-12-20",
+            hora = "14:00",
+            latitud = -8.1150,
+            longitud = -79.0320,
+            activo = true
+        ),
+        // (nuevo) Evento de recojo para la campaña 2 (ReJuega en tu Colegio).
+        PickupEvent(
+            id = 3,
+            campaignId = 2,
+            nombre = "Recojo escolar ReJuega",
+            lugar = "Colegio Nacional San Juan",
+            direccion = "Av. América 1000, Trujillo",
+            fecha = "2026-11-28",
+            hora = "09:00",
+            latitud = -8.1090,
+            longitud = -79.0250,
+            activo = true
         )
     )
 }
