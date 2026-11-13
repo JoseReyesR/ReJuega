@@ -20,6 +20,7 @@ import pe.rejuega.app.data.repository.PickupEventRepository
 import pe.rejuega.app.data.repository.PuntoEntregaRepository
 import pe.rejuega.app.data.repository.CampaignFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignSyncRepository
+import pe.rejuega.app.utils.DatosSemilla
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -106,6 +107,10 @@ class ReJuegaApp : Application() {
     private fun inicializarDatosSemilla() {
         applicationScope.launch {
             try {
+                // (nuevo) Insertar campañas semilla en Firestore (solo si está vacío).
+                container.campaignFirestoreRepository.inicializarCampaignsSemilla(
+                    DatosSemilla.listaCampaigns
+                )
                 container.campaignRepository.inicializarDatosSemilla()
                 container.jugueteRepository.inicializarDatosSemilla()
                 // (nuevo) Insertamos puntos de entrega fijos de prueba.

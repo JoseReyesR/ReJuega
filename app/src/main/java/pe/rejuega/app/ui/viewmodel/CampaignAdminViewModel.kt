@@ -38,8 +38,14 @@ class CampaignAdminViewModel(
     // (nuevo) Observa cambios en Firestore en tiempo real.
     private fun observarCampaigns() {
         viewModelScope.launch {
-            repository.obtenerCampaigns().collect { lista ->
-                _campaigns.value = lista
+            try {
+                repository.obtenerCampaigns().collect { lista ->
+                    _campaigns.value = lista
+                }
+            } catch (e: Exception) {
+                _uiState.value = CampaignAdminUiState(
+                    error = "Error al obtener campañas de Firestore: ${e.message}"
+                )
             }
         }
     }

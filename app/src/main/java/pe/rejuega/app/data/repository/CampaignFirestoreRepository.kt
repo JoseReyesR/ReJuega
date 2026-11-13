@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import pe.rejuega.app.data.remote.CampaignFirestore
 
+import pe.rejuega.app.data.local.Campaign
 // (nuevo) Gestiona el CRUD de campañas en Firestore.
 class CampaignFirestoreRepository(
     private val firestore: FirebaseFirestore
@@ -49,5 +50,30 @@ class CampaignFirestoreRepository(
     // (nuevo) Cierra una campaña (cambia estado a "Cerrada").
     suspend fun cerrarCampaign(id: String) {
         collection.document(id).update("estado", "Cerrada").await()
+    }
+
+    // (nuevo) Inserta campañas semilla en Firestore solo si la colección está vacía.
+    // (nuevo) Si ya hay datos (creados por el Admin), no inserta nada.
+    suspend fun inicializarCampaignsSemilla(campaignsSeed: List<Campaign>) {
+        // (nuevo) Verificar si ya hay campañas en Firestore.
+        val snapshot = collection.limit(1).get().await()
+        if (!snapshot.isEmpty) {
+            // (nuevo) Ya hay datos reales, no insertar semilla.
+            return
+        }
+        // (nuevo) La colección está vacía: insertar datos semilla.
+        campaignsSeed.forEach { seed ->
+            val campaign = CampaignFirestore(
+                titulo = seed.titulo,
+                descripcion = seed.descripcion,
+                fechaInicio = seed.fechaInicio,
+                fechaFin = seed.fechaFin,
+                estado = seed.estado,
+                imagenUrl = seed.imagenUrl,
+                creadoPor = "seed",
+                fechaCreacion = System.currentTimeMillis()
+            )
+            collection.add(campaign).await()
+        }
     }
 }

@@ -51,6 +51,7 @@ fun CampaignAdminScreen(
     onEditarClick: (String) -> Unit
 ) {
     val campaigns by viewModel.campaigns.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -75,23 +76,48 @@ fun CampaignAdminScreen(
             }
         }
     ) { padding ->
-        if (campaigns.isEmpty()) {
-            // (nuevo) Estado vacío.
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("No hay campañas registradas.")
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(campaigns) { campaign ->
-                    CampaignAdminCard(
-                        campaign = campaign,
-                        onEditarClick = { onEditarClick(campaign.id) },
-                        onCerrarClick = { viewModel.cerrarCampaign(campaign.id) }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // (nuevo) Muestra mensaje de error si la consulta a Firestore falla (ej. permisos).
+            if (uiState.error != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
                     )
+                ) {
+                    Text(
+                        text = uiState.error!!,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            if (campaigns.isEmpty() && uiState.error == null) {
+                // (nuevo) Estado vacío.
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No hay campañas registradas.")
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(campaigns) { campaign ->
+                        CampaignAdminCard(
+                            campaign = campaign,
+                            onEditarClick = { onEditarClick(campaign.id) },
+                            onCerrarClick = { viewModel.cerrarCampaign(campaign.id) }
+                        )
+                    }
                 }
             }
         }
