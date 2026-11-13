@@ -55,7 +55,7 @@ object RetrofitClient {
     }
 
     // (modificado) Archivo: RetrofitClient.kt - dentro del objeto RetrofitClient
-// (modificado) Cambio: Se agrega configuración para Cloudinary además de MockAPI.
+
 
     // =====================================================================
     // (nuevo) CONFIGURACIÓN PARA CLOUDINARY
