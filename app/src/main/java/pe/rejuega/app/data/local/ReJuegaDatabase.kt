@@ -17,9 +17,9 @@ import androidx.room.RoomDatabase
         MaterialEco::class,
         // (nuevo) Nueva entidad para eventos de recojo por campaña.
         PickupEvent::class],
-    // (modificado) Versión 5:  se agregó la tabla pickup_events.
 
-    version = 5, // (modificado) Subimos la versión a 5 porque cambió la estructura/nombres
+    // (modificado) Versión 6: se agregaron campos de sincronización a Campaign.
+    version = 6,
     exportSchema = false
 )
 abstract class ReJuegaDatabase : RoomDatabase() {

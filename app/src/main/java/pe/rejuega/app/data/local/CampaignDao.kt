@@ -34,4 +34,22 @@ interface CampaignDao {
     // (nuevo) Elimina una campaña específica.
     @Query("DELETE FROM campaigns WHERE id = :id")
     suspend fun eliminarCampaign(id: Long)
+
+
+    // Cambio: Se agregan métodos para sincronización con Firestore.
+
+    // (nuevo) Obtiene todas las campañas de forma síncrona (suspend).
+    // (nuevo) Se usa en la sincronización para leer el caché sin Flow.
+    @Query("SELECT * FROM campaigns ORDER BY fechaInicio DESC")
+    suspend fun obtenerCampaignsSync(): List<Campaign>
+
+    // (nuevo) Borra todas las campañas del caché.
+    // (nuevo) Se usa antes de insertar datos frescos de Firestore.
+    @Query("DELETE FROM campaigns")
+    suspend fun borrarTodas()
+
+    // (nuevo) Obtiene una campaña por su ID de Firestore.
+    // (nuevo) Útil para actualizar una campaña específica.
+    @Query("SELECT * FROM campaigns WHERE firestoreId = :firestoreId LIMIT 1")
+    suspend fun obtenerPorFirestoreId(firestoreId: String): Campaign?
 }

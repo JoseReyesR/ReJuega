@@ -1,6 +1,6 @@
-// (modificado) Archivo: Campaign.kt
-// (modificado) Descripción: Entidad que representa una campaña de donación.
-// (modificado) Motivo: Se usa el nombre "Campaign" ÚNICAMENTE porque la palabra "Campaña" contiene la letra 'ñ'.
+
+//  Descripción: Entidad que representa una campaña de donación.
+//  Motivo: Se usa el nombre "Campaign" ÚNICAMENTE porque la palabra "Campaña" contiene la letra 'ñ'.
 package pe.rejuega.app.data.local
 
 import androidx.room.Entity
@@ -12,12 +12,15 @@ data class Campaign(
     // (modificado) ID autogenerado por Room
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-
+    // (nuevo) ID del documento en Firestore. Permite mapear entre Room y Firestore.
+    val firestoreId: String = "",
     // (modificado) Campos en español sin tildes para evitar caracteres especiales
     val titulo: String,
     val descripcion: String,
     val fechaInicio: String, // (modificado) Formato sugerido: YYYY-MM-DD
     val fechaFin: String,
     val estado: String,      // (modificado) Ejemplos: "Activa", "Cerrada"
-    val imagenUrl: String
+    val imagenUrl: String,
+    // (nuevo) Timestamp de la última sincronización exitosa.
+    val ultimaSincronizacion: Long = 0
 )
