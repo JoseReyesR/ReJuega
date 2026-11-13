@@ -52,6 +52,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
 
+import pe.rejuega.app.ui.screens.CampaignAdminScreen
+import pe.rejuega.app.ui.screens.CampaignFormScreen
+import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
+import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
+
 // (modificado) Composable principal de navegación.
 
 @Composable
@@ -180,6 +185,10 @@ fun AppNavigation(
                     nombreAdmin = nombreAdmin,
                     onBackClick = {
                         navController.popBackStack()
+                    },
+                    // (nuevo) Navega a gestión de campañas.
+                    onGestionarCampaigns = {
+                        navController.navigate(Routes.CAMPAIGN_ADMIN)
                     }
                 )
             }
@@ -311,5 +320,40 @@ fun AppNavigation(
                 }
             )
         }
+
+        // (nuevo) Destino: gestión de campañas (Admin).
+        composable(Routes.CAMPAIGN_ADMIN) {
+            val uidAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.uid ?: ""
+            val campaignAdminViewModel: CampaignAdminViewModel = viewModel(
+                factory = CampaignAdminViewModelFactory(
+                    appContainer.campaignFirestoreRepository, uidAdmin
+                )
+            )
+            CampaignAdminScreen(
+                viewModel = campaignAdminViewModel,
+                onBackClick = { navController.popBackStack() },
+                onCrearClick = { navController.navigate(Routes.campaignForm("new")) },
+                onEditarClick = { id -> navController.navigate(Routes.campaignForm(id)) }
+            )
+        }
+
+        // (nuevo) Destino: formulario de campaña.
+        composable(Routes.CAMPAIGN_FORM) { backStackEntry ->
+            val campaignId = backStackEntry.arguments?.getString("campaignId") ?: "new"
+            val uidAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.uid ?: ""
+            val campaignAdminViewModel: CampaignAdminViewModel = viewModel(
+                factory = CampaignAdminViewModelFactory(
+                    appContainer.campaignFirestoreRepository, uidAdmin
+                )
+            )
+            CampaignFormScreen(
+                viewModel = campaignAdminViewModel,
+                campaignId = campaignId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+
     }
 }

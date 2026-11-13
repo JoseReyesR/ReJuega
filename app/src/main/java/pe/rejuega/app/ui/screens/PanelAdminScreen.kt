@@ -89,7 +89,9 @@ private val adminOptions = listOf(
 @Composable
 fun PanelAdminScreen(
     nombreAdmin: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    //Firma de PanelAdminScreen: agregar onGestionarCampaigns.
+    onGestionarCampaigns: () -> Unit = {}
 ) {
     // (nuevo) Estado para mostrar Snackbars informativos.
     val snackbarHostState = remember { SnackbarHostState() }
@@ -152,10 +154,11 @@ fun PanelAdminScreen(
                 AdminOptionCard(
                     opcion = opcion,
                     onClick = {
-                        // (nuevo) Por ahora mostramos un Snackbar indicando
-                        // (nuevo) que la funcionalidad se implementará después.
-                        scope.launch {
-                            snackbarHostState.showSnackbar(opcion.destino)
+                        // (nuevo) Si es la opción de campañas, navega.
+                        if (opcion.titulo == "Gestionar Campañas") {
+                            onGestionarCampaigns()
+                        } else {
+                            scope.launch { snackbarHostState.showSnackbar(opcion.destino) }
                         }
                     }
                 )

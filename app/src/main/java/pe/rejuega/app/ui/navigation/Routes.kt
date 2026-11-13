@@ -41,6 +41,13 @@ object Routes {
     // (nuevo) Pantalla de Perfil e Impacto Acumulado (HU-12).
     const val PERFIL = "perfil"
 
+    // (modificado) Nuevas rutas para gestión de campañas.
+    const val CAMPAIGN_ADMIN = "campaign_admin"
+    const val CAMPAIGN_FORM = "campaign_form/{campaignId}"
+
+    fun campaignForm(campaignId: String): String = "campaign_form/$campaignId"
+
+
     // (modificado) Función auxiliar para construir la ruta de detalle de campaña.
     fun campaignDetail(campaignId: Long): String {
         return "campaign_detail/$campaignId"
