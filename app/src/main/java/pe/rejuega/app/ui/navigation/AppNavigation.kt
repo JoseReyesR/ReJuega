@@ -123,19 +123,21 @@ fun AppNavigation(
 
             val campaignViewModel: CampaignViewModel = viewModel(
                 factory = CampaignViewModelFactory(
-                    appContainer.campaignRepository,
-                    appContainer.campaignFirestoreRepository
+                    appContainer.campaignSyncRepository
                 )
             )
             // (nuevo) Observamos el estado de la sesión para obtener el rol.
             val sessionState by sessionViewModel.sessionState.collectAsState()
+            // (nuevo) Observamos el estado de sincronización para el aviso offline.
+            val estaSincronizado by campaignViewModel.estaSincronizado.collectAsState()
 
             HomeScreen(
                 viewModel = campaignViewModel,
                 // (nuevo) Pasamos si el usuario es admin para mostrar/ocultar el Panel Admin.
                 esAdministrador = sessionViewModel.esAdministrador(),
                 nombreUsuario = sessionState.usuario?.nombre ?: "",
-
+                // (nuevo) Pasamos el estado de sincronización.
+                estaSincronizado = estaSincronizado,
                 onCampaignClick = { campaign ->
                     navController.navigate(Routes.campaignDetail(campaign.id))
                 },

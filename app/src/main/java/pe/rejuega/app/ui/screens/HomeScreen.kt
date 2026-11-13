@@ -49,8 +49,18 @@ import pe.rejuega.app.data.local.Campaign
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
 import pe.rejuega.app.utils.UiState
 import androidx.compose.material.icons.filled.Person
+
+import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 // (nuevo) Ícono de administración.
 import androidx.compose.material.icons.filled.AdminPanelSettings
+
+
 
 // (nuevo) Anotación requerida para usar TopAppBar con Material 3
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,13 +69,17 @@ import androidx.compose.material.icons.filled.AdminPanelSettings
 @Composable
 fun HomeScreen(
     viewModel: CampaignViewModel,
-    // (nuevo) Indica si el usuario actual tiene rol Administrador.
+    //  Indica si el usuario actual tiene rol Administrador.
     esAdministrador: Boolean = false,
-    // (nuevo) Nombre del usuario actual (para mostrar en la UI si se desea).
+    //  Nombre del usuario actual (para mostrar en la UI si se desea).
     nombreUsuario: String = "",
-
+    // (nuevo) Indica si hay sincronización activa.
+    estaSincronizado: Boolean = true,
+    // (nuevo) Acción al hacer clic en una campaña.
     onCampaignClick: (Campaign) -> Unit,
+    // (nuevo) Acción al hacer clic en el botón de Trazabilidad.
     onTraceabilityClick: () -> Unit = {},
+    // (nuevo) Acción al hacer clic en el botón de Cerrar Sesión.
     onLogoutClick: () -> Unit = {},
     // (nuevo) Acción para abrir la pantalla de impacto ambiental.
     onImpactoClick: () -> Unit = {},
@@ -84,6 +98,8 @@ fun HomeScreen(
         // (nuevo) Barra superior (TopAppBar) con el título de la app.
         topBar = {
             TopAppBar(
+
+
                 // (nuevo) Título principal de la app.
                 title = {
                     Column {
@@ -106,8 +122,14 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
+
+
                 // (modificado) Archivo: HomeScreen.kt - actions del TopAppBar
                 // (nuevo) Se agrega botón de cierre de sesión.
+
+
+
+
                 actions = {
                     IconButton(onClick = onTraceabilityClick) {
                         Icon(
@@ -145,6 +167,7 @@ fun HomeScreen(
                     }
 
 
+
                     IconButton(onClick = onLogoutClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
@@ -157,12 +180,44 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        // (nuevo) Box para centrar el contenido y aplicar el padding del Scaffold.
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // (nuevo) Aviso de modo offline cuando no hay sincronización.
+            if (!estaSincronizado) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WifiOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Sin conexión. Mostrando campañas guardadas.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+
+            // (nuevo) Box para contener la lista o estados de carga.
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
             // (nuevo) Dependiendo del estado del ViewModel, mostramos diferente contenido.
             // (nuevo) Esto es el patrón "when" de Kotlin aplicado a la UI.
             when (val state = uiState) {
@@ -253,6 +308,7 @@ fun HomeScreen(
             }
         }
     }
+}
 }
 
 // (nuevo) Composable que representa una tarjeta individual de campaña.

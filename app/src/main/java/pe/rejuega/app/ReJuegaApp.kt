@@ -19,7 +19,7 @@ import pe.rejuega.app.di.AppContainer
 import pe.rejuega.app.data.repository.PickupEventRepository
 import pe.rejuega.app.data.repository.PuntoEntregaRepository
 import pe.rejuega.app.data.repository.CampaignFirestoreRepository
-
+import pe.rejuega.app.data.repository.CampaignSyncRepository
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -74,6 +74,12 @@ class ReJuegaApp : Application() {
         val campaignFirestoreRepository = CampaignFirestoreRepository(
             firestore = firebaseFirestore
         )
+
+        // (nuevo) Repository de sincronización offline.
+        val campaignSyncRepository = CampaignSyncRepository(
+            campaignDao = database.campaignDao(),
+            firestore = firebaseFirestore
+        )
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -85,7 +91,9 @@ class ReJuegaApp : Application() {
             puntoEntregaRepository = puntoEntregaRepository,
             pickupEventRepository = pickupEventRepository,
             // (nuevo)
-            campaignFirestoreRepository = campaignFirestoreRepository
+            campaignFirestoreRepository = campaignFirestoreRepository,
+            // (nuevo)
+            campaignSyncRepository = campaignSyncRepository
         )
 
         // (modificado) Insertamos datos semilla locales.
