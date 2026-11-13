@@ -57,6 +57,11 @@ import pe.rejuega.app.ui.screens.CampaignFormScreen
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
 
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+
 import androidx.compose.runtime.getValue
 // (modificado) Composable principal de navegación.
 
@@ -126,10 +131,27 @@ fun AppNavigation(
                     appContainer.campaignSyncRepository
                 )
             )
+            // (nuevo) Refresca las campañas cada vez que el Home vuelve a estar visible.
+            // (nuevo) Resuelve el problema de que el Home no se actualiza al regresar
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        campaignViewModel.refrescar()
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
             // (nuevo) Observamos el estado de la sesión para obtener el rol.
             val sessionState by sessionViewModel.sessionState.collectAsState()
             // (nuevo) Observamos el estado de sincronización para el aviso offline.
             val estaSincronizado by campaignViewModel.estaSincronizado.collectAsState()
+            // (nuevo) Refresca las campañas cada vez que el Home vuelve a estar visible.
+            // (nuevo) Resuelve el problema de que el Home no se actualiza al regresar
+
 
             HomeScreen(
                 viewModel = campaignViewModel,

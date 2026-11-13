@@ -63,6 +63,7 @@ class CampaignViewModel(
             }
         }
     }
+
 }
 
 // (modificado) Factory actualizado para el nuevo repository.
