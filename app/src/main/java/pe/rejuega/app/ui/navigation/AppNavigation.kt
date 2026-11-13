@@ -57,6 +57,7 @@ import pe.rejuega.app.ui.screens.CampaignFormScreen
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
 
+import androidx.compose.runtime.getValue
 // (modificado) Composable principal de navegación.
 
 @Composable
@@ -121,7 +122,10 @@ fun AppNavigation(
             }
 
             val campaignViewModel: CampaignViewModel = viewModel(
-                factory = CampaignViewModelFactory(appContainer.campaignRepository)
+                factory = CampaignViewModelFactory(
+                    appContainer.campaignRepository,
+                    appContainer.campaignFirestoreRepository
+                )
             )
             // (nuevo) Observamos el estado de la sesión para obtener el rol.
             val sessionState by sessionViewModel.sessionState.collectAsState()

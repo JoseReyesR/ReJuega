@@ -15,45 +15,47 @@ import pe.rejuega.app.data.local.Campaign
 import pe.rejuega.app.data.repository.CampaignRepository
 import pe.rejuega.app.utils.UiState
 
+import pe.rejuega.app.data.repository.CampaignFirestoreRepository
+import pe.rejuega.app.data.remote.CampaignFirestore
+
+
+
 // (nuevo) ViewModel que gestiona el estado de la pantalla Home.
 // (nuevo) Recibe el Repository por constructor (Inyección de Dependencias).
 class CampaignViewModel(
-    private val campaignRepository: CampaignRepository
+    private val campaignRepository: CampaignRepository,        // (nuevo) Room (caché)
+    private val campaignFirestoreRepository: CampaignFirestoreRepository  // (nuevo) Firestore
+
 ) : ViewModel() {
 
     // (nuevo) Estado de la UI: Comienza en "Loading" porque apenas arranca la pantalla.
     // (nuevo) MutableStateFlow permite modificar el valor internamente.
     private val _uiState = MutableStateFlow<UiState<List<Campaign>>>(UiState.Loading)
 
-    // (nuevo) StateFlow de solo lectura: La UI solo puede leer el estado, no modificarlo.
-    // (nuevo) Esto garantiza el flujo unidireccional de datos (la UI observa, el ViewModel actualiza).
+    //  StateFlow de solo lectura: La UI solo puede leer el estado, no modificarlo.
+    // Esto garantiza el flujo unidireccional de datos (la UI observa, el ViewModel actualiza).
     val uiState: StateFlow<UiState<List<Campaign>>> = _uiState.asStateFlow()
 
-    // (nuevo) Bloque init: Se ejecuta cuando el ViewModel se crea por primera vez.
+    // Bloque init: Se ejecuta cuando el ViewModel se crea por primera vez.
     init {
-        // (nuevo) Cargamos los datos semilla y luego observamos las campañas de la base de datos.
+        // Cargamos los datos semilla y luego observamos las campañas de la base de datos.
         cargarCampaigns()
     }
 
-    // (nuevo) Función que carga las campañas desde el Repository.
-    // (nuevo) viewModelScope.launch: Ejecuta la corrutina asociada al ciclo de vida del ViewModel.
-    // (nuevo) Cuando el ViewModel se destruye, la corrutina se cancela automáticamente (evita fugas de memoria).
+    //  Función que carga las campañas desde el Repository.
+    //  viewModelScope.launch: Ejecuta la corrutina asociada al ciclo de vida del ViewModel.
+    //  Cuando el ViewModel se destruye, la corrutina se cancela automáticamente.
     private fun cargarCampaigns() {
         viewModelScope.launch {
             try {
-                // (nuevo) Paso 1: Inicializamos la base de datos con datos semilla (hardcodeados).
-                // (nuevo) Esto garantiza que la pantalla no esté vacía la primera vez que se abre.
-                campaignRepository.inicializarDatosSemilla()
-
-                // (nuevo) Paso 2: Observamos el flujo de campañas de Room.
-                // (nuevo) Room emitirá automáticamente una nueva lista cada vez que los datos cambien.
-                campaignRepository.campaigns.collect { campaigns ->
-                    // (nuevo) Si la lista está vacía, mostramos el estado Empty.
+                // (nuevo) Lee campañas de Firestore en tiempo real.
+                campaignFirestoreRepository.obtenerCampaigns().collect { campaigns ->
                     if (campaigns.isEmpty()) {
                         _uiState.value = UiState.Empty
                     } else {
-                        // (nuevo) Si hay datos, mostramos el estado Success con la lista de campañas.
-                        _uiState.value = UiState.Success(campaigns)
+                        // (nuevo) Mapea a Campaign (modelo de UI).
+                        val mapeadas = campaigns.filter { it.estado == "Activa" }.map { it.toCampaign() }
+                        _uiState.value = if (mapeadas.isEmpty()) UiState.Empty else UiState.Success(mapeadas)
                     }
                 }
             } catch (e: Exception) {
@@ -64,20 +66,27 @@ class CampaignViewModel(
     }
 }
 
+
+// (nuevo) Función de mapeo Firestore -> UI.
+fun CampaignFirestore.toCampaign(): Campaign {
+    return Campaign(
+        id = 0, titulo = titulo, descripcion = descripcion,
+        fechaInicio = fechaInicio, fechaFin = fechaFin,
+        estado = estado, imagenUrl = imagenUrl
+    )
+}
 // (nuevo) Factory para crear el ViewModel inyectando el Repository.
 // (nuevo) Android no sabe cómo crear un ViewModel con parámetros, así que le damos esta "fábrica".
 class CampaignViewModelFactory(
-    private val campaignRepository: CampaignRepository
+    private val campaignRepository: CampaignRepository,
+    private val campaignFirestoreRepository: CampaignFirestoreRepository
 ) : ViewModelProvider.Factory {
 
-    // (nuevo) Este método es llamado por Android cuando necesita crear una instancia del ViewModel.
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        // (nuevo) Verificamos que el tipo solicitado sea CampaignViewModel y lo creamos con el Repository.
         if (modelClass.isAssignableFrom(CampaignViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CampaignViewModel(campaignRepository) as T
+            return CampaignViewModel(campaignRepository, campaignFirestoreRepository) as T
         }
-        // (nuevo) Si se solicita un tipo diferente, lanzamos una excepción.
-        throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
+        throw IllegalArgumentException("ViewModel desconocido")
     }
 }
