@@ -8,6 +8,8 @@ import pe.rejuega.app.data.repository.CampaignRepository
 import pe.rejuega.app.data.repository.JugueteRepository
 import pe.rejuega.app.data.repository.PickupEventRepository
 import pe.rejuega.app.data.repository.PuntoEntregaRepository
+import pe.rejuega.app.data.repository.CampaignFirestoreRepository
+
 
 // (modificado) Contenedor manual de dependencias.
 class AppContainer(
@@ -18,5 +20,7 @@ class AppContainer(
     // (nuevo) Repositorio de puntos de entrega fijos (para el mapa futuro).
     val puntoEntregaRepository: PuntoEntregaRepository,
     // (nuevo) Repositorio de eventos de recojo por campaña (para el mapa futuro).
-    val pickupEventRepository: PickupEventRepository
+    val pickupEventRepository: PickupEventRepository,
+    // (nuevo) Repository de campañas en Firestore.
+    val campaignFirestoreRepository: CampaignFirestoreRepository
 )

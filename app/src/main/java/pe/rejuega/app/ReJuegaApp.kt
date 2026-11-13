@@ -18,6 +18,7 @@ import pe.rejuega.app.data.repository.JugueteRepository
 import pe.rejuega.app.di.AppContainer
 import pe.rejuega.app.data.repository.PickupEventRepository
 import pe.rejuega.app.data.repository.PuntoEntregaRepository
+import pe.rejuega.app.data.repository.CampaignFirestoreRepository
 
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
@@ -69,6 +70,10 @@ class ReJuegaApp : Application() {
         val pickupEventRepository = PickupEventRepository(
             pickupEventDao = database.pickupEventDao()
         )
+        // (nuevo) Repository de campañas en Firestore.
+        val campaignFirestoreRepository = CampaignFirestoreRepository(
+            firestore = firebaseFirestore
+        )
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -78,7 +83,9 @@ class ReJuegaApp : Application() {
             donationRepository = donationRepository,
             // (nuevo) Agregamos los repositorios de puntos de recojo.
             puntoEntregaRepository = puntoEntregaRepository,
-            pickupEventRepository = pickupEventRepository
+            pickupEventRepository = pickupEventRepository,
+            // (nuevo)
+            campaignFirestoreRepository = campaignFirestoreRepository
         )
 
         // (modificado) Insertamos datos semilla locales.
