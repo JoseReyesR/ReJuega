@@ -49,6 +49,8 @@ import pe.rejuega.app.data.local.Campaign
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
 import pe.rejuega.app.utils.UiState
 import androidx.compose.material.icons.filled.Person
+// (nuevo) Ícono de administración.
+import androidx.compose.material.icons.filled.AdminPanelSettings
 
 // (nuevo) Anotación requerida para usar TopAppBar con Material 3
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,13 +59,20 @@ import androidx.compose.material.icons.filled.Person
 @Composable
 fun HomeScreen(
     viewModel: CampaignViewModel,
+    // (nuevo) Indica si el usuario actual tiene rol Administrador.
+    esAdministrador: Boolean = false,
+    // (nuevo) Nombre del usuario actual (para mostrar en la UI si se desea).
+    nombreUsuario: String = "",
+
     onCampaignClick: (Campaign) -> Unit,
     onTraceabilityClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     // (nuevo) Acción para abrir la pantalla de impacto ambiental.
     onImpactoClick: () -> Unit = {},
     // (nuevo) Acción para abrir la pantalla de Perfil.
-    onPerfilClick: () -> Unit = {}
+    onPerfilClick: () -> Unit = {},
+    // (nuevo) Acción para abrir el Panel Admin (solo se llama si es admin).
+    onPanelAdminClick: () -> Unit = {}
 
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
@@ -123,6 +132,19 @@ fun HomeScreen(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
+                    // (nuevo) Botón de Panel Admin: SOLO se muestra si el usuario es Administrador.
+                    // (nuevo) Implementa RN-04: los controles de administración no se muestran al Donante.
+                    if (esAdministrador) {
+                        IconButton(onClick = onPanelAdminClick) {
+                            Icon(
+                                imageVector = Icons.Default.AdminPanelSettings,
+                                contentDescription = "Panel de Administración",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+
+
                     IconButton(onClick = onLogoutClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

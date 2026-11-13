@@ -30,6 +30,10 @@ object Routes {
     // (modificado) Panel de administración. Se implementará más adelante.
     const val ADMIN_PANEL = "admin_panel"
 
+    // (modificado) Archivo: Routes.kt - dentro del objeto Routes
+    // (nuevo) Pantalla del Panel de Administración (solo para rol Administrador).
+    const val PANEL_ADMIN = "panel_admin"
+
     // (nuevo) Pantalla de impacto ambiental (HU-11, ODS 12).
     const val IMPACTO_AMBIENTAL = "impacto_ambiental"
 

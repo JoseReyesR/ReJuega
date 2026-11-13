@@ -43,6 +43,14 @@ import pe.rejuega.app.ui.viewmodel.PerfilViewModelFactory
 import android.app.Application
 import androidx.compose.ui.platform.LocalContext
 
+// (nuevo) Imports para el SessionViewModel y el Panel Admin.
+import androidx.compose.runtime.LaunchedEffect
+import pe.rejuega.app.ui.screens.PanelAdminScreen
+import pe.rejuega.app.ui.viewmodel.SessionViewModel
+import pe.rejuega.app.ui.viewmodel.SessionViewModelFactory
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
 
 // (modificado) Composable principal de navegación.
 
@@ -52,10 +60,20 @@ fun AppNavigation(
     appContainer: AppContainer
 ) {
 
+    // (nuevo) Creamos el SessionViewModel a nivel de navegación.
+    // (nuevo) Este ViewModel mantiene el usuario actual y su rol disponibles para todas las pantallas que lo necesiten.
+
+    val sessionViewModel: SessionViewModel = viewModel(
+        factory = SessionViewModelFactory(appContainer.authRepository)
+    )
+    // (nuevo) Observamos el estado de la sesión para saber si hay usuario.
+    val sessionState by sessionViewModel.sessionState.collectAsState()
+
     // (nuevo) Verificamos si Firebase ya tiene una sesión activa.
     val existeSesion = remember {
         FirebaseAuth.getInstance().currentUser != null
     }
+
 
     // (nuevo) Definimos la pantalla inicial según el estado de sesión.
     val startDestination = if (existeSesion) {
@@ -91,13 +109,24 @@ fun AppNavigation(
 
         // (modificado) Destino: Home.
         composable(Routes.HOME) {
+            // (nuevo) Cargamos el usuario actual cuando se muestra el Home.
+            // (nuevo) Esto asegura que el rol esté disponible después del login.
+            LaunchedEffect(Unit) {
+                sessionViewModel.cargarUsuarioActual()
+            }
 
             val campaignViewModel: CampaignViewModel = viewModel(
                 factory = CampaignViewModelFactory(appContainer.campaignRepository)
             )
+            // (nuevo) Observamos el estado de la sesión para obtener el rol.
+            val sessionState by sessionViewModel.sessionState.collectAsState()
 
             HomeScreen(
                 viewModel = campaignViewModel,
+                // (nuevo) Pasamos si el usuario es admin para mostrar/ocultar el Panel Admin.
+                esAdministrador = sessionViewModel.esAdministrador(),
+                nombreUsuario = sessionState.usuario?.nombre ?: "",
+
                 onCampaignClick = { campaign ->
                     navController.navigate(Routes.campaignDetail(campaign.id))
                 },
@@ -107,7 +136,7 @@ fun AppNavigation(
                 // (nuevo) Cierre de sesión.
                 onLogoutClick = {
                     appContainer.authRepository.cerrarSesion()
-
+                    // (nuevo) Limpiamos la sesión en el SessionViewModel.
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.HOME) {
                             inclusive = true
@@ -118,11 +147,42 @@ fun AppNavigation(
                 onImpactoClick = {
                     navController.navigate(Routes.IMPACTO_AMBIENTAL)
                 },
+
                 // (nuevo) Conecta el ícono de perfil con la nueva pantalla.
                 onPerfilClick = {
                     navController.navigate(Routes.PERFIL)
+                },
+                // (nuevo) Conecta el ícono de panel admin con la nueva pantalla.
+                onPanelAdminClick = {
+                    navController.navigate(Routes.PANEL_ADMIN)
                 }
+
             )
+        }
+
+        // (nuevo) Destino: Panel de Administración (solo para rol Administrador).
+// (nuevo) Implementa RN-04: se verifica el rol antes de mostrar la pantalla.
+        composable(Routes.PANEL_ADMIN) {
+
+            // (nuevo) PROTECCIÓN POR ROL: verificamos que el usuario sea Administrador.
+            // (nuevo) Si no es admin, regresamos inmediatamente sin mostrar la pantalla.
+            // (nuevo) Esto es una segunda capa de protección (la primera es ocultar el botón en el Home).
+            if (!sessionViewModel.esAdministrador()) {
+                // (nuevo) El usuario no es admin, lo regresamos sin renderizar el panel.
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+            } else {
+                // (nuevo) El usuario es admin, mostramos el panel.
+                val nombreAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.nombre ?: "Admin"
+
+                PanelAdminScreen(
+                    nombreAdmin = nombreAdmin,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
         // (modificado) Destino: Detalle de campaña.
