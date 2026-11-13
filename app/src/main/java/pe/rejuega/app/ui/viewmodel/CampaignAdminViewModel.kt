@@ -30,9 +30,13 @@ class CampaignAdminViewModel(
     // (nuevo) Estado de las operaciones.
     private val _uiState = MutableStateFlow(CampaignAdminUiState())
     val uiState: StateFlow<CampaignAdminUiState> = _uiState.asStateFlow()
+    // (nuevo) Estado de refrescamiento para el pull-to-refresh.
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     init {
-        observarCampaigns()
+       // observarCampaigns()
+        refrescarCampaigns()
     }
 
     // (nuevo) Observa cambios en Firestore en tiempo real.
@@ -49,6 +53,8 @@ class CampaignAdminViewModel(
             }
         }
     }
+
+
 
     // (nuevo) Crea una campaña.
     fun crearCampaign(
@@ -104,6 +110,24 @@ class CampaignAdminViewModel(
     // (nuevo) Limpia el estado.
     fun limpiarEstado() {
         _uiState.value = CampaignAdminUiState()
+    }
+
+    // (nuevo) Metodo para forzar la recarga de campañas desde Firestore.
+    // (nuevo) Se llama cada vez que la pantalla de lista se muestra.
+    fun refrescarCampaigns() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                val lista = repository.obtenerCampaignsUnaVez()
+                _campaigns.value = lista
+            } catch (e: Exception) {
+                _uiState.value = CampaignAdminUiState(
+                    error = "Error al cargar campañas: ${e.message}"
+                )
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 }
 

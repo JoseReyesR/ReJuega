@@ -76,4 +76,22 @@ class CampaignFirestoreRepository(
             collection.add(campaign).await()
         }
     }
+
+
+    // (modificado) Obtiene todas las campañas (lectura única, no listener).
+    // (modificado) Se llama explícitamente cuando se necesita datos frescos.
+    suspend fun obtenerCampaignsUnaVez(): List<CampaignFirestore> {
+        return try {
+            val snapshot = collection
+                .orderBy("fechaCreacion", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(CampaignFirestore::class.java)?.copy(id = doc.id)
+            }
+        } catch (e: Exception) {
+            println("Error al obtener campañas: ${e.message}")
+            emptyList()
+        }
+    }
 }

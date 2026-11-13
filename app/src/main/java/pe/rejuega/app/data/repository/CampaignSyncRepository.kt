@@ -9,6 +9,8 @@ import kotlinx.coroutines.tasks.await
 import pe.rejuega.app.data.local.Campaign
 import pe.rejuega.app.data.local.CampaignDao
 import pe.rejuega.app.data.remote.CampaignFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.tasks.await
 
 class CampaignSyncRepository(
     private val campaignDao: CampaignDao,
@@ -27,7 +29,6 @@ class CampaignSyncRepository(
             val snapshot = firestore.collection("campaigns").get().await()
             val remoteCampaigns = snapshot.documents.mapNotNull { doc ->
                 doc.toObject(CampaignFirestore::class.java)?.let { cf ->
-                    // (nuevo) Mapeo Firestore -> Room.
                     Campaign(
                         firestoreId = doc.id,
                         titulo = cf.titulo,
@@ -41,12 +42,10 @@ class CampaignSyncRepository(
                 }
             }
 
-            // (nuevo) PASO 3: Solo actualizar caché si hay datos remotos.
-            // (nuevo) Si Firestore está vacío, mantenemos el caché existente.
+            // (nuevo) PASO 3: Actualizar caché si hay datos remotos.
             if (remoteCampaigns.isNotEmpty()) {
                 campaignDao.borrarTodas()
                 campaignDao.insertarCampaigns(remoteCampaigns)
-                // (nuevo) Emitir datos actualizados.
                 emit(campaignDao.obtenerCampaignsSync())
             }
         } catch (e: Exception) {

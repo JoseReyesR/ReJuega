@@ -1,4 +1,6 @@
-// (nuevo) Pantalla de gestión de campañas para el Admin.
+// (modificado) Archivo: CampaignAdminScreen.kt
+// (modificado) Cambio: Se agrega refresh automático al retroceder (ON_RESUME)
+// (modificado) y pull-to-refresh con gesto de deslizar hacia abajo.
 package pe.rejuega.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -32,13 +35,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import pe.rejuega.app.data.remote.CampaignFirestore
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
 
@@ -51,7 +59,24 @@ fun CampaignAdminScreen(
     onEditarClick: (String) -> Unit
 ) {
     val campaigns by viewModel.campaigns.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+    // (nuevo) REFRESH AUTOMÁTICO AL RETROCEDER.
+    // (nuevo) Se usa el ciclo de vida de la pantalla (ON_RESUME) para detectar
+    // (nuevo) cuando la pantalla vuelve a estar visible, incluyendo al retroceder.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // (nuevo) Cada vez que la pantalla se muestra, refresca los datos.
+                viewModel.refrescarCampaigns()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -69,40 +94,26 @@ fun CampaignAdminScreen(
                 )
             )
         },
-        // (nuevo) Botón flotante para crear campaña.
         floatingActionButton = {
             FloatingActionButton(onClick = onCrearClick) {
                 Icon(Icons.Default.Add, contentDescription = "Crear campaña")
             }
         }
     ) { padding ->
-        Column(
+        // (nuevo) PULL-TO-REFRESH: envuelve el contenido con PullToRefreshBox.
+        // (nuevo) Permite deslizar hacia abajo para refrescar manualmente.
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.refrescarCampaigns() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // (nuevo) Muestra mensaje de error si la consulta a Firestore falla (ej. permisos).
-            if (uiState.error != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+            if (campaigns.isEmpty() && !isRefreshing) {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = uiState.error!!,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            if (campaigns.isEmpty() && uiState.error == null) {
-                // (nuevo) Estado vacío.
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No hay campañas registradas.")
                 }
             } else {
@@ -124,7 +135,6 @@ fun CampaignAdminScreen(
     }
 }
 
-// (nuevo) Tarjeta de campaña con acciones de editar y cerrar.
 @Composable
 private fun CampaignAdminCard(
     campaign: CampaignFirestore,
@@ -148,14 +158,12 @@ private fun CampaignAdminCard(
             )
             Spacer(Modifier.height(8.dp))
             Row {
-                // (nuevo) Editar.
                 OutlinedButton(onClick = onEditarClick) {
                     Icon(Icons.Default.Edit, contentDescription = null, Modifier.width(18.dp))
                     Spacer(Modifier.width(4.dp))
                     Text("Editar")
                 }
                 Spacer(Modifier.width(8.dp))
-                // (nuevo) Cerrar campaña (solo si está activa).
                 if (campaign.estado == "Activa") {
                     Button(onClick = onCerrarClick) {
                         Icon(Icons.Default.Lock, contentDescription = null, Modifier.width(18.dp))
