@@ -30,6 +30,7 @@ data class Donacion(
     val estado: String = "",
     val fotoUrl: String = "",
     val estadoTrazabilidad: String = "Pendiente",
+    val motivoRechazo: String? = null,  // (nuevo) Motivo de rechazo
     val fechaRegistro: Long = 0
 )
 

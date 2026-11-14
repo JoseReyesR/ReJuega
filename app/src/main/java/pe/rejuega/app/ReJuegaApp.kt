@@ -21,6 +21,7 @@ import pe.rejuega.app.data.repository.PuntoEntregaRepository
 import pe.rejuega.app.data.repository.CampaignFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignSyncRepository
 import pe.rejuega.app.utils.DatosSemilla
+import pe.rejuega.app.data.repository.DonationFirestoreRepository
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -81,6 +82,12 @@ class ReJuegaApp : Application() {
             campaignDao = database.campaignDao(),
             firestore = firebaseFirestore
         )
+
+        // (nuevo) Dentro de onCreate(), antes de crear container:
+        val donationFirestoreRepository = DonationFirestoreRepository(
+            firestore = firebaseFirestore
+        )
+
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -94,7 +101,10 @@ class ReJuegaApp : Application() {
             // (nuevo)
             campaignFirestoreRepository = campaignFirestoreRepository,
             // (nuevo)
-            campaignSyncRepository = campaignSyncRepository
+            campaignSyncRepository = campaignSyncRepository,
+            donationFirestoreRepository = donationFirestoreRepository
+
+
         )
 
         // (modificado) Insertamos datos semilla locales.
