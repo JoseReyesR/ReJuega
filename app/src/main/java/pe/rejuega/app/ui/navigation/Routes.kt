@@ -15,8 +15,8 @@ object Routes {
     // (modificado) Detalle de campaña. Recibe el ID de la campaña como parámetro.
     const val CAMPAIGN_DETAIL = "campaign_detail/{campaignId}"
 
-    // (modificado) Registro de juguete. Ahora recibe el ID de la campaña seleccionada.
-    const val REGISTER_TOY = "register_toy/{campaignId}"
+    // (modificado) La ruta de registro ahora lleva también el título de la campaña.
+    const val REGISTER_TOY = "register_toy/{campaignId}/{campaignTitulo}"
 
     // (modificado) Pantalla de trazabilidad. Se implementará más adelante.
     const val TRACEABILITY = "traceability"
@@ -59,10 +59,9 @@ object Routes {
         return "campaign_detail/$campaignId"
     }
 
-    // (nuevo) Función auxiliar para construir la ruta de registro de juguete.
-    fun registerToy(campaignId: Long): String {
-        return "register_toy/$campaignId"
-    }
+    // (modificado) Se codifica el título para que espacios y tildes no rompan la URL.
+    fun registerToy(campaignId: Long, campaignTitulo: String): String =
+        "register_toy/$campaignId/${android.net.Uri.encode(campaignTitulo)}"
 
     fun donationDetailAdmin(donacionUid: String): String = "donation_detail_admin/$donacionUid"
 }

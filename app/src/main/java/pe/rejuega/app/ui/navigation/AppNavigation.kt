@@ -254,8 +254,9 @@ fun AppNavigation(
                 onBackClick = {
                     navController.popBackStack()
                 },
-                onDonateClick = {
-                    navController.navigate(Routes.registerToy(campaignId))
+                // (modificado) Navega con el ID y el título de la campaña.
+                onDonateClick = { titulo ->
+                    navController.navigate(Routes.registerToy(campaignId, titulo))
                 }
             )
         }
@@ -271,6 +272,8 @@ fun AppNavigation(
         ) { backStackEntry ->
 
             val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            // (nuevo) Título de la campaña (viene codificado y Navigation lo decodifica).
+            val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
             // (nuevo) Obtenemos el contexto de la aplicación para el AndroidViewModel.
             val context = LocalContext.current
             val application = context.applicationContext as Application
@@ -282,7 +285,8 @@ fun AppNavigation(
                 factory = JugueteViewModelFactory(
                     application = application,
                     donationRepository = appContainer.donationRepository,
-                    campaignId = campaignId
+                    campaignId = campaignId,
+                    campaignTitulo = campaignTitulo   // (nuevo)
                 )
             )
 

@@ -26,6 +26,7 @@ data class Donacion(
     val id: String = "",        // (nuevo) ID del documento en Firestore
     val uid: String = "",
     val campaignId: Long = 0,
+    val campaignTitulo: String = "",   // (nuevo) Nombre de la campaña elegida
     val nombre: String = "",
     val descripcion: String = "",
     val estado: String = "",
@@ -70,13 +71,8 @@ class DonationRepository(
     // (nuevo) Lanza excepciones si algo falla, para que el ViewModel las capture.
     // =====================================================================
     suspend fun registrarPropuesta(
-        context: Context,
-        uid: String,
-        campaignId: Long,
-        nombre: String,
-        descripcion: String,
-        estado: String,
-        fotoUri: Uri
+        context: Context, uid: String, campaignId: Long, campaignTitulo: String,
+        nombre: String, descripcion: String, estado: String, fotoUri: Uri
     ): String {
         // (nuevo) VALIDACIÓN PREVIA: verificar que exista un usuario autenticado.
         // (nuevo) Motivo: las reglas de Firestore exigen que el campo uid coincida
@@ -138,6 +134,7 @@ class DonationRepository(
         val donacion = Donacion(
             uid = uid,
             campaignId = campaignId,
+            campaignTitulo = campaignTitulo,   // (nuevo)
             nombre = nombre.trim(),
             descripcion = descripcion.trim(),
             estado = estado,

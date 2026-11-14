@@ -35,7 +35,8 @@ data class RegisterToyUiState(
 class JugueteViewModel(
     application: Application,
     private val donationRepository: DonationRepository,
-    private val campaignId: Long
+    private val campaignId: Long,
+    private val campaignTitulo: String      // (nuevo)
 ) : AndroidViewModel(application) {
 
     // (modificado) Estado interno del formulario.
@@ -117,6 +118,7 @@ class JugueteViewModel(
                     context = getApplication<Application>().applicationContext,
                     uid = uidUsuario,
                     campaignId = campaignId,
+                    campaignTitulo = campaignTitulo,   // (nuevo)
                     nombre = estadoActual.nombre,
                     descripcion = estadoActual.descripcion,
                     estado = estadoActual.estado,
@@ -146,14 +148,15 @@ class JugueteViewModel(
 class JugueteViewModelFactory(
     private val application: Application,
     private val donationRepository: DonationRepository,
-    private val campaignId: Long
+    private val campaignId: Long,
+    private val campaignTitulo: String     // (nuevo)
 ) : ViewModelProvider.Factory {
 
     // (modificado) Android llama a este método cuando necesita crear el ViewModel.
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(JugueteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return JugueteViewModel(application, donationRepository, campaignId) as T
+            return JugueteViewModel(application, donationRepository, campaignId, campaignTitulo) as T
         }
         throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

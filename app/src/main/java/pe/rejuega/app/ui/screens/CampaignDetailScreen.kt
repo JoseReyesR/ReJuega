@@ -50,7 +50,8 @@ import pe.rejuega.app.utils.UiState
 fun CampaignDetailScreen(
     viewModel: CampaignDetailViewModel,
     onBackClick: () -> Unit,
-    onDonateClick: () -> Unit
+    // (modificado) Ahora entrega el título de la campaña al navegar.
+    onDonateClick: (String) -> Unit
 ) {
     // (nuevo) Observamos el estado del ViewModel.
     val uiState by viewModel.uiState.collectAsState()
@@ -181,7 +182,8 @@ fun CampaignDetailScreen(
 
                             // (nuevo) Botón para registrar un juguete en esta campaña.
                             Button(
-                                onClick = onDonateClick,
+                                // (modificado) Pasa el título de la campaña visible.
+                                onClick = { onDonateClick(campaign.titulo) },
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = campaign.estado == "Activa"
                             ) {
