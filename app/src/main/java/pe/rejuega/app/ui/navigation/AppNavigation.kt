@@ -302,18 +302,17 @@ fun AppNavigation(
             )
         }
 
-        // (modificado) Destino: Trazabilidad.
+        // (modificado) Trazabilidad con uid real y repository de Firestore.
         composable(Routes.TRACEABILITY) {
-
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             val traceabilityViewModel: TraceabilityViewModel = viewModel(
-                factory = TraceabilityViewModelFactory(appContainer.jugueteRepository)
+                factory = TraceabilityViewModelFactory(
+                    appContainer.donationFirestoreRepository, uid
+                )
             )
-
             TraceabilityScreen(
                 viewModel = traceabilityViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                onBackClick = { navController.popBackStack() }
             )
         }
         // (nuevo) Destino: Pantalla de impacto ambiental (HU-11, ODS 12).

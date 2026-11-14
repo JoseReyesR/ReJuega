@@ -1,6 +1,5 @@
-// (nuevo) Archivo: TraceabilityScreen.kt
-// (nuevo) Descripción: Pantalla de trazabilidad de donaciones (HU-06).
-// (nuevo) Muestra loading, lista, estado vacío, error y acción simulada de administrador.
+// (modificado) Trazabilidad real del donante desde Firestore (HU-07).
+// (modificado) Se elimina el botón simulado de Admin: ahora solo lectura.
 package pe.rejuega.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,53 +42,34 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import pe.rejuega.app.data.local.Juguete
-import pe.rejuega.app.ui.components.TrazabilidadTimeline
+import pe.rejuega.app.data.remote.Donacion
+import pe.rejuega.app.ui.components.LineaDeTiempoDonacion
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
-import pe.rejuega.app.utils.ConfiguracionSimulacion
-import pe.rejuega.app.utils.EstadosTrazabilidad
+import pe.rejuega.app.utils.formatarFechaHora
 
-// (nuevo) OptIn necesario para TopAppBar de Material 3.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TraceabilityScreen(
     viewModel: TraceabilityViewModel,
     onBackClick: () -> Unit
 ) {
-    // (nuevo) Observamos los tres flujos que expone el ViewModel.
-    val juguetes by viewModel.juguetes.collectAsState()
+    val donaciones by viewModel.donaciones.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val mensajeError by viewModel.mensajeError.collectAsState()
-
-    // (nuevo) Snackbar para mostrar errores sin bloquear la pantalla.
+    val error by viewModel.error.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // (nuevo) Cuando cambia el error, lo mostramos y luego limpiamos el estado.
-    LaunchedEffect(mensajeError) {
-        if (mensajeError != null) {
-            snackbarHostState.showSnackbar(mensajeError ?: "")
-            viewModel.limpiarError()
-        }
+    LaunchedEffect(error) {
+        error?.let { snackbarHostState.showSnackbar(it) }
     }
 
     Scaffold(
-        // (nuevo) Contenedor de mensajes flotantes.
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = "Mis donaciones",
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+                title = { Text("Mis donaciones", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver al inicio"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -101,54 +79,30 @@ fun TraceabilityScreen(
                 )
             )
         }
-    ) { paddingValues ->
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) {
             when {
-                // (nuevo) Caso 1: todavía estamos cargando la BD.
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                isLoading -> CircularProgressIndicator(
+                    Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                donaciones.isEmpty() -> Column(
+                    Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Aún no has registrado donaciones.")
+                    Spacer(Modifier.height(8.dp))
+                    Text("Explora una campaña y haz tu primera donación.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-
-                // (nuevo) Caso 2: la BD respondió pero no hay donaciones.
-                juguetes.isEmpty() -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Aún no has registrado juguetes.",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Explora una campaña y haz tu primera donación.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // (nuevo) Caso 3: sí hay datos, mostramos la lista.
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(juguetes) { juguete ->
-                            JugueteTraceabilityCard(
-                                juguete = juguete,
-                                onAvanzarEstado = { viewModel.avanzarEstado(juguete.id) }
-                            )
-                        }
+                else -> LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(donaciones) { donacion ->
+                        DonacionTraceabilityCard(donacion)
                     }
                 }
             }
@@ -156,94 +110,61 @@ fun TraceabilityScreen(
     }
 }
 
-// (nuevo) Tarjeta individual de una donación con su línea de tiempo.
 @Composable
-private fun JugueteTraceabilityCard(
-    juguete: Juguete,
-    onAvanzarEstado: () -> Unit
-) {
+private fun DonacionTraceabilityCard(donacion: Donacion) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            // (nuevo) Cabecera: foto pequeña + nombre + campaña.
+        Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-
                 AsyncImage(
-                    model = juguete.fotoUrl,
-                    contentDescription = "Foto del juguete ${juguete.nombre}",
-                    modifier = Modifier
-                        .size(64.dp)
-                        .padding(end = 4.dp),
+                    model = donacion.fotoUrl,
+                    contentDescription = donacion.nombre,
+                    modifier = Modifier.size(64.dp),
                     contentScale = ContentScale.Crop
                 )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = juguete.nombre,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Campaña N° ${juguete.campaignId}",
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(donacion.nombre, style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold)
+                    // (nuevo) Campaña a la que pertenece (campo desnormalizado).
+                    Text(donacion.campaignTitulo.ifBlank { "Campaña no indicada" },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "Condición: ${juguete.estado}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                        color = MaterialTheme.colorScheme.primary)
+                    Text("Condición: ${donacion.estado}",
+                        style = MaterialTheme.typography.bodySmall)
+                    Text("Registrada: ${formatarFechaHora(donacion.fechaRegistro)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // (nuevo) Estado actual en texto (fuente única: EstadosTrazabilidad).
             Text(
-                text = "Estado actual: ${juguete.estadoTrazabilidad.replace("En Revision", "En revisión")}",
+                text = "Estado actual: ${donacion.estadoTrazabilidad.replace("En Revision", "En revisión")}",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
+                color = if (donacion.estadoTrazabilidad == "Rechazado")
+                    MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // (nuevo) Componente reutilizable de línea de tiempo.
-            TrazabilidadTimeline(estadoActual = juguete.estadoTrazabilidad)
+            // (nuevo) Línea de tiempo con fechas reales del historial.
+            LineaDeTiempoDonacion(
+                historial = donacion.historialEstados,
+                estadoActual = donacion.estadoTrazabilidad
+            )
 
-            // (nuevo) RB-03: la acción de avanzar estado SOLO aparece para Admin.
-            // (nuevo) Hoy es una simulación; en Sprint 5 se valida con Firebase.
-            if (ConfiguracionSimulacion.ES_ADMIN_SIMULADO &&
-                !EstadosTrazabilidad.estaFinalizado(juguete.estadoTrazabilidad)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = onAvanzarEstado,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.VerifiedUser,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Avanzar estado (Admin simulado)")
-                }
-
-                // (nuevo) Recordatorio visible de que esto no es seguridad real.
-                Text(
-                    text = "Simulación de desarrollo. En producción este botón requiere rol Administrador autenticado.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // (nuevo) Motivo de rechazo visible para el donante.
+            if (donacion.estadoTrazabilidad == "Rechazado" && donacion.motivoRechazo != null) {
+                Spacer(Modifier.height(8.dp))
+                Text("Motivo: ${donacion.motivoRechazo}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error)
             }
         }
     }

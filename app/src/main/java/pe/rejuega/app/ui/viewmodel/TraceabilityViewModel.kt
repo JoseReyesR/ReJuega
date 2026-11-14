@@ -1,6 +1,5 @@
-// (nuevo) Archivo: TraceabilityViewModel.kt
-// (nuevo) Descripción: ViewModel de la pantalla de trazabilidad (HU-06).
-// (nuevo) Responsabilidad: exponer la lista de donaciones y orquestar el cambio de estado.
+// (modificado) La trazabilidad ahora lee desde Firestore por uid (HU-07 criterio 2).
+// (modificado) El listener en tiempo real cumple el criterio 3 (reflejo al cambiar).
 package pe.rejuega.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -10,85 +9,50 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import pe.rejuega.app.data.local.Juguete
-import pe.rejuega.app.data.repository.JugueteRepository
+import pe.rejuega.app.data.remote.Donacion
+import pe.rejuega.app.data.repository.DonationFirestoreRepository
 
-// (nuevo) ViewModel que observa los juguetes guardados localmente en Room.
 class TraceabilityViewModel(
-    private val jugueteRepository: JugueteRepository
+    private val repository: DonationFirestoreRepository,
+    private val uid: String
 ) : ViewModel() {
 
-    // (nuevo) Lista interna de donaciones. Empieza vacía mientras Room responde.
-    private val _juguetes = MutableStateFlow<List<Juguete>>(emptyList())
+    private val _donaciones = MutableStateFlow<List<Donacion>>(emptyList())
+    val donaciones: StateFlow<List<Donacion>> = _donaciones.asStateFlow()
 
-    // (nuevo) Lista pública de solo lectura para la pantalla.
-    val juguetes: StateFlow<List<Juguete>> = _juguetes.asStateFlow()
-
-    // (nuevo) Bandera para mostrar el CircularProgressIndicator.
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // (nuevo) Mensaje de error visible, si existe.
-    private val _mensajeError = MutableStateFlow<String?>(null)
-    val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
-    // (nuevo) Se ejecuta la primera vez que se crea este ViewModel.
-    init {
-        observarJuguetes()
-    }
+    init { observar() }
 
-    // (nuevo) Se suscribe al Flow del repositorio.
-    // (nuevo) viewModelScope cancela la corrutina automáticamente al destruirse el ViewModel.
-    private fun observarJuguetes() {
+    private fun observar() {
         viewModelScope.launch {
             try {
-                jugueteRepository.juguetes.collect { lista ->
-                    _juguetes.value = lista
+                repository.obtenerPorUsuario(uid).collect { lista ->
+                    _donaciones.value = lista.sortedByDescending { it.fechaRegistro }
                     _isLoading.value = false
                 }
             } catch (e: Exception) {
-                // (nuevo) Si falla la BD, dejamos de cargar y mostramos un error.
                 _isLoading.value = false
-                _mensajeError.value = "No se pudieron cargar las donaciones: ${e.message}"
+                _error.value = "Error al cargar tus donaciones: ${e.message}"
             }
         }
-    }
-
-    // (nuevo) Solicita avanzar un juguete al siguiente estado.
-    // (nuevo) La validación real vive en el Repository, no aquí ni en la UI.
-    fun avanzarEstado(id: Long) {
-        viewModelScope.launch {
-            try {
-                // (nuevo) Limpiamos errores anteriores antes de intentar de nuevo.
-                _mensajeError.value = null
-
-                // (nuevo) Ejecutamos la operación en segundo plano.
-                jugueteRepository.avanzarEstadoJuguete(id)
-
-                // (nuevo) No hace falta recargar la lista: el Flow de Room ya la actualiza.
-            } catch (e: Exception) {
-                // (nuevo) Mostramos el mensaje controlado del Repository.
-                _mensajeError.value = e.message
-            }
-        }
-    }
-
-    // (nuevo) Permite cerrar el mensaje de error desde la UI.
-    fun limpiarError() {
-        _mensajeError.value = null
     }
 }
 
-// (nuevo) Factory para inyectar el repositorio al crear el ViewModel.
+// (modificado) Factory con repository y uid.
 class TraceabilityViewModelFactory(
-    private val jugueteRepository: JugueteRepository
+    private val repository: DonationFirestoreRepository,
+    private val uid: String
 ) : ViewModelProvider.Factory {
-
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TraceabilityViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TraceabilityViewModel(jugueteRepository) as T
+            return TraceabilityViewModel(repository, uid) as T
         }
-        throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
+        throw IllegalArgumentException("ViewModel desconocido")
     }
 }
