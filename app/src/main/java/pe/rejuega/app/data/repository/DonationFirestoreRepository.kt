@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import pe.rejuega.app.data.remote.Donacion
 import com.google.firebase.firestore.FieldValue
+
 class DonationFirestoreRepository(
     private val firestore: FirebaseFirestore
 ) {
@@ -30,21 +31,6 @@ class DonationFirestoreRepository(
         awaitClose { listener.remove() }
     }
 
-    // (nuevo) Escucha solo las donaciones de un usuario específico (por UID).
-    fun obtenerPorUsuario(uid: String): Flow<List<Donacion>> = callbackFlow {
-        val listener = collection
-            .whereEqualTo("uid", uid)
-            .orderBy("fechaRegistro", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
-                val lista = snapshot?.documents?.mapNotNull { doc ->
-                    //doc.toObject(Donacion::class.java)?.copy()
-                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
-    }
 
     // (modificado) Avanza el estado y agrega el hito al historial con fecha y autor.
     suspend fun actualizarEstado(docId: String, nuevoEstado: String, cambiadoPor: String) {
