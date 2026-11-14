@@ -19,22 +19,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-// (nuevo) Data class que representa el documento de donación en Firestore.
-// (nuevo) Firestore mapea automáticamente estas propiedades a campos del documento.
-// (nuevo) Los valores por defecto son necesarios para que Firestore pueda deserializar.
-data class Donacion(
-    val id: String = "",        // (nuevo) ID del documento en Firestore
-    val uid: String = "",
-    val campaignId: Long = 0,
-    val campaignTitulo: String = "",   // (nuevo) Nombre de la campaña elegida
-    val nombre: String = "",
-    val descripcion: String = "",
-    val estado: String = "",
-    val fotoUrl: String = "",
-    val estadoTrazabilidad: String = "Pendiente",
-    val motivoRechazo: String? = null,  // (nuevo) Motivo de rechazo
-    val fechaRegistro: Long = 0
-)
+
 
 // (nuevo) Repositorio que gestiona el registro completo de donaciones.
 // (nuevo) Recibe tres dependencias:
