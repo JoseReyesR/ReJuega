@@ -49,7 +49,8 @@ object Routes {
     // (nuevo) Rutas para validación de donaciones.
     const val DONATION_ADMIN = "donation_admin"
     const val DONATION_DETAIL_ADMIN = "donation_detail_admin/{donacionUid}"
-
+    // (nuevo)
+    const val NOTIFICATIONS = "notifications"
 
     fun campaignForm(campaignId: String): String = "campaign_form/$campaignId"
 

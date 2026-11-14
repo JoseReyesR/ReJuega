@@ -59,6 +59,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 // (nuevo) Ícono de administración.
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Notifications
+
 
 
 
@@ -86,7 +88,11 @@ fun HomeScreen(
     // (nuevo) Acción para abrir la pantalla de Perfil.
     onPerfilClick: () -> Unit = {},
     // (nuevo) Acción para abrir el Panel Admin (solo se llama si es admin).
-    onPanelAdminClick: () -> Unit = {}
+    onPanelAdminClick: () -> Unit = {},
+
+    notificacionesNoLeidas: Int = 0,
+    onNotificationsClick: () -> Unit = {}
+
 
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
@@ -167,7 +173,21 @@ fun HomeScreen(
                     }
 
 
-
+                    // (nuevo) Botón de notificaciones con badge de no leídas.
+                    IconButton(onClick = onNotificationsClick) {
+                        androidx.compose.material3.BadgedBox(
+                            badge = {
+                                if (notificacionesNoLeidas > 0) {
+                                    androidx.compose.material3.Badge {
+                                        Text(if (notificacionesNoLeidas > 9) "9+" else notificacionesNoLeidas.toString())
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.Notifications, contentDescription = "Notificaciones",
+                                tint = MaterialTheme.colorScheme.onPrimary)
+                        }
+                    }
                     IconButton(onClick = onLogoutClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

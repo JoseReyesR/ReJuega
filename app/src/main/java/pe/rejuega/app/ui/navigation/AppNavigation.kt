@@ -67,7 +67,17 @@ import pe.rejuega.app.ui.screens.DonationDetailAdminScreen
 import pe.rejuega.app.ui.viewmodel.DonationAdminViewModel
 import pe.rejuega.app.ui.viewmodel.DonationAdminViewModelFactory
 
+
 import androidx.compose.runtime.getValue
+import pe.rejuega.app.ui.screens.NotificationScreen
+import pe.rejuega.app.ui.viewmodel.NotificationViewModel
+import pe.rejuega.app.ui.viewmodel.NotificationViewModelFactory
+
+
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+
 // (modificado) Composable principal de navegación.
 
 @Composable
@@ -157,7 +167,15 @@ fun AppNavigation(
             // (nuevo) Refresca las campañas cada vez que el Home vuelve a estar visible.
             // (nuevo) Resuelve el problema de que el Home no se actualiza al regresar
 
-
+            // (nuevo) Observa el conteo de no leídas.
+            val uidUsuario = sessionState.usuario?.uid ?: ""
+            val notificationRepository = appContainer.notificationFirestoreRepository
+            var noLeidas by remember { mutableIntStateOf(0) }
+            LaunchedEffect(uidUsuario) {
+                if (uidUsuario.isNotBlank()) {
+                    notificationRepository.contarNoLeidas(uidUsuario).collect { noLeidas = it }
+                }
+            }
             HomeScreen(
                 viewModel = campaignViewModel,
                 // (nuevo) Pasamos si el usuario es admin para mostrar/ocultar el Panel Admin.
@@ -193,9 +211,13 @@ fun AppNavigation(
                 // (nuevo) Conecta el ícono de panel admin con la nueva pantalla.
                 onPanelAdminClick = {
                     navController.navigate(Routes.PANEL_ADMIN)
-                }
+                },
+                notificacionesNoLeidas = noLeidas,
+                onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) }
 
             )
+
+
         }
 
         // (nuevo) Destino: Panel de Administración (solo para rol Administrador).
@@ -427,6 +449,16 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() }
             )
+        }
+
+        composable(Routes.NOTIFICATIONS) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: NotificationViewModel = viewModel(
+                factory = NotificationViewModelFactory(
+                    appContainer.notificationFirestoreRepository, uid
+                )
+            )
+            NotificationScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
         }
 
 
