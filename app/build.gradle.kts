@@ -10,6 +10,8 @@ plugins {
     id("com.google.gms.google-services")
 
 
+
+
 }
 
 android {
@@ -131,4 +133,9 @@ dependencies {
     // (nuevo) Ya viene incluido con Retrofit, pero lo declaramos explícito
     // (nuevo) para usar las clases MultipartBody y RequestBody.
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // (nuevo) Firebase Cloud Messaging: obtiene el token del dispositivo y lo prepara
+// (nuevo) para cuando el servidor Node envíe push (Paso 20).
+
+    implementation("com.google.firebase:firebase-messaging-ktx")
 }

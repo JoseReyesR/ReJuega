@@ -97,6 +97,18 @@ class AuthRepository(
         auth.signInWithEmailAndPassword(correo, password).await()
     }
 
+
+    // (nuevo) Guarda el token FCM del dispositivo en el perfil del usuario.
+    suspend fun guardarTokenFCM() {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            val token = com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            firestore.collection("users").document(uid).update("fcmToken", token).await()
+        } catch (e: Exception) {
+            println("No se pudo guardar token FCM: ${e.message}")
+        }
+    }
+
     // (nuevo) Cierra la sesión actual.
     // (nuevo) No es suspend porque signOut es una operación local rápida.
     fun cerrarSesion() {
