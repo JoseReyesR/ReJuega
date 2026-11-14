@@ -45,6 +45,12 @@ object Routes {
     const val CAMPAIGN_ADMIN = "campaign_admin"
     const val CAMPAIGN_FORM = "campaign_form/{campaignId}"
 
+
+    // (nuevo) Rutas para validación de donaciones.
+    const val DONATION_ADMIN = "donation_admin"
+    const val DONATION_DETAIL_ADMIN = "donation_detail_admin/{donacionUid}"
+
+
     fun campaignForm(campaignId: String): String = "campaign_form/$campaignId"
 
 
@@ -57,4 +63,6 @@ object Routes {
     fun registerToy(campaignId: Long): String {
         return "register_toy/$campaignId"
     }
+
+    fun donationDetailAdmin(donacionUid: String): String = "donation_detail_admin/$donacionUid"
 }

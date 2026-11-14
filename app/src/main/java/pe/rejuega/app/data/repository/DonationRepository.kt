@@ -23,6 +23,7 @@ import java.io.IOException
 // (nuevo) Firestore mapea automáticamente estas propiedades a campos del documento.
 // (nuevo) Los valores por defecto son necesarios para que Firestore pueda deserializar.
 data class Donacion(
+    val id: String = "",        // (nuevo) ID del documento en Firestore
     val uid: String = "",
     val campaignId: Long = 0,
     val nombre: String = "",

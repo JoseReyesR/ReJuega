@@ -91,7 +91,8 @@ fun PanelAdminScreen(
     nombreAdmin: String,
     onBackClick: () -> Unit,
     //Firma de PanelAdminScreen: agregar onGestionarCampaigns.
-    onGestionarCampaigns: () -> Unit = {}
+    onGestionarCampaigns: () -> Unit = {},
+    onRevisarDonaciones: () -> Unit = {}
 ) {
     // (nuevo) Estado para mostrar Snackbars informativos.
     val snackbarHostState = remember { SnackbarHostState() }
@@ -148,17 +149,16 @@ fun PanelAdminScreen(
             )
 
             Spacer(modifier = Modifier.height(4.dp))
-
+            // aqui ponemos las opciones onclick del menu
             // (nuevo) Renderizamos cada opción como una tarjeta.
             adminOptions.forEach { opcion ->
                 AdminOptionCard(
                     opcion = opcion,
                     onClick = {
-                        // (nuevo) Si es la opción de campañas, navega.
-                        if (opcion.titulo == "Gestionar Campañas") {
-                            onGestionarCampaigns()
-                        } else {
-                            scope.launch { snackbarHostState.showSnackbar(opcion.destino) }
+                        when (opcion.titulo) {
+                            "Gestionar Campañas" -> onGestionarCampaigns()
+                            "Revisar Donaciones" -> onRevisarDonaciones()
+                            else -> scope.launch { snackbarHostState.showSnackbar(opcion.destino) }
                         }
                     }
                 )

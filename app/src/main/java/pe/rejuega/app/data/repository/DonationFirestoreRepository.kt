@@ -14,14 +14,16 @@ class DonationFirestoreRepository(
 ) {
     private val collection = firestore.collection("donations")
 
-    // (nuevo) Escucha todas las donaciones en tiempo real.
+    // (modificado) obtenerTodas(): ahora conserva el ID del documento Firestore.
     fun obtenerTodas(): Flow<List<Donacion>> = callbackFlow {
         val listener = collection
             .orderBy("fechaRegistro", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) { close(error); return@addSnapshotListener }
                 val lista = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Donacion::class.java)?.copy()
+                    // (modificado) Antes: .copy() → perdía el docId.
+                    // (modificado) Ahora: .copy(id = doc.id) → cada Donacion conoce su documento.
+                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
                 trySend(lista)
             }
@@ -36,7 +38,8 @@ class DonationFirestoreRepository(
             .addSnapshotListener { snapshot, error ->
                 if (error != null) { close(error); return@addSnapshotListener }
                 val lista = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Donacion::class.java)?.copy()
+                    //doc.toObject(Donacion::class.java)?.copy()
+                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
                 trySend(lista)
             }

@@ -46,6 +46,7 @@ fun DonationAdminScreen(
     viewModel: DonationAdminViewModel,
     onBackClick: () -> Unit,
     onDonacionClick: (Donacion) -> Unit
+
 ) {
     val pendientes by viewModel.donations.collectAsState()
     val listaFiltrada = pendientes.filter {

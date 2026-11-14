@@ -62,6 +62,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
+import pe.rejuega.app.ui.screens.DonationAdminScreen
+import pe.rejuega.app.ui.screens.DonationDetailAdminScreen
+import pe.rejuega.app.ui.viewmodel.DonationAdminViewModel
+import pe.rejuega.app.ui.viewmodel.DonationAdminViewModelFactory
+
 import androidx.compose.runtime.getValue
 // (modificado) Composable principal de navegación.
 
@@ -217,7 +222,10 @@ fun AppNavigation(
                     // (nuevo) Navega a gestión de campañas.
                     onGestionarCampaigns = {
                         navController.navigate(Routes.CAMPAIGN_ADMIN)
-                    }
+                    },
+                    // (nuevo) Navegación a revisar donaciones.
+                    onRevisarDonaciones = { navController.navigate(Routes.DONATION_ADMIN) }
+
                 )
             }
         }
@@ -377,6 +385,34 @@ fun AppNavigation(
             CampaignFormScreen(
                 viewModel = campaignAdminViewModel,
                 campaignId = campaignId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+        // (nuevo) Destino: lista de donaciones pendientes.
+        composable(Routes.DONATION_ADMIN) {
+            val donationAdminViewModel: DonationAdminViewModel = viewModel(
+                factory = DonationAdminViewModelFactory(appContainer.donationFirestoreRepository)
+            )
+            DonationAdminScreen(
+                viewModel = donationAdminViewModel,
+                onBackClick = { navController.popBackStack() },
+                onDonacionClick = { donacion ->
+                    // (modificado) Se navega con el ID del documento Firestore, no con el uid del donante.
+                    navController.navigate(Routes.donationDetailAdmin(donacion.id))
+                }
+            )
+        }
+
+// (nuevo) Destino: detalle de donación.
+        composable(Routes.DONATION_DETAIL_ADMIN) { backStackEntry ->
+            val donacionUid = backStackEntry.arguments?.getString("donacionUid") ?: ""
+            val donationAdminViewModel: DonationAdminViewModel = viewModel(
+                factory = DonationAdminViewModelFactory(appContainer.donationFirestoreRepository)
+            )
+            DonationDetailAdminScreen(
+                viewModel = donationAdminViewModel,
+                donacionId = donacionUid,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() }
             )

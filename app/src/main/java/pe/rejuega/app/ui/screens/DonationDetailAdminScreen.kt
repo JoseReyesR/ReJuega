@@ -49,7 +49,9 @@ import pe.rejuega.app.data.remote.Donacion
 import pe.rejuega.app.ui.viewmodel.DonationAdminUiState
 import pe.rejuega.app.ui.viewmodel.DonationAdminViewModel
 import pe.rejuega.app.utils.EstadosTrazabilidad
-
+// (nuevo) Imports para el Snackbar de errores.
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonationDetailAdminScreen(
@@ -60,21 +62,36 @@ fun DonationDetailAdminScreen(
 ) {
     val donations by viewModel.donations.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
-    val donacion = donations.find { it.uid == donacionId || it.nombre == donacionId }
+    // (nuevo) Estado del Snackbar para mostrar errores visibles.
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // (modificado) Se busca por ID de documento (antes comparaba uid y nombre).
+    val donacion = donations.find { it.id == donacionId }
+
 
     // (nuevo) Como usamos navegación con ID, buscamos por todos los campos.
     // (nuevo) En una app real usaríamos el docId de Firestore.
     var mostrarDialogoRechazo by remember { mutableStateOf(false) }
     var motivoRechazo by rememberSaveable { mutableStateOf("") }
 
+    // (modificado) Ahora se muestran los errores en Snackbar, no se tragan en silencio.
     LaunchedEffect(uiState) {
-        if (uiState is DonationAdminUiState.Success) {
-            viewModel.limpiarEstado()
-            onSaved()
+        when (val state = uiState) {
+            is DonationAdminUiState.Success -> {
+                viewModel.limpiarEstado()
+                onSaved()
+            }
+            is DonationAdminUiState.Error -> {
+                snackbarHostState.showSnackbar(state.mensaje)
+                viewModel.limpiarEstado()
+            }
+            else -> Unit
         }
     }
 
     Scaffold(
+        // (nuevo) Host del Snackbar para mensajes de éxito/error.
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Detalle de Donación", fontWeight = FontWeight.Bold) },
@@ -147,7 +164,8 @@ fun DonationDetailAdminScreen(
                     val siguiente = EstadosTrazabilidad.siguienteDe(donacion.estadoTrazabilidad)
                     if (siguiente != null) {
                         Button(
-                            onClick = { viewModel.avanzarEstado(donacion.uid, donacion.estadoTrazabilidad) },
+                            // (modificado) Se usa el ID del documento Firestore.
+                            onClick = { viewModel.avanzarEstado(donacion.id, donacion.estadoTrazabilidad) },
                             enabled = uiState !is DonationAdminUiState.Loading,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -205,7 +223,8 @@ fun DonationDetailAdminScreen(
                 TextButton(
                     onClick = {
                         if (motivoRechazo.isNotBlank()) {
-                            viewModel.rechazar(donacion.uid, motivoRechazo)
+                            // (modificado) Se usa el ID del documento Firestore.
+                            viewModel.rechazar(donacion.id, motivoRechazo)
                             mostrarDialogoRechazo = false
                             motivoRechazo = ""
                         }
