@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import pe.rejuega.app.data.remote.Donacion
-
+import com.google.firebase.firestore.FieldValue
 class DonationFirestoreRepository(
     private val firestore: FirebaseFirestore
 ) {
@@ -46,22 +46,55 @@ class DonationFirestoreRepository(
         awaitClose { listener.remove() }
     }
 
-    // (nuevo) Actualiza el estado de trazabilidad (solo Admin según reglas).
-    suspend fun actualizarEstado(docId: String, nuevoEstado: String) {
-        collection.document(docId)
-            .update("estadoTrazabilidad", nuevoEstado)
-            .await()
-    }
-
-    // (nuevo) Actualiza el estado con motivo de rechazo.
-    suspend fun rechazarDonacion(docId: String, motivo: String) {
-        collection.document(docId)
-            .update(
-                mapOf(
-                    "estadoTrazabilidad" to "Rechazado",
-                    "motivoRechazo" to motivo
+    // (modificado) Avanza el estado y agrega el hito al historial con fecha y autor.
+    suspend fun actualizarEstado(docId: String, nuevoEstado: String, cambiadoPor: String) {
+        collection.document(docId).update(
+            mapOf(
+                "estadoTrazabilidad" to nuevoEstado,
+                // (nuevo) arrayUnion agrega sin pisar los hitos anteriores (RB-11).
+                "historialEstados" to FieldValue.arrayUnion(
+                    mapOf(
+                        "estado" to nuevoEstado,
+                        "fecha" to System.currentTimeMillis(),
+                        "cambiadoPor" to cambiadoPor
+                    )
                 )
             )
-            .await()
+        ).await()
     }
+
+    // (modificado) Rechaza con motivo y deja el hito en el historial.
+    suspend fun rechazarDonacion(docId: String, motivo: String, cambiadoPor: String) {
+        collection.document(docId).update(
+            mapOf(
+                "estadoTrazabilidad" to "Rechazado",
+                "motivoRechazo" to motivo,
+                "historialEstados" to FieldValue.arrayUnion(
+                    mapOf(
+                        "estado" to "Rechazado",
+                        "fecha" to System.currentTimeMillis(),
+                        "cambiadoPor" to cambiadoPor
+                    )
+                )
+            )
+        ).await()
+    }
+
+
+
+    // (nuevo) Observa solo las donaciones del usuario (trazabilidad del donante).
+    // (nuevo) Sin orderBy para no exigir índice compuesto.
+    fun obtenerPorUsuario(uid: String): Flow<List<Donacion>> = callbackFlow {
+        val listener = collection.whereEqualTo("uid", uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val lista = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+                trySend(lista)
+            }
+        awaitClose { listener.remove() }
+    }
+
+
 }

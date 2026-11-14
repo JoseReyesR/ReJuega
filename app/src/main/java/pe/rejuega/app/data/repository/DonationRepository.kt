@@ -125,6 +125,10 @@ class DonationRepository(
             estado = estado,
             fotoUrl = downloadUrl,
             estadoTrazabilidad = "Pendiente",
+            // (nuevo) Primer hito del historial: creado por el propio donante.
+            historialEstados = listOf(
+                CambioEstado("Pendiente", System.currentTimeMillis(), uid)
+            ),
             fechaRegistro = System.currentTimeMillis()
         )
 

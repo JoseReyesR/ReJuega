@@ -395,8 +395,12 @@ fun AppNavigation(
         }
         // (nuevo) Destino: lista de donaciones pendientes.
         composable(Routes.DONATION_ADMIN) {
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             val donationAdminViewModel: DonationAdminViewModel = viewModel(
-                factory = DonationAdminViewModelFactory(appContainer.donationFirestoreRepository)
+                factory = DonationAdminViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    uidAdmin
+                )
             )
             DonationAdminScreen(
                 viewModel = donationAdminViewModel,
@@ -411,8 +415,12 @@ fun AppNavigation(
 // (nuevo) Destino: detalle de donación.
         composable(Routes.DONATION_DETAIL_ADMIN) { backStackEntry ->
             val donacionUid = backStackEntry.arguments?.getString("donacionUid") ?: ""
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             val donationAdminViewModel: DonationAdminViewModel = viewModel(
-                factory = DonationAdminViewModelFactory(appContainer.donationFirestoreRepository)
+                factory = DonationAdminViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    uidAdmin
+                )
             )
             DonationDetailAdminScreen(
                 viewModel = donationAdminViewModel,

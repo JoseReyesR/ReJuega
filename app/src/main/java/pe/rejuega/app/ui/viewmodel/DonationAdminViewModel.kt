@@ -13,7 +13,8 @@ import pe.rejuega.app.data.repository.DonationFirestoreRepository
 import pe.rejuega.app.utils.EstadosTrazabilidad
 
 class DonationAdminViewModel(
-    private val repository: DonationFirestoreRepository
+    private val repository: DonationFirestoreRepository,
+    private val uidAdmin: String          // (nuevo)
 ) : ViewModel() {
 
     // (nuevo) Lista completa de donaciones.
@@ -52,14 +53,15 @@ class DonationAdminViewModel(
         _donacionSeleccionada.value = donacion
     }
 
-    // (nuevo) Avanza al siguiente estado de trazabilidad (RB-02).
+
+    // (modificado) Pasa el uid al repositorio.
     fun avanzarEstado(docId: String, estadoActual: String) {
         viewModelScope.launch {
             _uiState.value = DonationAdminUiState.Loading
             try {
                 val siguiente = EstadosTrazabilidad.siguienteDe(estadoActual)
                 if (siguiente != null) {
-                    repository.actualizarEstado(docId, siguiente)
+                    repository.actualizarEstado(docId, siguiente, uidAdmin)
                     _uiState.value = DonationAdminUiState.Success("Estado actualizado a: $siguiente")
                 } else {
                     _uiState.value = DonationAdminUiState.Error("No se puede avanzar más.")
@@ -70,12 +72,12 @@ class DonationAdminViewModel(
         }
     }
 
-    // (nuevo) Rechaza la donación con motivo.
+    // (modificado) Pasa el uid al repositorio.
     fun rechazar(docId: String, motivo: String) {
         viewModelScope.launch {
             _uiState.value = DonationAdminUiState.Loading
             try {
-                repository.rechazarDonacion(docId, motivo)
+                repository.rechazarDonacion(docId, motivo, uidAdmin)
                 _uiState.value = DonationAdminUiState.Success("Donación rechazada.")
             } catch (e: Exception) {
                 _uiState.value = DonationAdminUiState.Error("Error: ${e.message}")
@@ -96,13 +98,15 @@ sealed class DonationAdminUiState {
     data class Error(val mensaje: String) : DonationAdminUiState()
 }
 
+// (modificado) Factory con uidAdmin.
 class DonationAdminViewModelFactory(
-    private val repository: DonationFirestoreRepository
+    private val repository: DonationFirestoreRepository,
+    private val uidAdmin: String
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(DonationAdminViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return DonationAdminViewModel(repository) as T
+            return DonationAdminViewModel(repository, uidAdmin) as T
         }
         throw IllegalArgumentException("ViewModel desconocido")
     }
