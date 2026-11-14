@@ -22,6 +22,7 @@ import pe.rejuega.app.data.repository.CampaignFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignSyncRepository
 import pe.rejuega.app.utils.DatosSemilla
 import pe.rejuega.app.data.repository.DonationFirestoreRepository
+import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -48,6 +49,8 @@ class ReJuegaApp : Application() {
         // (nuevo) Instancias de Firebase.
         val firebaseAuth = FirebaseAuth.getInstance()
         val firebaseFirestore = FirebaseFirestore.getInstance()
+        // (nuevo)
+        val notificationFirestoreRepository = NotificationFirestoreRepository(firebaseFirestore)
 
         // (nuevo) Repositorio de autenticación.
         val authRepository = AuthRepository(
@@ -88,6 +91,7 @@ class ReJuegaApp : Application() {
             firestore = firebaseFirestore
         )
 
+
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -102,7 +106,11 @@ class ReJuegaApp : Application() {
             campaignFirestoreRepository = campaignFirestoreRepository,
             // (nuevo)
             campaignSyncRepository = campaignSyncRepository,
-            donationFirestoreRepository = donationFirestoreRepository
+
+            donationFirestoreRepository = donationFirestoreRepository,
+
+            notificationFirestoreRepository = notificationFirestoreRepository
+
 
 
         )

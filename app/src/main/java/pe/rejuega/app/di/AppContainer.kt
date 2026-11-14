@@ -11,6 +11,7 @@ import pe.rejuega.app.data.repository.PuntoEntregaRepository
 import pe.rejuega.app.data.repository.CampaignFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignSyncRepository
 import pe.rejuega.app.data.repository.DonationFirestoreRepository
+import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 // (modificado) Contenedor manual de dependencias.
 class AppContainer(
     val campaignRepository: CampaignRepository,
@@ -26,5 +27,6 @@ class AppContainer(
     // (nuevo) Repository de sincronización offline.
     val campaignSyncRepository: CampaignSyncRepository,
     // (nuevo)
-    val donationFirestoreRepository: DonationFirestoreRepository
+    val donationFirestoreRepository: DonationFirestoreRepository,
+    val notificationFirestoreRepository: NotificationFirestoreRepository
 )
