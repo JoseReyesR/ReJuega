@@ -53,6 +53,9 @@ import androidx.compose.runtime.getValue
 
 
 import pe.rejuega.app.ui.screens.CampaignAdminScreen
+import pe.rejuega.app.ui.screens.CampaignGalleryScreen
+import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModel
+import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModelFactory
 import pe.rejuega.app.ui.screens.CampaignFormScreen
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
@@ -164,8 +167,8 @@ fun AppNavigation(
             val sessionState by sessionViewModel.sessionState.collectAsState()
             // (nuevo) Observamos el estado de sincronización para el aviso offline.
             val estaSincronizado by campaignViewModel.estaSincronizado.collectAsState()
-            // (nuevo) Refresca las campañas cada vez que el Home vuelve a estar visible.
-            // (nuevo) Resuelve el problema de que el Home no se actualiza al regresar
+            // (nuevo) Filtro de campañas.
+            val filtro by campaignViewModel.filtro.collectAsState()
 
             // (nuevo) Observa el conteo de no leídas.
             val uidUsuario = sessionState.usuario?.uid ?: ""
@@ -189,6 +192,11 @@ fun AppNavigation(
                 nombreUsuario = sessionState.usuario?.nombre ?: "",
                 // (nuevo) Pasamos el estado de sincronización.
                 estaSincronizado = estaSincronizado,
+                filtroEstado = filtro,
+                onFiltroChange = { campaignViewModel.cambiarFiltro(it) },
+                onVerEvidenciasClick = { campaign ->
+                    navController.navigate(Routes.campaignGallery(campaign.firestoreId, campaign.titulo))
+                },
                 onCampaignClick = { campaign ->
                     navController.navigate(Routes.campaignDetail(campaign.id))
                 },
@@ -467,6 +475,29 @@ fun AppNavigation(
                 )
             )
             NotificationScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
+        }
+
+        // (nuevo) Destino: Galería de evidencias de una campaña (HU-09).
+        composable(Routes.CAMPAIGN_GALLERY) { backStackEntry ->
+            val campaignId = backStackEntry.arguments?.getString("campaignId") ?: ""
+            val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
+            val esAdmin = sessionViewModel.esAdministrador()
+            val uidAdmin = if (esAdmin) FirebaseAuth.getInstance().currentUser?.uid else null
+
+            val galleryViewModel: CampaignGalleryViewModel = viewModel(
+                factory = CampaignGalleryViewModelFactory(
+                    repository = appContainer.campaignGalleryRepository,
+                    campaignId = campaignId,
+                    campaignTitulo = campaignTitulo,
+                    uidAdmin = uidAdmin
+                )
+            )
+
+            CampaignGalleryScreen(
+                viewModel = galleryViewModel,
+                esAdmin = esAdmin,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
 

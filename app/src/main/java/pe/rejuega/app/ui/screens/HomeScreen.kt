@@ -58,6 +58,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 // (nuevo) Ícono de administración.
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Button
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Notifications
 
@@ -91,9 +95,13 @@ fun HomeScreen(
     onPanelAdminClick: () -> Unit = {},
 
     notificacionesNoLeidas: Int = 0,
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
 
-
+    // (nuevo) Filtro de estado de campañas.
+    filtroEstado: String = "Activas",
+    onFiltroChange: (String) -> Unit = {},
+    // (nuevo) Acción para ver galería de evidencias.
+    onVerEvidenciasClick: (Campaign) -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -234,6 +242,23 @@ fun HomeScreen(
                 }
             }
 
+            // (nuevo) Chips de filtro de estado.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("Activas", "Cerradas", "Todas").forEach { opcion ->
+                    FilterChip(
+                        selected = filtroEstado == opcion,
+                        onClick = { onFiltroChange(opcion) },
+                        label = { Text(opcion) }
+                    )
+                }
+            }
+
             // (nuevo) Box para contener la lista o estados de carga.
             Box(
                 modifier = Modifier.fillMaxSize()
@@ -270,8 +295,8 @@ fun HomeScreen(
                             // (nuevo) Tarjeta individual de campaña.
                             CampaignCard(
                                 campaign = campaign,
-                                // (nuevo) Cuando el usuario toque la tarjeta, llamamos a la lambda de navegación.
-                                onClick = { onCampaignClick(campaign) }
+                                onClick = { onCampaignClick(campaign) },
+                                onVerEvidencias = { onVerEvidenciasClick(campaign) }
                             )
                         }
                     }
@@ -336,7 +361,8 @@ fun HomeScreen(
 @Composable
 fun CampaignCard(
     campaign: Campaign,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onVerEvidencias: (() -> Unit)? = null
 ) {
     // (nuevo) Card es el contenedor de Material 3 con elevación y esquinas redondeadas.
     Card(
@@ -434,6 +460,17 @@ fun CampaignCard(
                         else
                             MaterialTheme.colorScheme.error
                     )
+                }
+
+                // (nuevo) Botón de evidencias solo si está cerrada y hay acción.
+                if (campaign.estado == "Cerrada" && onVerEvidencias != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { onVerEvidencias() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Ver galería de evidencias")
+                    }
                 }
             }
         }

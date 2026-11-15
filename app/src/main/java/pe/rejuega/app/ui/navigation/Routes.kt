@@ -52,7 +52,13 @@ object Routes {
     // (nuevo)
     const val NOTIFICATIONS = "notifications"
 
+    // (nuevo) Rutas para galeria de evidencias (HU-09).
+    const val CAMPAIGN_GALLERY = "campaign_gallery/{campaignId}/{campaignTitulo}"
+
     fun campaignForm(campaignId: String): String = "campaign_form/$campaignId"
+
+    fun campaignGallery(campaignId: String, campaignTitulo: String): String =
+        "campaign_gallery/$campaignId/${android.net.Uri.encode(campaignTitulo)}"
 
 
     // (modificado) Función auxiliar para construir la ruta de detalle de campaña.

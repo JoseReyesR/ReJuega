@@ -26,6 +26,13 @@ class CampaignViewModel(
     private val _estaSincronizado = MutableStateFlow(true)
     val estaSincronizado: StateFlow<Boolean> = _estaSincronizado.asStateFlow()
 
+    // (nuevo) Filtro de campañas por estado.
+    private val _filtro = MutableStateFlow("Activas")
+    val filtro: StateFlow<String> = _filtro.asStateFlow()
+
+    // (nuevo) Lista completa sin filtrar guardada en memoria.
+    private val _campaignsTodas = MutableStateFlow<List<Campaign>>(emptyList())
+
     init {
         cargarCampaigns()
     }
@@ -35,18 +42,28 @@ class CampaignViewModel(
         viewModelScope.launch {
             try {
                 campaignSyncRepository.obtenerCampaigns().collect { campaigns ->
-                    // (nuevo) Filtrar solo campañas activas para el Donante.
-                    val activas = campaigns.filter { it.estado == "Activa" }
-                    if (activas.isEmpty()) {
-                        _uiState.value = UiState.Empty
-                    } else {
-                        _uiState.value = UiState.Success(activas)
-                    }
+                    _campaignsTodas.value = campaigns
+                    aplicarFiltro()
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al cargar campañas: ${e.message}")
             }
         }
+    }
+
+    private fun aplicarFiltro() {
+        val todas = _campaignsTodas.value
+        val filtradas = when (_filtro.value) {
+            "Activas" -> todas.filter { it.estado == "Activa" }
+            "Cerradas" -> todas.filter { it.estado == "Cerrada" }
+            else -> todas
+        }
+        _uiState.value = if (filtradas.isEmpty()) UiState.Empty else UiState.Success(filtradas)
+    }
+
+    fun cambiarFiltro(nuevo: String) {
+        _filtro.value = nuevo
+        aplicarFiltro()
     }
 
     // (nuevo) Fuerza una sincronización manual (botón de refrescar).
