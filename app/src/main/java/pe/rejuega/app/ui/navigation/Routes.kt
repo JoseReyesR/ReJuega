@@ -12,8 +12,8 @@ object Routes {
     // (modificado) Pantalla Home: lista de campañas.
     const val HOME = "home"
 
-    // (modificado) Detalle de campaña. Recibe el ID de la campaña como parámetro.
-    const val CAMPAIGN_DETAIL = "campaign_detail/{campaignId}"
+    // (modificado) Detalle de campaña. Recibe el ID local y el ID de Firestore.
+    const val CAMPAIGN_DETAIL = "campaign_detail/{campaignId}/{firestoreId}"
 
     // (modificado) La ruta de registro ahora lleva también el título de la campaña.
     const val REGISTER_TOY = "register_toy/{campaignId}/{campaignTitulo}"
@@ -68,8 +68,9 @@ object Routes {
 
 
     // (modificado) Función auxiliar para construir la ruta de detalle de campaña.
-    fun campaignDetail(campaignId: Long): String {
-        return "campaign_detail/$campaignId"
+    fun campaignDetail(campaignId: Long, firestoreId: String): String {
+        val idValido = firestoreId.ifBlank { "none" }
+        return "campaign_detail/$campaignId/$idValido"
     }
 
     // (modificado) Se codifica el título para que espacios y tildes no rompan la URL.

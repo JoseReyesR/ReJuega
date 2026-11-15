@@ -49,6 +49,7 @@ import pe.rejuega.app.utils.UiState
 @Composable
 fun CampaignDetailScreen(
     viewModel: CampaignDetailViewModel,
+    eventosRecojo: List<pe.rejuega.app.data.remote.PickupEventFirestore> = emptyList(),
     onBackClick: () -> Unit,
     // (modificado) Ahora entrega el título de la campaña al navegar.
     onDonateClick: (String) -> Unit
@@ -178,9 +179,7 @@ fun CampaignDetailScreen(
                                 style = MaterialTheme.typography.bodyLarge
                             )
 
-                            // (nuevo) Sección de eventos de recojo de la campaña.
-                            val eventosRecojo by viewModel.eventosRecojo.collectAsState()
-
+                            // (nuevo) Sección de puntos de recojo programados (visible para el donante).
                             if (eventosRecojo.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(

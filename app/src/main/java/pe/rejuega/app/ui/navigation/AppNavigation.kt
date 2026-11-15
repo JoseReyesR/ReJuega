@@ -22,6 +22,8 @@ import pe.rejuega.app.ui.viewmodel.AuthViewModel
 import pe.rejuega.app.ui.viewmodel.AuthViewModelFactory
 import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModelFactory
+import pe.rejuega.app.ui.viewmodel.EventosRecojoViewModel
+import pe.rejuega.app.ui.viewmodel.EventosRecojoViewModelFactory
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignViewModelFactory
 import pe.rejuega.app.ui.viewmodel.JugueteViewModel
@@ -203,7 +205,7 @@ fun AppNavigation(
                     navController.navigate(Routes.campaignGallery(campaign.firestoreId, campaign.titulo))
                 },
                 onCampaignClick = { campaign ->
-                    navController.navigate(Routes.campaignDetail(campaign.id))
+                    navController.navigate(Routes.campaignDetail(campaign.id, campaign.firestoreId))
                 },
                 onTraceabilityClick = {
                     navController.navigate(Routes.TRACEABILITY)
@@ -273,28 +275,35 @@ fun AppNavigation(
             }
         }
 
-        // (modificado) Destino: Detalle de campaña.
+        // (modificado) Destino de detalle con eventos de recojo independientes.
         composable(
             route = Routes.CAMPAIGN_DETAIL,
             arguments = listOf(
-                navArgument("campaignId") {
-                    type = NavType.LongType
-                }
+                navArgument("campaignId") { type = NavType.LongType },
+                navArgument("firestoreId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-
             val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: ""
 
             val detailViewModel: CampaignDetailViewModel = viewModel(
                 factory = CampaignDetailViewModelFactory(
-                    appContainer.campaignRepository,
-                    appContainer.puntoRecojoFirestoreRepository,
-                    campaignId
+                    appContainer.campaignRepository, campaignId
                 )
             )
 
+            val eventosRecojoViewModel: EventosRecojoViewModel = viewModel(
+                factory = EventosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository, firestoreId
+                )
+            )
+            val eventosRecojo by eventosRecojoViewModel.eventos.collectAsState()
+
+            println(">>> DETALLE: firestoreId=$firestoreId eventos=${eventosRecojo.size}")
+
             CampaignDetailScreen(
                 viewModel = detailViewModel,
+                eventosRecojo = eventosRecojo,
                 onBackClick = {
                     navController.popBackStack()
                 },
