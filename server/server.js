@@ -1,16 +1,27 @@
+// server.js - Servidor Express principal
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// Middlewares
+app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') || '*' }));
 app.use(express.json());
 
+// Ruta de prueba
 app.get('/', (req, res) => {
-    res.json({ message: 'Servidor ReJuega funcionando', status: 'OK' });
+    res.status(200).json({
+        app: 'ReJuega API',
+        version: '1.0.0',
+        status: 'OK',
+        timestamp: new Date().toISOString()
+    });
 });
 
+// Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`📡 Modo: ${process.env.NODE_ENV || 'development'}`);
 });
