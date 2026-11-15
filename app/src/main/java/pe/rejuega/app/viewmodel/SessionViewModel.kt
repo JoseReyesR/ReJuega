@@ -2,7 +2,7 @@
 // (nuevo) Responsabilidad: exponer el usuario autenticado y su rol a toda la app,
 // (nuevo) para que la UI pueda mostrar/ocultar funcionalidades según el rol.
 // (nuevo) Implementa RN-04: Control de acceso por rol.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

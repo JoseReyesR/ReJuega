@@ -1,7 +1,7 @@
 // (nuevo) Archivo: PerfilViewModel.kt
 // (nuevo) Descripción: ViewModel para la pantalla de Perfil e Impacto Acumulado (HU-12).
 // (nuevo) Responsabilidad: Calcular el impacto local y enviarlo a MockAPI mediante POST.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

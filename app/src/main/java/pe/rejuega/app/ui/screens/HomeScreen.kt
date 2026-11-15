@@ -18,12 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 // (nuevo) Ícono de hoja para impacto ambiental.
-import androidx.compose.material.icons.filled.Eco
-import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,26 +52,17 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import pe.rejuega.app.ui.components.MenuLateralReJuega
-import pe.rejuega.app.ui.viewmodel.CampaignViewModel
+import pe.rejuega.app.viewmodel.CampaignViewModel
 import pe.rejuega.app.utils.UiState
-import androidx.compose.material.icons.filled.Person
 
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
 // (nuevo) Ícono de administración.
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Button
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.Notifications
-
-
 
 
 // (nuevo) Anotación requerida para usar TopAppBar con Material 3

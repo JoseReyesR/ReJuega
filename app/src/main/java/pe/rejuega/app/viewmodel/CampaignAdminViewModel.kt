@@ -1,5 +1,5 @@
 // (nuevo) ViewModel para el CRUD de campañas del Admin.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

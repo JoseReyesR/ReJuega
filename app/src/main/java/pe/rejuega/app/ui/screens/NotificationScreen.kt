@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pe.rejuega.app.data.remote.Notificacion
-import pe.rejuega.app.ui.viewmodel.NotificationViewModel
+import pe.rejuega.app.viewmodel.NotificationViewModel
 import pe.rejuega.app.utils.formatarFechaHora
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,5 +1,5 @@
 // (nuevo) ViewModel para gestionar la galería de una campaña.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import android.content.Context
 import android.net.Uri

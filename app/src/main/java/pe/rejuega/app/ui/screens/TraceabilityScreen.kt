@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.remote.Donacion
 import pe.rejuega.app.ui.components.LineaDeTiempoDonacion
-import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
+import pe.rejuega.app.viewmodel.TraceabilityViewModel
 import pe.rejuega.app.utils.formatarFechaHora
 
 @OptIn(ExperimentalMaterial3Api::class)

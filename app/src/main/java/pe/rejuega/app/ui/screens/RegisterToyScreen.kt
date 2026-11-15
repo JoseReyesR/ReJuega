@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,7 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import pe.rejuega.app.ui.viewmodel.JugueteViewModel
+import pe.rejuega.app.viewmodel.JugueteViewModel
 import pe.rejuega.app.utils.ImageUtils
 // (nuevo) Imports necesarios para el AlertDialog de confirmación.
 import androidx.compose.material.icons.filled.CheckCircle

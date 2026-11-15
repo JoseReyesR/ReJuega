@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.remote.MaterialJugueteDto
-import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModel
+import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModel
 import pe.rejuega.app.utils.UiState
 
 // (nuevo) OptIn necesario para TopAppBar de Material 3.

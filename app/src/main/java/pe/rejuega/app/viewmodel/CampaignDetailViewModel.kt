@@ -1,7 +1,7 @@
 // (nuevo) Archivo: CampaignDetailViewModel.kt
 // (nuevo) Descripción: ViewModel para la pantalla de detalle de campaña.
 // (nuevo) Responsabilidad: Buscar una campaña por ID y exponer su estado a la UI.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

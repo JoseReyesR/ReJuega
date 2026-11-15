@@ -1,6 +1,6 @@
 // (modificado) Archivo: ui/viewmodel/CampaignViewModel.kt
 // (modificado) Cambio: Ahora usa CampaignSyncRepository para sincronización offline.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

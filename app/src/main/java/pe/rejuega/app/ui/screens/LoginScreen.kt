@@ -39,7 +39,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import pe.rejuega.app.ui.viewmodel.AuthViewModel
+import pe.rejuega.app.viewmodel.AuthViewModel
 
 // (nuevo) Pantalla de autenticación.
 @Composable

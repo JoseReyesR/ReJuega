@@ -1,6 +1,6 @@
 // (modificado) La trazabilidad ahora lee desde Firestore por uid (HU-07 criterio 2).
 // (modificado) El listener en tiempo real cumple el criterio 3 (reflejo al cambiar).
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

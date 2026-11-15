@@ -26,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -50,7 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import pe.rejuega.app.data.remote.CampaignFirestore
-import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
+import pe.rejuega.app.viewmodel.CampaignAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

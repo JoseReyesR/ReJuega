@@ -18,29 +18,29 @@ import pe.rejuega.app.ui.screens.HomeScreen
 import pe.rejuega.app.ui.screens.LoginScreen
 import pe.rejuega.app.ui.screens.RegisterToyScreen
 import pe.rejuega.app.ui.screens.TraceabilityScreen
-import pe.rejuega.app.ui.viewmodel.AuthViewModel
-import pe.rejuega.app.ui.viewmodel.AuthViewModelFactory
-import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModel
-import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModelFactory
-import pe.rejuega.app.ui.viewmodel.EventosRecojoViewModel
-import pe.rejuega.app.ui.viewmodel.EventosRecojoViewModelFactory
-import pe.rejuega.app.ui.viewmodel.CampaignViewModel
-import pe.rejuega.app.ui.viewmodel.CampaignViewModelFactory
-import pe.rejuega.app.ui.viewmodel.JugueteViewModel
-import pe.rejuega.app.ui.viewmodel.JugueteViewModelFactory
-import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
-import pe.rejuega.app.ui.viewmodel.TraceabilityViewModelFactory
+import pe.rejuega.app.viewmodel.AuthViewModel
+import pe.rejuega.app.viewmodel.AuthViewModelFactory
+import pe.rejuega.app.viewmodel.CampaignDetailViewModel
+import pe.rejuega.app.viewmodel.CampaignDetailViewModelFactory
+import pe.rejuega.app.viewmodel.EventosRecojoViewModel
+import pe.rejuega.app.viewmodel.EventosRecojoViewModelFactory
+import pe.rejuega.app.viewmodel.CampaignViewModel
+import pe.rejuega.app.viewmodel.CampaignViewModelFactory
+import pe.rejuega.app.viewmodel.JugueteViewModel
+import pe.rejuega.app.viewmodel.JugueteViewModelFactory
+import pe.rejuega.app.viewmodel.TraceabilityViewModel
+import pe.rejuega.app.viewmodel.TraceabilityViewModelFactory
 import pe.rejuega.app.utils.UiState
 
 // (nuevo) Pantalla y ViewModel de impacto ambiental.
 import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
-import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModel
-import pe.rejuega.app.ui.viewmodel.ImpactoAmbientalViewModelFactory
+import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModel
+import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModelFactory
 import pe.rejuega.app.data.repository.MaterialEcoRepository
 // (modificado) Archivo: AppNavigation.kt - imports
 import pe.rejuega.app.ui.screens.PerfilScreen
-import pe.rejuega.app.ui.viewmodel.PerfilViewModel
-import pe.rejuega.app.ui.viewmodel.PerfilViewModelFactory
+import pe.rejuega.app.viewmodel.PerfilViewModel
+import pe.rejuega.app.viewmodel.PerfilViewModelFactory
 
 // (nuevo) Imports necesarios para el nuevo factory del JugueteViewModel.
 import android.app.Application
@@ -49,27 +49,27 @@ import androidx.compose.ui.platform.LocalContext
 // (nuevo) Imports para el SessionViewModel y el Panel Admin.
 import androidx.compose.runtime.LaunchedEffect
 import pe.rejuega.app.ui.screens.PanelAdminScreen
-import pe.rejuega.app.ui.viewmodel.SessionViewModel
-import pe.rejuega.app.ui.viewmodel.SessionViewModelFactory
+import pe.rejuega.app.viewmodel.SessionViewModel
+import pe.rejuega.app.viewmodel.SessionViewModelFactory
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
 
 import pe.rejuega.app.ui.screens.CampaignAdminScreen
 import pe.rejuega.app.ui.screens.CampaignGalleryScreen
-import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModel
-import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModelFactory
+import pe.rejuega.app.viewmodel.CampaignGalleryViewModel
+import pe.rejuega.app.viewmodel.CampaignGalleryViewModelFactory
 import pe.rejuega.app.ui.screens.PuntosRecojoAdminScreen
 import pe.rejuega.app.ui.screens.PuntoEntregaFormScreen
 import pe.rejuega.app.ui.screens.PickupEventFormScreen
 import pe.rejuega.app.ui.screens.MapaPuntosRecojoScreen
-import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModel
-import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModelFactory
-import pe.rejuega.app.ui.viewmodel.MapaViewModel
-import pe.rejuega.app.ui.viewmodel.MapaViewModelFactory
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModelFactory
+import pe.rejuega.app.viewmodel.MapaViewModel
+import pe.rejuega.app.viewmodel.MapaViewModelFactory
 import pe.rejuega.app.ui.screens.CampaignFormScreen
-import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
-import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
+import pe.rejuega.app.viewmodel.CampaignAdminViewModel
+import pe.rejuega.app.viewmodel.CampaignAdminViewModelFactory
 
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.Lifecycle
@@ -78,19 +78,17 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 
 import pe.rejuega.app.ui.screens.DonationAdminScreen
 import pe.rejuega.app.ui.screens.DonationDetailAdminScreen
-import pe.rejuega.app.ui.viewmodel.DonationAdminViewModel
-import pe.rejuega.app.ui.viewmodel.DonationAdminViewModelFactory
+import pe.rejuega.app.viewmodel.DonationAdminViewModel
+import pe.rejuega.app.viewmodel.DonationAdminViewModelFactory
 
 
-import androidx.compose.runtime.getValue
 import pe.rejuega.app.ui.screens.NotificationScreen
-import pe.rejuega.app.ui.viewmodel.NotificationViewModel
-import pe.rejuega.app.ui.viewmodel.NotificationViewModelFactory
+import pe.rejuega.app.viewmodel.NotificationViewModel
+import pe.rejuega.app.viewmodel.NotificationViewModelFactory
 
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 
 // (modificado) Composable principal de navegación.
 

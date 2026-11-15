@@ -42,7 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
+import pe.rejuega.app.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.utils.convertirFechaAMillis
 import pe.rejuega.app.utils.convertirMillisAFecha
 

@@ -49,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pe.rejuega.app.data.remote.PickupEventFirestore
 import pe.rejuega.app.data.remote.PuntoEntregaFirestore
-import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModel
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import pe.rejuega.app.data.remote.PickupEventFirestore
 import pe.rejuega.app.ui.components.SelectorDireccion
 import pe.rejuega.app.ui.components.TimeDropdown
-import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModel
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
 import pe.rejuega.app.utils.convertirFechaAMillis
 import pe.rejuega.app.utils.convertirMillisAFecha
 

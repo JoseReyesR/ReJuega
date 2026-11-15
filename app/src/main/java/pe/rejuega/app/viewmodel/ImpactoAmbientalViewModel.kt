@@ -1,7 +1,7 @@
 // (nuevo) Archivo: ImpactoAmbientalViewModel.kt
 // (nuevo) Descripción: ViewModel para la pantalla de impacto ambiental (HU-11).
 // (nuevo) Responsabilidad: consumir MockAPI y exponer el estado a la UI.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

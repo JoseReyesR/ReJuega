@@ -36,7 +36,7 @@ import pe.rejuega.app.data.remote.PuntoEntregaFirestore
 import pe.rejuega.app.ui.components.HorarioPicker
 import pe.rejuega.app.ui.components.SelectorDireccion
 import pe.rejuega.app.ui.components.construirHorario
-import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModel
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

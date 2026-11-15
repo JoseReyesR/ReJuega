@@ -3,8 +3,6 @@
 // (nuevo) Implementa los estados de UI: Loading, Success, Error, Empty para la operación POST.
 package pe.rejuega.app.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,7 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import pe.rejuega.app.ui.viewmodel.PerfilViewModel
+import pe.rejuega.app.viewmodel.PerfilViewModel
 import pe.rejuega.app.utils.UiState
 
 // (nuevo) OptIn necesario para TopAppBar de Material 3.

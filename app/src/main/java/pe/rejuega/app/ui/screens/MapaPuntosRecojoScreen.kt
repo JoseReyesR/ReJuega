@@ -43,7 +43,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import pe.rejuega.app.ui.viewmodel.MapaViewModel
+import pe.rejuega.app.viewmodel.MapaViewModel
 import java.util.Locale
 
 // (nuevo) Centro por defecto: Trujillo, Perú.

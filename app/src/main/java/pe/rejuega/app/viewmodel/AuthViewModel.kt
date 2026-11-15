@@ -1,7 +1,7 @@
 // (nuevo) Archivo: AuthViewModel.kt
 // (nuevo) Descripción: ViewModel para Login y Registro.
 // (nuevo) Implementa HU-01: autenticación de usuarios por rol.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

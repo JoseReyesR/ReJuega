@@ -1,5 +1,5 @@
 // (nuevo) ViewModel de gestión de puntos de recojo (Admin).
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

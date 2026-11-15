@@ -49,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import pe.rejuega.app.ui.viewmodel.CampaignDetailViewModel
+import pe.rejuega.app.viewmodel.CampaignDetailViewModel
 import pe.rejuega.app.utils.UiState
 
 // (nuevo) Se requiere OptIn porque TopAppBar de Material 3 es experimental.

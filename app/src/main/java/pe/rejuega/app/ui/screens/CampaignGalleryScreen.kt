@@ -58,7 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.remote.CampaignEvidence
-import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModel
+import pe.rejuega.app.viewmodel.CampaignGalleryViewModel
 import pe.rejuega.app.utils.formatarFechaHora
 
 @OptIn(ExperimentalMaterial3Api::class)

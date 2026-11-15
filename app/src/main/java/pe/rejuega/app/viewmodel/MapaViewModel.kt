@@ -1,6 +1,6 @@
 // (nuevo) ViewModel del mapa: unifica puntos fijos y eventos activos,
 // (nuevo) y calcula el punto recomendado por cercanía (HU-10).
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import android.location.Location
 import androidx.lifecycle.ViewModel

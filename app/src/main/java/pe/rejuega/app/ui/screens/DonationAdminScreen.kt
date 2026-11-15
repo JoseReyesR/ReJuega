@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.remote.Donacion
-import pe.rejuega.app.ui.viewmodel.DonationAdminViewModel
+import pe.rejuega.app.viewmodel.DonationAdminViewModel
 
 // (nuevo) Opciones de filtro disponibles.
 private val FILTROS = listOf("Por revisar", "Aprobadas", "Entregadas", "Rechazadas", "Todas")

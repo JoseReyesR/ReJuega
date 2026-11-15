@@ -2,7 +2,7 @@
 // (modificado) Cambio: Ahora extiende de AndroidViewModel para tener acceso al Context.
 // (modificado) Cambio: Usa DonationRepository para subir a Cloudinary + Firestore + Room.
 // (modificado) Motivo: Implementar el registro real de juguetes con foto en la nube.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import android.app.Application
 import android.net.Uri

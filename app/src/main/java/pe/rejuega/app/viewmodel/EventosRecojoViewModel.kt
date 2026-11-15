@@ -1,6 +1,6 @@
 // (nuevo) ViewModel independiente que observa los eventos de recojo de una campaña.
 // (nuevo) No depende del CampaignDetailViewModel: recibe el firestoreId directo.
-package pe.rejuega.app.ui.viewmodel
+package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
