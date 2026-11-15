@@ -236,6 +236,9 @@ fun AppNavigation(
                 onPanelAdminClick = {
                     navController.navigate(Routes.PANEL_ADMIN)
                 },
+                onCampaignAdminClick = { navController.navigate(Routes.CAMPAIGN_ADMIN) },
+                onDonationAdminClick = { navController.navigate(Routes.DONATION_ADMIN) },
+                onPuntosRecojoAdminClick = { navController.navigate(Routes.PUNTOS_RECOJO_ADMIN) },
                 notificacionesNoLeidas = noLeidas,
                 onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) },
                 onMapaClick = { navController.navigate(Routes.MAPA_PUNTOS_RECOJO) }

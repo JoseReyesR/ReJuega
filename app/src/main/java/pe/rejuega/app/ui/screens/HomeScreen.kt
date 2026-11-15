@@ -47,6 +47,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.local.Campaign
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import pe.rejuega.app.ui.components.MenuLateralReJuega
 import pe.rejuega.app.ui.viewmodel.CampaignViewModel
 import pe.rejuega.app.utils.UiState
 import androidx.compose.material.icons.filled.Person
@@ -94,6 +101,9 @@ fun HomeScreen(
     onPerfilClick: () -> Unit = {},
     // (nuevo) Acción para abrir el Panel Admin (solo se llama si es admin).
     onPanelAdminClick: () -> Unit = {},
+    onCampaignAdminClick: () -> Unit = {},
+    onDonationAdminClick: () -> Unit = {},
+    onPuntosRecojoAdminClick: () -> Unit = {},
 
     notificacionesNoLeidas: Int = 0,
     onNotificationsClick: () -> Unit = {},
@@ -110,116 +120,59 @@ fun HomeScreen(
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
     val uiState by viewModel.uiState.collectAsState()
 
-    // (nuevo) Scaffold es el esqueleto de Material 3: Proporciona TopAppBar, contenido, FAB, etc.
-    Scaffold(
-        // (nuevo) Barra superior (TopAppBar) con el título de la app.
-        topBar = {
-            TopAppBar(
+    // (nuevo) Estado del menú lateral y scope para abrirlo/cerrarlo.
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-
-                // (nuevo) Título principal de la app.
-                title = {
-                    Column {
-                        // (nuevo) Nombre de la app.
-                        Text(
-                            text = "ReJuega",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        // (nuevo) Subtítulo que indica qué está viendo el usuario.
-                        Text(
-                            text = "Campañas activas de donación",
-                            style = MaterialTheme.typography.bodySmall
-                        )
+    // (nuevo) El menú lateral envuelve todo el Scaffold.
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            MenuLateralReJuega(
+                nombreUsuario = nombreUsuario,
+                esAdmin = esAdministrador,
+                notificacionesNoLeidas = notificacionesNoLeidas,
+                onSeleccion = { destino ->
+                    scope.launch { drawerState.close() }
+                    when (destino) {
+                        "panel" -> onPanelAdminClick()
+                        "campaigns" -> onCampaignAdminClick()
+                        "donations" -> onDonationAdminClick()
+                        "puntos" -> onPuntosRecojoAdminClick()
+                        "trazabilidad" -> onTraceabilityClick()
+                        "mapa" -> onMapaClick()
+                        "impacto" -> onImpactoClick()
+                        "notificaciones" -> onNotificationsClick()
+                        "perfil" -> onPerfilClick()
+                        "logout" -> onLogoutClick()
                     }
-                },
-
-                // (nuevo) Colores de la barra superior: Usamos el color primario (Verde Esperanza).
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-
-
-                // (modificado) Archivo: HomeScreen.kt - actions del TopAppBar
-                // (nuevo) Se agrega botón de cierre de sesión.
-
-
-
-
-                actions = {
-                    IconButton(onClick = onTraceabilityClick) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "Ver trazabilidad de mis donaciones",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                    // (nuevo) Botón para acceder a la pantalla de impacto ambiental.
-                    IconButton(onClick = onImpactoClick) {
-                        Icon(
-                            imageVector = Icons.Default.Eco,
-                            contentDescription = "Ver impacto ambiental",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                    // ... (nuevo) Agregar antes del IconButton de ExitToApp ...
-                    IconButton(onClick = onPerfilClick) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Ver mi perfil y huella ecológica",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                    // (nuevo) Botón de Panel Admin: SOLO se muestra si el usuario es Administrador.
-                    // (nuevo) Implementa RN-04: los controles de administración no se muestran al Donante.
-                    if (esAdministrador) {
-                        IconButton(onClick = onPanelAdminClick) {
+                }
+            )
+        }
+    ) {
+        // (nuevo) Scaffold es el esqueleto de Material 3: Proporciona TopAppBar, contenido, FAB, etc.
+        Scaffold(
+            // (nuevo) Barra superior (TopAppBar) con el menú lateral.
+            topBar = {
+                TopAppBar(
+                    title = { Text("ReJuega", fontWeight = FontWeight.Bold) },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
-                                imageVector = Icons.Default.AdminPanelSettings,
-                                contentDescription = "Panel de Administración",
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Abrir menú",
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
-                    }
-
-
-                    // (nuevo) Botón de notificaciones con badge de no leídas.
-                    IconButton(onClick = onNotificationsClick) {
-                        androidx.compose.material3.BadgedBox(
-                            badge = {
-                                if (notificacionesNoLeidas > 0) {
-                                    androidx.compose.material3.Badge {
-                                        Text(if (notificacionesNoLeidas > 9) "9+" else notificacionesNoLeidas.toString())
-                                    }
-                                }
-                            }
-                        ) {
-                            Icon(Icons.Default.Notifications, contentDescription = "Notificaciones",
-                                tint = MaterialTheme.colorScheme.onPrimary)
-                        }
-                    }
-                    // (nuevo) Botón de mapa de puntos de recojo (visible para ambos roles).
-                    IconButton(onClick = onMapaClick) {
-                        Icon(
-                            imageVector = Icons.Default.Map,
-                            contentDescription = "Ver mapa de puntos de recojo",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Cerrar sesión",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-
-            )
-        }
-    ) { paddingValues ->
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            }
+        ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -365,6 +318,7 @@ fun HomeScreen(
             }
         }
     }
+}
 }
 }
 
