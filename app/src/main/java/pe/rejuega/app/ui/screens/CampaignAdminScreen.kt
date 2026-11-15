@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -56,7 +57,8 @@ fun CampaignAdminScreen(
     viewModel: CampaignAdminViewModel,
     onBackClick: () -> Unit,
     onCrearClick: () -> Unit,
-    onEditarClick: (String) -> Unit
+    onEditarClick: (String) -> Unit,
+    onVerGaleriaClick: (id: String, titulo: String) -> Unit = { _, _ -> }
 ) {
     val campaigns by viewModel.campaigns.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -126,7 +128,8 @@ fun CampaignAdminScreen(
                         CampaignAdminCard(
                             campaign = campaign,
                             onEditarClick = { onEditarClick(campaign.id) },
-                            onCerrarClick = { viewModel.cerrarCampaign(campaign.id) }
+                            onCerrarClick = { viewModel.cerrarCampaign(campaign.id) },
+                            onVerGaleriaClick = { onVerGaleriaClick(campaign.id, campaign.titulo) }
                         )
                     }
                 }
@@ -139,7 +142,8 @@ fun CampaignAdminScreen(
 private fun CampaignAdminCard(
     campaign: CampaignFirestore,
     onEditarClick: () -> Unit,
-    onCerrarClick: () -> Unit
+    onCerrarClick: () -> Unit,
+    onVerGaleriaClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -162,6 +166,12 @@ private fun CampaignAdminCard(
                     Icon(Icons.Default.Edit, contentDescription = null, Modifier.width(18.dp))
                     Spacer(Modifier.width(4.dp))
                     Text("Editar")
+                }
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(onClick = onVerGaleriaClick) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = null, Modifier.width(18.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Galería")
                 }
                 Spacer(Modifier.width(8.dp))
                 if (campaign.estado == "Activa") {

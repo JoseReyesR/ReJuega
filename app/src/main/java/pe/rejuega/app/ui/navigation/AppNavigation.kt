@@ -260,7 +260,8 @@ fun AppNavigation(
                         navController.navigate(Routes.CAMPAIGN_ADMIN)
                     },
                     // (nuevo) Navegación a revisar donaciones.
-                    onRevisarDonaciones = { navController.navigate(Routes.DONATION_ADMIN) }
+                    onRevisarDonaciones = { navController.navigate(Routes.DONATION_ADMIN) },
+                    onGaleriaEvidencias = { navController.navigate(Routes.CAMPAIGN_ADMIN) }
 
                 )
             }
@@ -408,7 +409,10 @@ fun AppNavigation(
                 viewModel = campaignAdminViewModel,
                 onBackClick = { navController.popBackStack() },
                 onCrearClick = { navController.navigate(Routes.campaignForm("new")) },
-                onEditarClick = { id -> navController.navigate(Routes.campaignForm(id)) }
+                onEditarClick = { id -> navController.navigate(Routes.campaignForm(id)) },
+                onVerGaleriaClick = { id, titulo ->
+                    navController.navigate(Routes.campaignGallery(id, titulo))
+                }
             )
         }
 
