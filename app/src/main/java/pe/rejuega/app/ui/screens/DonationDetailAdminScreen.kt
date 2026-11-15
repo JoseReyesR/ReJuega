@@ -164,8 +164,8 @@ fun DonationDetailAdminScreen(
                     val siguiente = EstadosTrazabilidad.siguienteDe(donacion.estadoTrazabilidad)
                     if (siguiente != null) {
                         Button(
-                            // (modificado) Se usa el ID del documento Firestore.
-                            onClick = { viewModel.avanzarEstado(donacion.id, donacion.estadoTrazabilidad) },
+                            // (modificado) Se pasa la donación completa para que el ViewModel cree la notificación.
+                            onClick = { viewModel.avanzarEstado(donacion.id, donacion.estadoTrazabilidad, donacion) },
                             enabled = uiState !is DonationAdminUiState.Loading,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -224,7 +224,8 @@ fun DonationDetailAdminScreen(
                     onClick = {
                         if (motivoRechazo.isNotBlank()) {
                             // (modificado) Se usa el ID del documento Firestore.
-                            viewModel.rechazar(donacion.id, motivoRechazo)
+                            // (modificado) Se pasa la donación completa para que el ViewModel cree la notificación.
+                            viewModel.rechazar(donacion.id, motivoRechazo, donacion)
                             mostrarDialogoRechazo = false
                             motivoRechazo = ""
                         }

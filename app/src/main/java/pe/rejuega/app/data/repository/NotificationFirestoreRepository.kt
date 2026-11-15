@@ -2,7 +2,6 @@
 package pe.rejuega.app.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -15,15 +14,19 @@ class NotificationFirestoreRepository(
     private val collection = firestore.collection("notifications")
 
     // (nuevo) Observa las notificaciones del usuario (listener en tiempo real).
+    // (modificado) Se ordena en Kotlin para no exigir un índice compuesto en Firestore.
     fun observarPorUsuario(uid: String): Flow<List<Notificacion>> = callbackFlow {
         val listener = collection
             .whereEqualTo("uidDestinatario", uid)
-            .orderBy("fechaCreacion", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    println("Error observando notificaciones: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 val lista = snapshot?.documents?.mapNotNull { doc ->
                     doc.toObject(Notificacion::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
+                }?.sortedByDescending { it.fechaCreacion } ?: emptyList()
                 trySend(lista)
             }
         awaitClose { listener.remove() }
@@ -35,7 +38,11 @@ class NotificationFirestoreRepository(
             .whereEqualTo("uidDestinatario", uid)
             .whereEqualTo("leida", false)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    println("Error contando no leídas: ${error.message}")
+                    trySend(0)
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.size() ?: 0)
             }
         awaitClose { listener.remove() }

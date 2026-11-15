@@ -25,7 +25,8 @@ class CampaignFirestoreRepository(
             .orderBy("fechaCreacion", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error)
+                    println("Error al obtener campañas en tiempo real: ${error.message}")
+                    trySend(emptyList())
                     return@addSnapshotListener
                 }
                 // (nuevo) Mapea documentos a objetos, asignando el ID del documento.

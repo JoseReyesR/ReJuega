@@ -20,7 +20,11 @@ class DonationFirestoreRepository(
         val listener = collection
             .orderBy("fechaRegistro", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    println("Error escuchando donaciones: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 val lista = snapshot?.documents?.mapNotNull { doc ->
                     // (modificado) Antes: .copy() → perdía el docId.
                     // (modificado) Ahora: .copy(id = doc.id) → cada Donacion conoce su documento.
@@ -73,7 +77,11 @@ class DonationFirestoreRepository(
     fun obtenerPorUsuario(uid: String): Flow<List<Donacion>> = callbackFlow {
         val listener = collection.whereEqualTo("uid", uid)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    println("Error escuchando donaciones del usuario: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 val lista = snapshot?.documents?.mapNotNull { doc ->
                     doc.toObject(Donacion::class.java)?.copy(id = doc.id)
                 } ?: emptyList()

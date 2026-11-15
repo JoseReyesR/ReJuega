@@ -173,7 +173,13 @@ fun AppNavigation(
             var noLeidas by remember { mutableIntStateOf(0) }
             LaunchedEffect(uidUsuario) {
                 if (uidUsuario.isNotBlank()) {
-                    notificationRepository.contarNoLeidas(uidUsuario).collect { noLeidas = it }
+                    try {
+                        notificationRepository.contarNoLeidas(uidUsuario).collect { noLeidas = it }
+                    } catch (e: Exception) {
+                        noLeidas = 0
+                    }
+                } else {
+                    noLeidas = 0
                 }
             }
             HomeScreen(
@@ -420,6 +426,7 @@ fun AppNavigation(
             val donationAdminViewModel: DonationAdminViewModel = viewModel(
                 factory = DonationAdminViewModelFactory(
                     appContainer.donationFirestoreRepository,
+                    appContainer.notificationFirestoreRepository,
                     uidAdmin
                 )
             )
@@ -440,6 +447,7 @@ fun AppNavigation(
             val donationAdminViewModel: DonationAdminViewModel = viewModel(
                 factory = DonationAdminViewModelFactory(
                     appContainer.donationFirestoreRepository,
+                    appContainer.notificationFirestoreRepository,
                     uidAdmin
                 )
             )

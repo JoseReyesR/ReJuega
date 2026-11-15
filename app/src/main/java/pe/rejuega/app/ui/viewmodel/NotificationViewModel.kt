@@ -23,7 +23,11 @@ class NotificationViewModel(
 
     private fun observar() {
         viewModelScope.launch {
-            repository.observarPorUsuario(uid).collect { _notificaciones.value = it }
+            try {
+                repository.observarPorUsuario(uid).collect { _notificaciones.value = it }
+            } catch (e: Exception) {
+                println("Error en ViewModel de notificaciones: ${e.message}")
+            }
         }
     }
 
