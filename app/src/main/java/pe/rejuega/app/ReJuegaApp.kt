@@ -23,6 +23,7 @@ import pe.rejuega.app.data.repository.CampaignSyncRepository
 import pe.rejuega.app.utils.DatosSemilla
 import pe.rejuega.app.data.repository.DonationFirestoreRepository
 import pe.rejuega.app.data.repository.NotificationFirestoreRepository
+import pe.rejuega.app.data.repository.CampaignGalleryRepository
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -92,6 +93,9 @@ class ReJuegaApp : Application() {
         )
 
 
+        // (nuevo) Repositorio de galería de evidencias.
+        val campaignGalleryRepository = CampaignGalleryRepository(firebaseFirestore)
+
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -109,10 +113,9 @@ class ReJuegaApp : Application() {
 
             donationFirestoreRepository = donationFirestoreRepository,
 
-            notificationFirestoreRepository = notificationFirestoreRepository
+            notificationFirestoreRepository = notificationFirestoreRepository,
 
-
-
+            campaignGalleryRepository = campaignGalleryRepository
         )
 
         // (modificado) Insertamos datos semilla locales.
