@@ -17,7 +17,10 @@ data class Donacion(
     val motivoRechazo: String? = null,   // Solo si fue rechazada
     // (nuevo) Historial inmutable de cambios de estado (HU-07 criterio 4, RB-11).
     val historialEstados: List<CambioEstado> = emptyList(),
-    val fechaRegistro: Long = 0
+    val fechaRegistro: Long = 0,
+    // (nuevo) Campos de material para la huella ecológica real.
+    val materialTipo: String = "",
+    val co2AhorradoKg: Double = 0.0
 )
 
 // (nuevo) Un hito de la trazabilidad: qué estado, cuándo y quién lo cambió.

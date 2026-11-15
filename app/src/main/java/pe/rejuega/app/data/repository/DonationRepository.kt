@@ -57,7 +57,8 @@ class DonationRepository(
     // =====================================================================
     suspend fun registrarPropuesta(
         context: Context, uid: String, campaignId: Long, campaignTitulo: String,
-        nombre: String, descripcion: String, estado: String, fotoUri: Uri
+        nombre: String, descripcion: String, estado: String, fotoUri: Uri,
+        materialTipo: String = "", co2AhorradoKg: Double = 0.0
     ): String {
         // (nuevo) VALIDACIÓN PREVIA: verificar que exista un usuario autenticado.
         // (nuevo) Motivo: las reglas de Firestore exigen que el campo uid coincida
@@ -129,7 +130,9 @@ class DonationRepository(
             historialEstados = listOf(
                 CambioEstado("Pendiente", System.currentTimeMillis(), uid)
             ),
-            fechaRegistro = System.currentTimeMillis()
+            fechaRegistro = System.currentTimeMillis(),
+            materialTipo = materialTipo,
+            co2AhorradoKg = co2AhorradoKg
         )
 
         // (nuevo) PASO 9: Guardar la donación en Firestore.

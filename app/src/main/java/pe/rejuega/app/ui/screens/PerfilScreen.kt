@@ -1,8 +1,8 @@
 // (nuevo) Archivo: PerfilScreen.kt
-// (nuevo) Descripción: Pantalla de Perfil que muestra el impacto acumulado y permite sincronizarlo (HU-12).
-// (nuevo) Implementa los estados de UI: Loading, Success, Error, Empty para la operación POST.
+// (nuevo) Descripción: Pantalla de Perfil que muestra el impacto acumulado y datos del usuario.
 package pe.rejuega.app.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,46 +10,76 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import pe.rejuega.app.viewmodel.PerfilViewModel
 import pe.rejuega.app.utils.UiState
+import pe.rejuega.app.viewmodel.PerfilUsuarioViewModel
+import pe.rejuega.app.viewmodel.PerfilViewModel
+import java.util.Locale
 
-// (nuevo) OptIn necesario para TopAppBar de Material 3.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(
     viewModel: PerfilViewModel,
+    perfilUsuarioViewModel: PerfilUsuarioViewModel,
     onBackClick: () -> Unit
 ) {
-    // (nuevo) Observamos el estado del ViewModel.
     val uiState by viewModel.uiState.collectAsState()
+    val perfilState by perfilUsuarioViewModel.state.collectAsState()
+    val co2Donaciones by perfilUsuarioViewModel.co2Donaciones.collectAsState()
+
+    var mostrarDialogoContrasena by remember { mutableStateOf(false) }
+    var contrasenaActual by remember { mutableStateOf("") }
+    var contrasenaNueva by remember { mutableStateOf("") }
+    var contrasenaConfirmacion by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(perfilState.mensaje, perfilState.error) {
+        perfilState.mensaje?.let { snackbarHostState.showSnackbar(it); perfilUsuarioViewModel.limpiarMensaje() }
+        perfilState.error?.let { snackbarHostState.showSnackbar(it); perfilUsuarioViewModel.limpiarMensaje() }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -79,14 +109,112 @@ fun PerfilScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // (nuevo) Tarjeta principal con el impacto acumulado local.
+            // (nuevo) Sección de datos personales del perfil.
+            Text("Mis datos de perfil", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = perfilState.nombre,
+                onValueChange = { perfilUsuarioViewModel.onCampoChange("nombre", it) },
+                label = { Text("Nombre completo") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = perfilState.telefono,
+                onValueChange = { perfilUsuarioViewModel.onCampoChange("telefono", it) },
+                label = { Text("Teléfono") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = perfilState.ciudad,
+                onValueChange = { perfilUsuarioViewModel.onCampoChange("ciudad", it) },
+                label = { Text("Ciudad / distrito") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = perfilState.direccion,
+                onValueChange = { perfilUsuarioViewModel.onCampoChange("direccion", it) },
+                label = { Text("Dirección (referencia de recojo)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+
+            // (nuevo) Dropdown de género.
+            var expandedGenero by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(expanded = expandedGenero, onExpandedChange = { expandedGenero = it }) {
+                OutlinedTextField(
+                    value = perfilState.genero,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Género (opcional)") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedGenero) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                )
+                ExposedDropdownMenu(expanded = expandedGenero, onDismissRequest = { expandedGenero = false }) {
+                    listOf("Femenino", "Masculino", "No binario", "Prefiero no decir").forEach { g ->
+                        DropdownMenuItem(
+                            text = { Text(g) },
+                            onClick = {
+                                perfilUsuarioViewModel.onCampoChange("genero", g)
+                                expandedGenero = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = { perfilUsuarioViewModel.guardarPerfil() },
+                enabled = !perfilState.isLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (perfilState.isLoading) CircularProgressIndicator(Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
+                else Text("Guardar cambios de perfil")
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // (nuevo) CO₂ real aportado por sus donaciones.
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Tu aporte ambiental real", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = String.format(Locale.US, "%.1f kg de CO₂ evitados con tus donaciones", co2Donaciones),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = { mostrarDialogoContrasena = true },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Cambiar contraseña") }
+
+            Spacer(Modifier.height(24.dp))
+
+            // (nuevo) Tarjeta principal con el impacto acumulado local.
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
                 Column(
@@ -267,5 +395,47 @@ fun PerfilScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+
+    // (nuevo) Diálogo de cambio de contraseña.
+    if (mostrarDialogoContrasena) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoContrasena = false },
+            title = { Text("Cambiar contraseña") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = contrasenaActual,
+                        onValueChange = { contrasenaActual = it },
+                        label = { Text("Contraseña actual") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = contrasenaNueva,
+                        onValueChange = { contrasenaNueva = it },
+                        label = { Text("Nueva contraseña (mín. 6)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = contrasenaConfirmacion,
+                        onValueChange = { contrasenaConfirmacion = it },
+                        label = { Text("Confirmar nueva") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    perfilUsuarioViewModel.cambiarContrasena(contrasenaActual, contrasenaNueva, contrasenaConfirmacion)
+                    mostrarDialogoContrasena = false
+                    contrasenaActual = ""; contrasenaNueva = ""; contrasenaConfirmacion = ""
+                }) { Text("Actualizar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoContrasena = false }) { Text("Cancelar") }
+            }
+        )
     }
 }

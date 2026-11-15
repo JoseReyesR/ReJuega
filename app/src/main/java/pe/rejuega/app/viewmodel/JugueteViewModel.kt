@@ -16,6 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.rejuega.app.data.remote.DonationRepository
+import pe.rejuega.app.data.remote.MaterialJugueteDto
+import pe.rejuega.app.data.repository.MaterialEcoRepository
+import pe.rejuega.app.utils.DatosSemilla
 
 // (modificado) Estado de la interfaz del formulario de registro.
 // (modificado) Se mantiene igual que antes. No cambia la estructura.
@@ -35,6 +38,7 @@ data class RegisterToyUiState(
 class JugueteViewModel(
     application: Application,
     private val donationRepository: DonationRepository,
+    private val materialEcoRepository: MaterialEcoRepository,
     private val campaignId: Long,
     private val campaignTitulo: String      // (nuevo)
 ) : AndroidViewModel(application) {
@@ -44,6 +48,34 @@ class JugueteViewModel(
 
     // (modificado) Estado público de solo lectura para la pantalla.
     val uiState: StateFlow<RegisterToyUiState> = _uiState.asStateFlow()
+
+    // (nuevo) Materiales disponibles para el dropdown.
+    private val _materiales = MutableStateFlow<List<MaterialJugueteDto>>(emptyList())
+    val materiales: StateFlow<List<MaterialJugueteDto>> = _materiales.asStateFlow()
+
+    // (nuevo) Material elegido por el usuario.
+    private val _materialSeleccionado = MutableStateFlow<MaterialJugueteDto?>(null)
+    val materialSeleccionado: StateFlow<MaterialJugueteDto?> = _materialSeleccionado.asStateFlow()
+
+    init { cargarMateriales() }
+
+    // (nuevo) Carga de la API con respaldo local sin internet.
+    private fun cargarMateriales() {
+        viewModelScope.launch {
+            _materiales.value = try {
+                materialEcoRepository.obtenerMaterialesUnaVez()
+                    .ifEmpty { DatosSemilla.listaMaterialesDto }
+            } catch (e: Exception) {
+                DatosSemilla.listaMaterialesDto
+            }
+        }
+    }
+
+    // (nuevo) Selección del material.
+    fun onMaterialSeleccionado(material: MaterialJugueteDto) {
+        _materialSeleccionado.value = material
+        _uiState.update { it.copy(error = null) }
+    }
 
     // (modificado) Actualiza el nombre cuando el usuario escribe.
     fun onNombreChange(nuevoNombre: String) {
@@ -106,11 +138,21 @@ class JugueteViewModel(
             return
         }
 
+        // (nuevo) VALIDACIÓN 5: Material obligatorio.
+        if (_materialSeleccionado.value == null) {
+            _uiState.update {
+                it.copy(error = "Selecciona el material del juguete.")
+            }
+            return
+        }
+
         // (modificado) Si pasa todas las validaciones, iniciamos el registro.
         viewModelScope.launch {
             try {
                 // (modificado) Indicamos que estamos cargando.
                 _uiState.update { it.copy(isLoading = true, error = null) }
+
+                val material = _materialSeleccionado.value!!
 
                 // (modificado) Llamamos al Repository que hace todo el flujo:
                 // (modificado) comprimir → subir a Cloudinary → Firestore → Room.
@@ -122,7 +164,9 @@ class JugueteViewModel(
                     nombre = estadoActual.nombre,
                     descripcion = estadoActual.descripcion,
                     estado = estadoActual.estado,
-                    fotoUri = estadoActual.fotoUri!!
+                    fotoUri = estadoActual.fotoUri!!,
+                    materialTipo = material.tipoMaterial,
+                    co2AhorradoKg = material.co2AhorradoKg
                 )
 
                 // (modificado) Si todo sale bien, marcamos éxito.
@@ -148,6 +192,7 @@ class JugueteViewModel(
 class JugueteViewModelFactory(
     private val application: Application,
     private val donationRepository: DonationRepository,
+    private val materialEcoRepository: MaterialEcoRepository,
     private val campaignId: Long,
     private val campaignTitulo: String     // (nuevo)
 ) : ViewModelProvider.Factory {
@@ -156,7 +201,7 @@ class JugueteViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(JugueteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return JugueteViewModel(application, donationRepository, campaignId, campaignTitulo) as T
+            return JugueteViewModel(application, donationRepository, materialEcoRepository, campaignId, campaignTitulo) as T
         }
         throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

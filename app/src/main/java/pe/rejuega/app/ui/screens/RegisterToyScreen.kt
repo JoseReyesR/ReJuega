@@ -30,7 +30,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -72,6 +76,9 @@ fun RegisterToyScreen(
 ) {
     // (modificado) Observamos el estado del formulario desde el ViewModel.
     val uiState by viewModel.uiState.collectAsState()
+    val materiales by viewModel.materiales.collectAsState()
+    val materialSeleccionado by viewModel.materialSeleccionado.collectAsState()
+    var expandedMaterial by remember { mutableStateOf(false) }
 
     // (nuevo) Contexto necesario para FileProvider y permisos de cámara.
     val context = LocalContext.current
@@ -226,6 +233,43 @@ fun RegisterToyScreen(
                     onClick = { viewModel.onEstadoChange("Buen Estado") }
                 )
                 Text(text = "Buen Estado")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // (nuevo) Dropdown de material del juguete (alimenta la huella ecológica).
+            Text(
+                text = "Material del juguete",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            ExposedDropdownMenuBox(
+                expanded = expandedMaterial,
+                onExpandedChange = { expandedMaterial = it }
+            ) {
+                OutlinedTextField(
+                    value = materialSeleccionado?.tipoMaterial ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Selecciona el material") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMaterial) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedMaterial,
+                    onDismissRequest = { expandedMaterial = false }
+                ) {
+                    materiales.forEach { material ->
+                        DropdownMenuItem(
+                            text = { Text("${material.tipoMaterial} · ${material.co2AhorradoKg} kg CO₂") },
+                            onClick = {
+                                viewModel.onMaterialSeleccionado(material)
+                                expandedMaterial = false
+                            }
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

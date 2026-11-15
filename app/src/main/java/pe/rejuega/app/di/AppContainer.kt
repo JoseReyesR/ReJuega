@@ -15,6 +15,7 @@ import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignGalleryRepository
 import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
 import pe.rejuega.app.data.repository.GeocodingRepository
+import pe.rejuega.app.data.repository.MaterialEcoRepository
 // (modificado) Contenedor manual de dependencias.
 class AppContainer(
     val campaignRepository: CampaignRepository,
@@ -37,5 +38,7 @@ class AppContainer(
     // (nuevo) Repositorio de puntos de recojo y eventos en Firestore.
     val puntoRecojoFirestoreRepository: PuntoRecojoFirestoreRepository,
     // (nuevo) Repositorio de geocodificación (Nominatim).
-    val geocodingRepository: GeocodingRepository
+    val geocodingRepository: GeocodingRepository,
+    // (nuevo) Repositorio de materiales ecológicos (MockAPI).
+    val materialEcoRepository: MaterialEcoRepository
 )

@@ -90,5 +90,17 @@ class DonationFirestoreRepository(
         awaitClose { listener.remove() }
     }
 
+    // (nuevo) Consulta única para calcular el CO2 total de las donaciones del usuario.
+    suspend fun obtenerPorUsuarioUnaVez(uid: String): List<Donacion> {
+        return try {
+            val snapshot = collection.whereEqualTo("uid", uid).get().await()
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Donacion::class.java)?.copy(id = doc.id)
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
 
 }

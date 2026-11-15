@@ -26,6 +26,7 @@ import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignGalleryRepository
 import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
 import pe.rejuega.app.data.repository.GeocodingRepository
+import pe.rejuega.app.data.repository.MaterialEcoRepository
 import java.io.File
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
@@ -112,6 +113,9 @@ class ReJuegaApp : Application() {
         // (nuevo) Repositorio de geocodificación (Nominatim).
         val geocodingRepository = GeocodingRepository()
 
+        // (nuevo) Repositorio de materiales ecológicos (MockAPI).
+        val materialEcoRepository = MaterialEcoRepository()
+
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -135,7 +139,9 @@ class ReJuegaApp : Application() {
 
             puntoRecojoFirestoreRepository = puntoRecojoFirestoreRepository,
 
-            geocodingRepository = geocodingRepository
+            geocodingRepository = geocodingRepository,
+
+            materialEcoRepository = materialEcoRepository
         )
 
         // (modificado) Insertamos datos semilla locales.

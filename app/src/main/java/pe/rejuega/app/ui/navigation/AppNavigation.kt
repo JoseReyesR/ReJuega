@@ -41,6 +41,8 @@ import pe.rejuega.app.data.repository.MaterialEcoRepository
 import pe.rejuega.app.ui.screens.PerfilScreen
 import pe.rejuega.app.viewmodel.PerfilViewModel
 import pe.rejuega.app.viewmodel.PerfilViewModelFactory
+import pe.rejuega.app.viewmodel.PerfilUsuarioViewModel
+import pe.rejuega.app.viewmodel.PerfilUsuarioViewModelFactory
 
 // (nuevo) Imports necesarios para el nuevo factory del JugueteViewModel.
 import android.app.Application
@@ -359,6 +361,7 @@ fun AppNavigation(
                 factory = JugueteViewModelFactory(
                     application = application,
                     donationRepository = appContainer.donationRepository,
+                    materialEcoRepository = appContainer.materialEcoRepository,
                     campaignId = campaignId,
                     campaignTitulo = campaignTitulo   // (nuevo)
                 )
@@ -421,13 +424,22 @@ fun AppNavigation(
             val perfilViewModel: PerfilViewModel = viewModel(
                 factory = PerfilViewModelFactory(
                     jugueteRepository = appContainer.jugueteRepository,
-                    materialEcoRepository = pe.rejuega.app.data.repository.MaterialEcoRepository(),
+                    materialEcoRepository = appContainer.materialEcoRepository,
                     uidUsuario = uidUsuario
+                )
+            )
+
+            val perfilUsuarioViewModel: PerfilUsuarioViewModel = viewModel(
+                factory = PerfilUsuarioViewModelFactory(
+                    authRepository = appContainer.authRepository,
+                    donationRepository = appContainer.donationFirestoreRepository,
+                    uid = uidUsuario
                 )
             )
 
             PerfilScreen(
                 viewModel = perfilViewModel,
+                perfilUsuarioViewModel = perfilUsuarioViewModel,
                 onBackClick = {
                     navController.popBackStack()
                 }

@@ -18,6 +18,11 @@ class MaterialEcoRepository {
     // (nuevo) Instancia del servicio Retrofit (obtenida del cliente singleton).
     private val service = RetrofitClient.getMaterialJugueteService()
 
+    // (nuevo) Lectura directa para el dropdown de materiales.
+    suspend fun obtenerMaterialesUnaVez(): List<MaterialJugueteDto> {
+        return service.obtenerMateriales()
+    }
+
     // (nuevo) Obtiene la lista de materiales desde la API REST.
     // (nuevo) Retorna un Flow que emite el estado de la operación (éxito o error).
     // (nuevo) El ViewModel observa este Flow y actualiza la UI según el resultado.

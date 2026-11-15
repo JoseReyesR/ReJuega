@@ -3,6 +3,7 @@
 // (nuevo) Responsabilidad: separar la lógica de Firebase del ViewModel.
 package pe.rejuega.app.data.remote
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -113,5 +114,25 @@ class AuthRepository(
     // (nuevo) No es suspend porque signOut es una operación local rápida.
     fun cerrarSesion() {
         auth.signOut()
+    }
+
+    // (nuevo) Actualiza los datos del perfil del usuario autenticado.
+    suspend fun actualizarPerfil(datos: Map<String, Any>): Result<Unit> = try {
+        val uid = auth.currentUser?.uid ?: throw Exception("No hay sesión activa.")
+        firestore.collection("users").document(uid).update(datos).await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    // (nuevo) Cambio de contraseña con re-autenticación (exigencia de Firebase).
+    suspend fun cambiarContrasena(actual: String, nueva: String): Result<Unit> = try {
+        val user = auth.currentUser ?: throw Exception("No hay sesión activa.")
+        val credencial = EmailAuthProvider.getCredential(user.email ?: "", actual)
+        user.reauthenticate(credencial).await()
+        user.updatePassword(nueva).await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }

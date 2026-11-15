@@ -6,27 +6,15 @@ package pe.rejuega.app.domain.model
 // (nuevo) Data class que representa el documento de usuario en Firestore.
 // (nuevo) Firestore necesita una clase con constructor vacío o valores por defecto.
 data class Usuario(
-
-    // (nuevo) UID generado por Firebase Authentication.
     val uid: String = "",
-
-    // (nuevo) Correo electrónico del usuario.
     val correo: String = "",
-
-    // (nuevo) Nombre visible del usuario.
     val nombre: String = "",
-
-    // (nuevo) Rol del usuario.
-    // (nuevo) Valores permitidos: "Donante" o "Administrador".
     val rol: String = "Donante",
-
-    // (nuevo) Fecha de registro en formato texto simple.
-    val fechaRegistro: String = ""
+    val fechaRegistro: String = "",
+    val direccion: String = "",   // (nuevo) referencia para coordinación de recojo
+    val telefono: String = "",    // (nuevo) contacto para la ONG
+    val ciudad: String = "",      // (nuevo) logística de campañas
+    val genero: String = ""       // (nuevo) estadísticas de la ONG
 ) {
-
-    // (nuevo) Función auxiliar para saber si el usuario es administrador.
-    // (nuevo) Esta función será usada más adelante para mostrar u ocultar acciones.
-    fun esAdministrador(): Boolean {
-        return rol == "Administrador"
-    }
+    fun esAdministrador(): Boolean = rol == "Administrador"
 }

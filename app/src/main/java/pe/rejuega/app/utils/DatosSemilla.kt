@@ -7,6 +7,7 @@ import pe.rejuega.app.data.local.Campaign
 import pe.rejuega.app.data.local.Juguete
 import pe.rejuega.app.data.local.MaterialEco
 import pe.rejuega.app.data.local.PuntoEntrega
+import pe.rejuega.app.data.remote.MaterialJugueteDto
 
 // (modificado) Objeto singleton con datos de prueba.
 
@@ -72,6 +73,14 @@ object DatosSemilla {
             co2AhorradoKg = 1.8,
             descripcionImpacto = "La madera procesada requiere mucha energía. ¡Gracias por salvar árboles y reducir huella!"
         )
+    )
+
+    // (nuevo) Materiales por defecto si la API no responde (mismos valores que MockAPI).
+    val listaMaterialesDto = listOf(
+        MaterialJugueteDto("1", "Plástico ABS", 2.5, "Reutilizar evita 2.5 kg de CO₂.", null),
+        MaterialJugueteDto("2", "Madera", 1.8, "Reutilizar evita 1.8 kg de CO₂.", null),
+        MaterialJugueteDto("3", "Metal", 3.2, "Reutilizar evita 3.2 kg de CO₂.", null),
+        MaterialJugueteDto("4", "Peluche / Textil", 1.5, "Reutilizar evita 1.5 kg de CO₂.", null)
     )
 
     // (nuevo) Lista de juguetes hardcodeados para probar la base de datos local.
