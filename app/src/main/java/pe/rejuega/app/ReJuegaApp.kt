@@ -26,6 +26,7 @@ import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignGalleryRepository
 import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
 import pe.rejuega.app.data.repository.GeocodingRepository
+import java.io.File
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -37,6 +38,13 @@ class ReJuegaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // (nuevo) Configuración de osmdroid: User-Agent y caché de tiles (política OSM).
+        org.osmdroid.config.Configuration.getInstance().apply {
+            userAgentValue = packageName
+            osmdroidBasePath = File(cacheDir, "osmdroid")
+            osmdroidTileCache = File(File(cacheDir, "osmdroid"), "tiles")
+        }
 
         // (nuevo) Inicializamos Firebase explícitamente.
         // (nuevo) Normalmente Firebase se inicializa solo, pero esto hace el proceso más claro.

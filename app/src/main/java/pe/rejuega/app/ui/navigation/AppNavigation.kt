@@ -61,8 +61,11 @@ import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModelFactory
 import pe.rejuega.app.ui.screens.PuntosRecojoAdminScreen
 import pe.rejuega.app.ui.screens.PuntoEntregaFormScreen
 import pe.rejuega.app.ui.screens.PickupEventFormScreen
+import pe.rejuega.app.ui.screens.MapaPuntosRecojoScreen
 import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModel
 import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModelFactory
+import pe.rejuega.app.ui.viewmodel.MapaViewModel
+import pe.rejuega.app.ui.viewmodel.MapaViewModelFactory
 import pe.rejuega.app.ui.screens.CampaignFormScreen
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
@@ -234,7 +237,8 @@ fun AppNavigation(
                     navController.navigate(Routes.PANEL_ADMIN)
                 },
                 notificacionesNoLeidas = noLeidas,
-                onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) }
+                onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) },
+                onMapaClick = { navController.navigate(Routes.MAPA_PUNTOS_RECOJO) }
 
             )
 
@@ -576,6 +580,17 @@ fun AppNavigation(
                 viewModel = vm, eventId = eventId,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Destino del mapa de puntos de recojo (HU-10).
+        composable(Routes.MAPA_PUNTOS_RECOJO) {
+            val mapaViewModel: MapaViewModel = viewModel(
+                factory = MapaViewModelFactory(appContainer.puntoRecojoFirestoreRepository)
+            )
+            MapaPuntosRecojoScreen(
+                viewModel = mapaViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

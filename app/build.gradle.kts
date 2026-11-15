@@ -138,4 +138,10 @@ dependencies {
 // (nuevo) para cuando el servidor Node envíe push (Paso 20).
 
     implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // (nuevo) osmdroid: mapa gratuito basado en OpenStreetMap (sin API key).
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
+    // (nuevo) Fused Location Provider para obtener la ubicación del usuario.
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }

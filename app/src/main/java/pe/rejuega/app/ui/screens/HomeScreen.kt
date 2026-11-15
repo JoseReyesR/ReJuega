@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 // (nuevo) Ícono de hoja para impacto ambiental.
 import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,7 +102,9 @@ fun HomeScreen(
     filtroEstado: String = "Activas",
     onFiltroChange: (String) -> Unit = {},
     // (nuevo) Acción para ver galería de evidencias.
-    onVerEvidenciasClick: (Campaign) -> Unit = {}
+    onVerEvidenciasClick: (Campaign) -> Unit = {},
+    // (nuevo) Acción para ver mapa de puntos de recojo.
+    onMapaClick: () -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -196,6 +199,15 @@ fun HomeScreen(
                                 tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
+                    // (nuevo) Botón de mapa de puntos de recojo (visible para ambos roles).
+                    IconButton(onClick = onMapaClick) {
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = "Ver mapa de puntos de recojo",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
                     IconButton(onClick = onLogoutClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

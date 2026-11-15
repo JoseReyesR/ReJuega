@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <!-- (nuevo) Permiso de notificaciones para Android 13+ (RN-07). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- (nuevo) Ubicación aproximada para recomendar el punto más cercano (RN-07). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- (nuevo) Permiso para acceder a Internet (necesario para Coil y Firebase) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- (nuevo) Permitir tráfico de red  -->
