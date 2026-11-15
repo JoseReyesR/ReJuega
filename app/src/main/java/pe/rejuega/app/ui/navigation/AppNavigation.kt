@@ -56,6 +56,11 @@ import pe.rejuega.app.ui.screens.CampaignAdminScreen
 import pe.rejuega.app.ui.screens.CampaignGalleryScreen
 import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignGalleryViewModelFactory
+import pe.rejuega.app.ui.screens.PuntosRecojoAdminScreen
+import pe.rejuega.app.ui.screens.PuntoEntregaFormScreen
+import pe.rejuega.app.ui.screens.PickupEventFormScreen
+import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModel
+import pe.rejuega.app.ui.viewmodel.PuntosRecojoViewModelFactory
 import pe.rejuega.app.ui.screens.CampaignFormScreen
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.ui.viewmodel.CampaignAdminViewModelFactory
@@ -261,7 +266,8 @@ fun AppNavigation(
                     },
                     // (nuevo) Navegación a revisar donaciones.
                     onRevisarDonaciones = { navController.navigate(Routes.DONATION_ADMIN) },
-                    onGaleriaEvidencias = { navController.navigate(Routes.CAMPAIGN_ADMIN) }
+                    onGaleriaEvidencias = { navController.navigate(Routes.CAMPAIGN_ADMIN) },
+                    onPuntosRecojoClick = { navController.navigate(Routes.PUNTOS_RECOJO_ADMIN) }
 
                 )
             }
@@ -282,6 +288,7 @@ fun AppNavigation(
             val detailViewModel: CampaignDetailViewModel = viewModel(
                 factory = CampaignDetailViewModelFactory(
                     appContainer.campaignRepository,
+                    appContainer.puntoRecojoFirestoreRepository,
                     campaignId
                 )
             )
@@ -501,6 +508,65 @@ fun AppNavigation(
                 viewModel = galleryViewModel,
                 esAdmin = esAdmin,
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Lista de puntos y eventos (HU-04, HU-14).
+        composable(Routes.PUNTOS_RECOJO_ADMIN) {
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: PuntosRecojoViewModel = viewModel(
+                factory = PuntosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository,
+                    appContainer.campaignFirestoreRepository,
+                    appContainer.geocodingRepository,
+                    uidAdmin
+                )
+            )
+            PuntosRecojoAdminScreen(
+                viewModel = vm,
+                onBackClick = { navController.popBackStack() },
+                onCrearPunto = { navController.navigate(Routes.puntoEntregaForm("new")) },
+                onCrearEvento = { navController.navigate(Routes.pickupEventForm("new")) },
+                onEditarPunto = { id -> navController.navigate(Routes.puntoEntregaForm(id)) },
+                onEditarEvento = { id -> navController.navigate(Routes.pickupEventForm(id)) }
+            )
+        }
+
+        // (nuevo) Formulario de punto fijo.
+        composable(Routes.PUNTO_ENTREGA_FORM) { backStackEntry ->
+            val puntoId = backStackEntry.arguments?.getString("puntoId") ?: "new"
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: PuntosRecojoViewModel = viewModel(
+                factory = PuntosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository,
+                    appContainer.campaignFirestoreRepository,
+                    appContainer.geocodingRepository,
+                    uidAdmin
+                )
+            )
+            PuntoEntregaFormScreen(
+                viewModel = vm, puntoId = puntoId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Formulario de evento de recojo.
+        composable(Routes.PICKUP_EVENT_FORM) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: "new"
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: PuntosRecojoViewModel = viewModel(
+                factory = PuntosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository,
+                    appContainer.campaignFirestoreRepository,
+                    appContainer.geocodingRepository,
+                    uidAdmin
+                )
+            )
+            PickupEventFormScreen(
+                viewModel = vm, eventId = eventId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
             )
         }
 

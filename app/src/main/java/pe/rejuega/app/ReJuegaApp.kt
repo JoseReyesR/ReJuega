@@ -24,6 +24,8 @@ import pe.rejuega.app.utils.DatosSemilla
 import pe.rejuega.app.data.repository.DonationFirestoreRepository
 import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignGalleryRepository
+import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
+import pe.rejuega.app.data.repository.GeocodingRepository
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
 
@@ -96,6 +98,12 @@ class ReJuegaApp : Application() {
         // (nuevo) Repositorio de galería de evidencias.
         val campaignGalleryRepository = CampaignGalleryRepository(firebaseFirestore)
 
+        // (nuevo) Repositorio de puntos de recojo y eventos en Firestore.
+        val puntoRecojoFirestoreRepository = PuntoRecojoFirestoreRepository(firebaseFirestore)
+
+        // (nuevo) Repositorio de geocodificación (Nominatim).
+        val geocodingRepository = GeocodingRepository()
+
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -115,7 +123,11 @@ class ReJuegaApp : Application() {
 
             notificationFirestoreRepository = notificationFirestoreRepository,
 
-            campaignGalleryRepository = campaignGalleryRepository
+            campaignGalleryRepository = campaignGalleryRepository,
+
+            puntoRecojoFirestoreRepository = puntoRecojoFirestoreRepository,
+
+            geocodingRepository = geocodingRepository
         )
 
         // (modificado) Insertamos datos semilla locales.

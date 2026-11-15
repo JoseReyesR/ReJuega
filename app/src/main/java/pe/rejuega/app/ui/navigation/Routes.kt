@@ -52,8 +52,14 @@ object Routes {
     // (nuevo)
     const val NOTIFICATIONS = "notifications"
 
-    // (nuevo) Rutas para galeria de evidencias (HU-09).
+    // (nuevo) Rutas de gestión de puntos de recojo (HU-04, HU-14).
+    const val PUNTOS_RECOJO_ADMIN = "puntos_recojo_admin"
+    const val PUNTO_ENTREGA_FORM = "punto_entrega_form/{puntoId}"
+    const val PICKUP_EVENT_FORM = "pickup_event_form/{eventId}"
     const val CAMPAIGN_GALLERY = "campaign_gallery/{campaignId}/{campaignTitulo}"
+
+    fun puntoEntregaForm(puntoId: String) = "punto_entrega_form/$puntoId"
+    fun pickupEventForm(eventId: String) = "pickup_event_form/$eventId"
 
     fun campaignForm(campaignId: String): String = "campaign_form/$campaignId"
 

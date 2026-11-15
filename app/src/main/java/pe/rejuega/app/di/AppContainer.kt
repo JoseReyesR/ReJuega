@@ -13,6 +13,8 @@ import pe.rejuega.app.data.repository.CampaignSyncRepository
 import pe.rejuega.app.data.repository.DonationFirestoreRepository
 import pe.rejuega.app.data.repository.NotificationFirestoreRepository
 import pe.rejuega.app.data.repository.CampaignGalleryRepository
+import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
+import pe.rejuega.app.data.repository.GeocodingRepository
 // (modificado) Contenedor manual de dependencias.
 class AppContainer(
     val campaignRepository: CampaignRepository,
@@ -31,5 +33,9 @@ class AppContainer(
     val donationFirestoreRepository: DonationFirestoreRepository,
     val notificationFirestoreRepository: NotificationFirestoreRepository,
     // (nuevo) Repositorio de galería de evidencias.
-    val campaignGalleryRepository: CampaignGalleryRepository
+    val campaignGalleryRepository: CampaignGalleryRepository,
+    // (nuevo) Repositorio de puntos de recojo y eventos en Firestore.
+    val puntoRecojoFirestoreRepository: PuntoRecojoFirestoreRepository,
+    // (nuevo) Repositorio de geocodificación (Nominatim).
+    val geocodingRepository: GeocodingRepository
 )

@@ -93,7 +93,8 @@ fun PanelAdminScreen(
     //Firma de PanelAdminScreen: agregar onGestionarCampaigns.
     onGestionarCampaigns: () -> Unit = {},
     onRevisarDonaciones: () -> Unit = {},
-    onGaleriaEvidencias: () -> Unit = onGestionarCampaigns
+    onGaleriaEvidencias: () -> Unit = onGestionarCampaigns,
+    onPuntosRecojoClick: () -> Unit = {}
 ) {
     // (nuevo) Estado para mostrar Snackbars informativos.
     val snackbarHostState = remember { SnackbarHostState() }
@@ -160,6 +161,7 @@ fun PanelAdminScreen(
                             "Gestionar Campañas" -> onGestionarCampaigns()
                             "Galería de Evidencias" -> onGaleriaEvidencias()
                             "Revisar Donaciones" -> onRevisarDonaciones()
+                            "Puntos de Recojo" -> onPuntosRecojoClick()
                             else -> scope.launch { snackbarHostState.showSnackbar(opcion.destino) }
                         }
                     }

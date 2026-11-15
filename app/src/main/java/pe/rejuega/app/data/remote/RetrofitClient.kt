@@ -81,4 +81,32 @@ object RetrofitClient {
     fun getCloudinaryService(): CloudinaryService {
         return cloudinaryRetrofit.create(CloudinaryService::class.java)
     }
+
+    // (nuevo) User-Agent exigido por la política de Nominatim.
+    private val userAgentInterceptor = okhttp3.Interceptor { chain ->
+        chain.proceed(
+            chain.request().newBuilder()
+                .header("User-Agent", "ReJuegaApp/1.0 (proyecto academico UPCH)")
+                .build()
+        )
+    }
+
+    // (nuevo) Cliente exclusivo para Nominatim (con User-Agent).
+    private val nominatimClient = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .addInterceptor(userAgentInterceptor)
+        .build()
+
+    // (nuevo) Retrofit para Nominatim.
+    private val nominatimRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://nominatim.openstreetmap.org/")
+            .client(nominatimClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    // (nuevo) Acceso al servicio de geocodificación.
+    fun getNominatimService(): NominatimService = nominatimRetrofit.create(NominatimService::class.java)
 }

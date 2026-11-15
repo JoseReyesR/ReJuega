@@ -178,6 +178,34 @@ fun CampaignDetailScreen(
                                 style = MaterialTheme.typography.bodyLarge
                             )
 
+                            // (nuevo) Sección de eventos de recojo de la campaña.
+                            val eventosRecojo by viewModel.eventosRecojo.collectAsState()
+
+                            if (eventosRecojo.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Puntos de recojo programados",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                eventosRecojo.forEach { evento ->
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                        )
+                                    ) {
+                                        Column(Modifier.padding(12.dp)) {
+                                            Text(evento.nombre, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                            Text("${evento.lugar} - ${evento.direccion}", style = MaterialTheme.typography.bodySmall)
+                                            Text("${evento.fecha} a las ${evento.hora}", style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.primary)
+                                        }
+                                    }
+                                }
+                            }
+
                             Spacer(modifier = Modifier.height(24.dp))
 
                             // (nuevo) Botón para registrar un juguete en esta campaña.

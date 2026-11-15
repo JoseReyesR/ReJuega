@@ -11,20 +11,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pe.rejuega.app.data.local.Campaign
+import pe.rejuega.app.data.remote.PickupEventFirestore
 import pe.rejuega.app.data.repository.CampaignRepository
+import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
 import pe.rejuega.app.utils.UiState
 
 // (nuevo) ViewModel para mostrar el detalle de una campaña.
 class CampaignDetailViewModel(
     private val campaignRepository: CampaignRepository,
+    private val puntoRecojoRepository: PuntoRecojoFirestoreRepository,
     private val campaignId: Long
 ) : ViewModel() {
 
     // (nuevo) Estado inicial de la pantalla: cargando.
     private val _uiState = MutableStateFlow<UiState<Campaign>>(UiState.Loading)
-
-    // (nuevo) Estado público de solo lectura para la UI.
     val uiState: StateFlow<UiState<Campaign>> = _uiState.asStateFlow()
+
+    // (nuevo) Eventos de recojo activos de esta campaña.
+    private val _eventosRecojo = MutableStateFlow<List<PickupEventFirestore>>(emptyList())
+    val eventosRecojo: StateFlow<List<PickupEventFirestore>> = _eventosRecojo.asStateFlow()
 
     // (nuevo) Al crear el ViewModel, se carga automáticamente la campaña.
     init {
@@ -38,10 +43,18 @@ class CampaignDetailViewModel(
                 // (nuevo) Se busca la campaña en la base de datos local.
                 val campaign = campaignRepository.obtenerCampaignPorId(campaignId)
 
-                // (nuevo) Si la campaña existe, se muestra Success.
-                // (nuevo) Si no existe, se muestra Error.
                 if (campaign != null) {
                     _uiState.value = UiState.Success(campaign)
+                    val idFirestore = campaign.firestoreId.ifBlank { campaignId.toString() }
+                    viewModelScope.launch {
+                        try {
+                            puntoRecojoRepository.observarEventosPorCampaign(idFirestore).collect { eventos ->
+                                _eventosRecojo.value = eventos
+                            }
+                        } catch (e: Exception) {
+                            println("Error cargando eventos de recojo: ${e.message}")
+                        }
+                    }
                 } else {
                     _uiState.value = UiState.Error("No se encontró la campaña seleccionada.")
                 }
@@ -56,6 +69,7 @@ class CampaignDetailViewModel(
 // (nuevo) Factory para crear el ViewModel con dependencias y parámetros.
 class CampaignDetailViewModelFactory(
     private val campaignRepository: CampaignRepository,
+    private val puntoRecojoRepository: PuntoRecojoFirestoreRepository,
     private val campaignId: Long
 ) : ViewModelProvider.Factory {
 
@@ -63,7 +77,7 @@ class CampaignDetailViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CampaignDetailViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CampaignDetailViewModel(campaignRepository, campaignId) as T
+            return CampaignDetailViewModel(campaignRepository, puntoRecojoRepository, campaignId) as T
         }
         throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }
