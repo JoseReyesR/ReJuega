@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -161,24 +162,38 @@ private fun CampaignAdminCard(
                 color = if (campaign.estado == "Activa") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
             Spacer(Modifier.height(8.dp))
-            Row {
-                OutlinedButton(onClick = onEditarClick) {
-                    Icon(Icons.Default.Edit, contentDescription = null, Modifier.width(18.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Editar")
-                }
-                Spacer(Modifier.width(8.dp))
-                OutlinedButton(onClick = onVerGaleriaClick) {
-                    Icon(Icons.Default.PhotoLibrary, contentDescription = null, Modifier.width(18.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Galería")
-                }
-                Spacer(Modifier.width(8.dp))
-                if (campaign.estado == "Activa") {
-                    Button(onClick = onCerrarClick) {
-                        Icon(Icons.Default.Lock, contentDescription = null, Modifier.width(18.dp))
+            Column {
+                Row {
+                    OutlinedButton(
+                        onClick = onEditarClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Edit, null, Modifier.width(18.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("Cerrar")
+                        Text("Editar", maxLines = 1)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    OutlinedButton(
+                        onClick = onVerGaleriaClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.PhotoLibrary, null, Modifier.width(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Galería", maxLines = 1)
+                    }
+                }
+                if (campaign.estado == "Activa") {
+                    Spacer(Modifier.height(8.dp))
+                    Button(
+                        onClick = onCerrarClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(Icons.Default.Lock, null, Modifier.width(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Cerrar campaña", maxLines = 1)
                     }
                 }
             }

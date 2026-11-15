@@ -19,7 +19,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,13 +30,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -50,12 +58,17 @@ import pe.rejuega.app.utils.UiState
 fun CampaignDetailScreen(
     viewModel: CampaignDetailViewModel,
     eventosRecojo: List<pe.rejuega.app.data.remote.PickupEventFirestore> = emptyList(),
+    esAdmin: Boolean = false,
+    onEditarClick: () -> Unit = {},
+    onGaleriaClick: () -> Unit = {},
+    onCerrarClick: () -> Unit = {},
     onBackClick: () -> Unit,
     // (modificado) Ahora entrega el título de la campaña al navegar.
     onDonateClick: (String) -> Unit
 ) {
     // (nuevo) Observamos el estado del ViewModel.
     val uiState by viewModel.uiState.collectAsState()
+    var mostrarDialogoCerrar by remember { mutableStateOf(false) }
 
     // (nuevo) Estructura base de la pantalla.
     Scaffold(
@@ -207,18 +220,47 @@ fun CampaignDetailScreen(
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // (nuevo) Botón para registrar un juguete en esta campaña.
-                            Button(
-                                // (modificado) Pasa el título de la campaña visible.
-                                onClick = { onDonateClick(campaign.titulo) },
-                                modifier = Modifier.fillMaxWidth(),
-                                enabled = campaign.estado == "Activa"
-                            ) {
-                                Text(text = "Donar juguete")
+                            // (modificado) Acciones según rol: Admin gestiona, Donante dona.
+                            if (esAdmin) {
+                                Row {
+                                    OutlinedButton(
+                                        onClick = onEditarClick,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text("Editar", maxLines = 1)
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    OutlinedButton(
+                                        onClick = onGaleriaClick,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text("Galería", maxLines = 1)
+                                    }
+                                }
+                                if (campaign.estado == "Activa") {
+                                    Spacer(Modifier.height(8.dp))
+                                    Button(
+                                        onClick = { mostrarDialogoCerrar = true },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.error
+                                        )
+                                    ) {
+                                        Text("Cerrar campaña", maxLines = 1)
+                                    }
+                                }
+                            } else {
+                                Button(
+                                    onClick = { onDonateClick(campaign.titulo) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = campaign.estado == "Activa"
+                                ) {
+                                    Text("Donar juguete")
+                                }
                             }
 
-                            // (nuevo) Si la campaña no está activa, se muestra un mensaje.
-                            if (campaign.estado != "Activa") {
+                            // (nuevo) Si la campaña no está activa (y es donante), se muestra un mensaje.
+                            if (!esAdmin && campaign.estado != "Activa") {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = "Esta campaña ya no admite nuevas donaciones.",
@@ -226,6 +268,24 @@ fun CampaignDetailScreen(
                                     color = MaterialTheme.colorScheme.error,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            // (nuevo) Confirmación antes de cerrar la campaña.
+                            if (mostrarDialogoCerrar) {
+                                AlertDialog(
+                                    onDismissRequest = { mostrarDialogoCerrar = false },
+                                    title = { Text("Cerrar campaña") },
+                                    text = { Text("¿Seguro que deseas cerrar '${campaign.titulo}'? Los donantes ya no podrán donar, pero podrán ver sus evidencias.") },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            mostrarDialogoCerrar = false
+                                            onCerrarClick()
+                                        }) { Text("Cerrar campaña", color = MaterialTheme.colorScheme.error) }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { mostrarDialogoCerrar = false }) { Text("Cancelar") }
+                                    }
                                 )
                             }
                         }

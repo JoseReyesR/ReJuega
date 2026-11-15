@@ -30,6 +30,7 @@ import pe.rejuega.app.ui.viewmodel.JugueteViewModel
 import pe.rejuega.app.ui.viewmodel.JugueteViewModelFactory
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModel
 import pe.rejuega.app.ui.viewmodel.TraceabilityViewModelFactory
+import pe.rejuega.app.utils.UiState
 
 // (nuevo) Pantalla y ViewModel de impacto ambiental.
 import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
@@ -308,9 +309,24 @@ fun AppNavigation(
 
             println(">>> DETALLE: firestoreId=$firestoreId eventos=${eventosRecojo.size}")
 
+            val esAdmin = sessionViewModel.esAdministrador()
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val campaignAdminViewModel: CampaignAdminViewModel = viewModel(
+                factory = CampaignAdminViewModelFactory(
+                    appContainer.campaignFirestoreRepository, uidAdmin
+                )
+            )
+
+            val detailState by detailViewModel.uiState.collectAsState()
+            val tituloCampaign = (detailState as? UiState.Success)?.data?.titulo ?: ""
+
             CampaignDetailScreen(
                 viewModel = detailViewModel,
                 eventosRecojo = eventosRecojo,
+                esAdmin = esAdmin,
+                onEditarClick = { navController.navigate(Routes.campaignForm(firestoreId)) },
+                onGaleriaClick = { navController.navigate(Routes.campaignGallery(firestoreId, tituloCampaign)) },
+                onCerrarClick = { campaignAdminViewModel.cerrarCampaign(firestoreId) },
                 onBackClick = {
                     navController.popBackStack()
                 },

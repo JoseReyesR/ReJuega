@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.local.Campaign
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.rememberDrawerState
@@ -124,6 +125,11 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // (nuevo) Si el menú está abierto, el botón atrás del teléfono lo cierra (no sale de la app).
+    BackHandler(enabled = drawerState.isOpen) {
+        scope.launch { drawerState.close() }
+    }
+
     // (nuevo) El menú lateral envuelve todo el Scaffold.
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -161,6 +167,16 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Menu,
                                 contentDescription = "Abrir menú",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    },
+                    // (nuevo) Cierre de sesión rápido en la esquina superior derecha.
+                    actions = {
+                        IconButton(onClick = onLogoutClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                contentDescription = "Cerrar sesión",
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
