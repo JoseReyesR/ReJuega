@@ -27,6 +27,8 @@ import pe.rejuega.app.data.repository.CampaignGalleryRepository
 import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
 import pe.rejuega.app.data.repository.GeocodingRepository
 import pe.rejuega.app.data.repository.MaterialEcoRepository
+import pe.rejuega.app.data.repository.NodeApiRepository
+import pe.rejuega.app.data.remote.RetrofitClient
 import java.io.File
 // (modificado) Clase Application.
 class ReJuegaApp : Application() {
@@ -116,6 +118,9 @@ class ReJuegaApp : Application() {
         // (nuevo) Repositorio de materiales ecológicos (MockAPI).
         val materialEcoRepository = MaterialEcoRepository()
 
+        // (nuevo) Repositorio de pruebas del servidor Node.js.
+        val nodeApiRepository = NodeApiRepository(RetrofitClient.getNodeApiService())
+
         // (modificado) Guardamos todas las dependencias.
         // (modificado) Archivo: ReJuegaApp.kt - creación del container
         container = AppContainer(
@@ -141,7 +146,9 @@ class ReJuegaApp : Application() {
 
             geocodingRepository = geocodingRepository,
 
-            materialEcoRepository = materialEcoRepository
+            materialEcoRepository = materialEcoRepository,
+
+            nodeApiRepository = nodeApiRepository
         )
 
         // (modificado) Insertamos datos semilla locales.

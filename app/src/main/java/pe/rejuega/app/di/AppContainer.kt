@@ -16,6 +16,7 @@ import pe.rejuega.app.data.repository.CampaignGalleryRepository
 import pe.rejuega.app.data.repository.PuntoRecojoFirestoreRepository
 import pe.rejuega.app.data.repository.GeocodingRepository
 import pe.rejuega.app.data.repository.MaterialEcoRepository
+import pe.rejuega.app.data.repository.NodeApiRepository
 // (modificado) Contenedor manual de dependencias.
 class AppContainer(
     val campaignRepository: CampaignRepository,
@@ -40,5 +41,7 @@ class AppContainer(
     // (nuevo) Repositorio de geocodificación (Nominatim).
     val geocodingRepository: GeocodingRepository,
     // (nuevo) Repositorio de materiales ecológicos (MockAPI).
-    val materialEcoRepository: MaterialEcoRepository
+    val materialEcoRepository: MaterialEcoRepository,
+    // (nuevo) Repositorio de pruebas del servidor Node.js.
+    val nodeApiRepository: NodeApiRepository
 )
