@@ -73,9 +73,14 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+// (modificado) Escuchar en 0.0.0.0 permite conexiones desde el celular físico.
+// abrir puerto de mysql , ejecutar en powershell el siguiente comando:
+// New-NetFirewallRule -DisplayName "Node.js ReJuega API" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor corriendo en:`);
+    console.log(`   - Local:                http://localhost:${PORT}`);
+    console.log(`   - Red (ip PC):          http://192.168.100.106:${PORT}`);
+    console.log(`   - Celular (IP Celular): http://TU_IP_LOCAL:${PORT}`);
     console.log(`📡 Modo: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📋 Endpoints disponibles:`);
     console.log(`   - GET/POST /api/materiales`);

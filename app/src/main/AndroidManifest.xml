@@ -15,9 +15,11 @@
 
     <!-- (nuevo) Indicamos que la app usa cámara pero no es obligatoria para instalar. -->
     <!-- (nuevo) Así la app puede instalarse en dispositivos sin cámara (ej. algunos emuladores). -->
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <!--Verificar que cleartextTraffic está habilitado  android:usesCleartextTraffic="true"-->
     <application
         android:usesCleartextTraffic="true"
         android:name=".ReJuegaApp"

@@ -2,7 +2,10 @@
 package pe.rejuega.app.data.remote
 
 object ApiConfig {
-    // (nuevo) Emulador: 10.0.2.2 apunta al localhost de tu PC.
-    // (nuevo) Celular físico: cambia a http://IP_DE_TU_PC:3000/ (misma Wi-Fi).
-    const val NODE_BASE_URL = "http://10.0.2.2:3000/"
+    // (modificado) Usa la IP local de tu PC para celular físico.
+    // Reemplaza 192.168.1.100 por TU IP real (paso 1).
+    const val NODE_BASE_URL = "http://192.168.100.106:3000/"
+
+    // (nuevo) Alias para emulador (por si quieres cambiar rápidamente).
+    const val EMULATOR_BASE_URL = "http://10.0.2.2:3000/"
 }
