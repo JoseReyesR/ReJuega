@@ -39,10 +39,13 @@ import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModelFactory
 import pe.rejuega.app.data.repository.MaterialEcoRepository
 // (modificado) Archivo: AppNavigation.kt - imports
 import pe.rejuega.app.ui.screens.PerfilScreen
+import pe.rejuega.app.ui.screens.ApiTestScreen
 import pe.rejuega.app.viewmodel.PerfilViewModel
 import pe.rejuega.app.viewmodel.PerfilViewModelFactory
 import pe.rejuega.app.viewmodel.PerfilUsuarioViewModel
 import pe.rejuega.app.viewmodel.PerfilUsuarioViewModelFactory
+import pe.rejuega.app.viewmodel.ApiTestViewModel
+import pe.rejuega.app.viewmodel.ApiTestViewModelFactory
 
 // (nuevo) Imports necesarios para el nuevo factory del JugueteViewModel.
 import android.app.Application
@@ -242,7 +245,8 @@ fun AppNavigation(
                 onPuntosRecojoAdminClick = { navController.navigate(Routes.PUNTOS_RECOJO_ADMIN) },
                 notificacionesNoLeidas = noLeidas,
                 onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) },
-                onMapaClick = { navController.navigate(Routes.MAPA_PUNTOS_RECOJO) }
+                onMapaClick = { navController.navigate(Routes.MAPA_PUNTOS_RECOJO) },
+                onServidorClick = { navController.navigate(Routes.SERVIDOR_TEST) }
 
             )
 
@@ -619,6 +623,17 @@ fun AppNavigation(
             )
             MapaPuntosRecojoScreen(
                 viewModel = mapaViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Destino de pruebas del servidor Node.js.
+        composable(Routes.SERVIDOR_TEST) {
+            val vm: ApiTestViewModel = viewModel(
+                factory = ApiTestViewModelFactory(appContainer.nodeApiRepository)
+            )
+            ApiTestScreen(
+                viewModel = vm,
                 onBackClick = { navController.popBackStack() }
             )
         }

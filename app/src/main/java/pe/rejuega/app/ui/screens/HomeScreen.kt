@@ -103,7 +103,9 @@ fun HomeScreen(
     // (nuevo) Acción para ver galería de evidencias.
     onVerEvidenciasClick: (Campaign) -> Unit = {},
     // (nuevo) Acción para ver mapa de puntos de recojo.
-    onMapaClick: () -> Unit = {}
+    onMapaClick: () -> Unit = {},
+    // (nuevo) Acción para ver pruebas del servidor.
+    onServidorClick: () -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -133,6 +135,7 @@ fun HomeScreen(
                         "campaigns" -> onCampaignAdminClick()
                         "donations" -> onDonationAdminClick()
                         "puntos" -> onPuntosRecojoAdminClick()
+                        "servidor" -> onServidorClick()
                         "trazabilidad" -> onTraceabilityClick()
                         "mapa" -> onMapaClick()
                         "impacto" -> onImpactoClick()

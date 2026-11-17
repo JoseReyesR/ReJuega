@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Map
@@ -110,7 +111,8 @@ fun MenuLateralReJuega(
                 DestinoMenu("panel", "Panel de Administración", Icons.Default.AdminPanelSettings),
                 DestinoMenu("campaigns", "Gestión de Campañas", Icons.Default.Campaign),
                 DestinoMenu("donations", "Revisión de Donaciones", Icons.Default.CheckCircle),
-                DestinoMenu("puntos", "Gestión de Puntos de Recojo", Icons.Default.Place)
+                DestinoMenu("puntos", "Gestión de Puntos de Recojo", Icons.Default.Place),
+                DestinoMenu("servidor", "Pruebas del Servidor", Icons.Default.Dns)
             ).forEach { d ->
                 NavigationDrawerItem(
                     label = { Text(d.nombre) },
