@@ -109,4 +109,16 @@ object RetrofitClient {
 
     // (nuevo) Acceso al servicio de geocodificación.
     fun getNominatimService(): NominatimService = nominatimRetrofit.create(NominatimService::class.java)
+
+    // (nuevo) Retrofit exclusivo para el servidor Node.js propio.
+    private val nodeRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(ApiConfig.NODE_BASE_URL)
+            .client(okHttpClient)   // (nuevo) reutiliza tu cliente con timeouts
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    // (nuevo) Acceso al servicio del servidor propio.
+    fun getNodeApiService(): NodeApiService = nodeRetrofit.create(NodeApiService::class.java)
 }
