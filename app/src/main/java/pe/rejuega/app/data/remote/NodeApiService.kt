@@ -8,6 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.DELETE
 
 interface NodeApiService {
 
@@ -42,4 +43,8 @@ interface NodeApiService {
 
     @PUT("api/campaigns/{id}/estado")
     suspend fun cambiarEstadoCampaign(@Path("id") id: String, @Body body: Map<String, String>): Response<ApiCreateResponse>
+
+    // (nuevo) DELETE /api/campaigns/:id
+    @DELETE("api/campaigns/{id}")
+    suspend fun eliminarCampaign(@Path("id") id: String): Response<ApiCreateResponse>
 }

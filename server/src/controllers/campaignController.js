@@ -171,6 +171,27 @@ const CampaignController = {
         } catch (error) {
             res.status(500).json({ success: false, error: 'Error al cambiar estado', details: error.message });
         }
+    },
+
+    // (nuevo) DELETE /api/campaigns/:id
+    delete: async (req, res) => {
+        try {
+            const { id } = req.params;
+            console.log('>>> DELETE /api/campaigns/' + id);
+
+            const existente = await CampaignModel.getById(id);
+            if (!existente) {
+                return res.status(404).json({ success: false, error: 'Campaña no encontrada' });
+            }
+
+            await CampaignModel.delete(id);
+
+            console.log('>>> DELETE OK:', id);
+            res.status(200).json({ success: true, message: 'Campaña eliminada' });
+        } catch (error) {
+            console.error('>>> DELETE ERROR:', error.message);
+            res.status(500).json({ success: false, error: 'Error al eliminar', details: error.message });
+        }
     }
 };
 

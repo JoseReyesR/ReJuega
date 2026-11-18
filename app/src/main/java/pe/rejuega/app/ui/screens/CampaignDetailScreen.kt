@@ -37,6 +37,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,9 +49,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import pe.rejuega.app.viewmodel.CampaignDetailViewModel
 import pe.rejuega.app.utils.UiState
+import pe.rejuega.app.utils.isoAFechaVisible
 
 // (nuevo) Se requiere OptIn porque TopAppBar de Material 3 es experimental.
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +74,19 @@ fun CampaignDetailScreen(
     // (nuevo) Observamos el estado del ViewModel.
     val uiState by viewModel.uiState.collectAsState()
     var mostrarDialogoCerrar by remember { mutableStateOf(false) }
+
+    // (nuevo) Cada vez que la pantalla vuelve al frente (ej. al regresar del formulario de edición),
+    // (nuevo) se recarga la campaña desde el servidor para reflejar cambios.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.cargarCampaign()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     // (nuevo) Estructura base de la pantalla.
     Scaffold(
@@ -171,7 +189,7 @@ fun CampaignDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.size(4.dp))
                                 Text(
-                                    text = "${campaign.fechaInicio} → ${campaign.fechaFin}",
+                                    text = "${isoAFechaVisible(campaign.fechaInicio)} → ${isoAFechaVisible(campaign.fechaFin)}",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }

@@ -32,3 +32,26 @@ fun formatarFechaHora(millis: Long): String {
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return sdf.format(Date(millis))
 }
+
+// (nuevo) Convierte ISO 8601 o YYYY-MM-DD a formato visible dd/MM/yyyy.
+fun isoAFechaVisible(iso: String?): String {
+    if (iso.isNullOrBlank()) return ""
+    return try {
+        val soloFecha = iso.substring(0, 10)
+        val partes = soloFecha.split("-")
+        if (partes.size == 3) "${partes[2]}/${partes[1]}/${partes[0]}" else soloFecha
+    } catch (e: Exception) {
+        iso
+    }
+}
+
+// (nuevo) Convierte dd/MM/yyyy a YYYY-MM-DD para MySQL.
+fun fechaVisibleAIso(visible: String?): String {
+    if (visible.isNullOrBlank()) return ""
+    return try {
+        val partes = visible.split("/")
+        if (partes.size == 3) "${partes[2]}-${partes[1]}-${partes[0]}" else visible
+    } catch (e: Exception) {
+        visible
+    }
+}

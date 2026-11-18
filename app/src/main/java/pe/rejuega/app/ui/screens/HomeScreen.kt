@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import pe.rejuega.app.ui.components.MenuLateralReJuega
 import pe.rejuega.app.viewmodel.CampaignViewModel
 import pe.rejuega.app.utils.UiState
+import pe.rejuega.app.utils.isoAFechaVisible
 
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.foundation.layout.width
@@ -400,7 +401,7 @@ fun CampaignCard(
                     Spacer(modifier = Modifier.size(4.dp))
                     // (nuevo) Texto con el rango de fechas.
                     Text(
-                        text = "${campaign.fechaInicio} → ${campaign.fechaFin}",
+                        text = "${isoAFechaVisible(campaign.fechaInicio)} → ${isoAFechaVisible(campaign.fechaFin)}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

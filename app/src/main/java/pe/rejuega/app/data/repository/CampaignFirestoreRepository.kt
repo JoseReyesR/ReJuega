@@ -99,6 +99,20 @@ class CampaignFirestoreRepository(
         }
     }
 
+    // (nuevo) Elimina campaña: Node primario + borrado en Firestore como respaldo.
+    suspend fun eliminarCampaign(id: String) {
+        try {
+            val resp = node.eliminarCampaign(id)
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            println(">>> CAMPAIGN DELETE OK: $id")
+            // (respaldo) Borrar también en Firestore.
+            try { collection.document(id).delete().await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> CAMPAIGN DELETE EX: ${e.message} → uso Firestore")
+            collection.document(id).delete().await()
+        }
+    }
+
     // (nuevo) Inserta campañas semilla en Firestore solo si la colección está vacía.
     suspend fun inicializarCampaignsSemilla(campaignsSeed: List<Campaign>) {
         val snapshot = collection.limit(1).get().await()

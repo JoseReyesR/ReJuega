@@ -25,11 +25,13 @@ class CampaignDetailViewModel(
     val uiState: StateFlow<UiState<Campaign>> = _uiState.asStateFlow()
 
     init {
-        cargarCampaignPorId()
+        cargarCampaign()
     }
 
-    private fun cargarCampaignPorId() {
+    // (modificado) Método público para recargar la campaña desde el repositorio.
+    fun cargarCampaign() {
         viewModelScope.launch {
+            _uiState.value = UiState.Loading
             try {
                 val campaign = campaignRepository.obtenerCampaignPorId(campaignId)
                 if (campaign != null) {

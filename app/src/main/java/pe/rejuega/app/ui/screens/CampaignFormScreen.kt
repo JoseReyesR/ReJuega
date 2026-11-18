@@ -1,6 +1,5 @@
 // (modificado) Archivo: CampaignFormScreen.kt
-// (modificado) Cambio: Se agrega DatePicker para las fechas y se corrige
-// (modificado) la carga de datos al editar una campaña existente.
+// (modificado) Cambio: Se agrega DatePicker con fechas visibles dd/MM/yyyy y conversión a YYYY-MM-DD para MySQL.
 package pe.rejuega.app.ui.screens
 
 import androidx.compose.foundation.clickable
@@ -42,9 +41,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import pe.rejuega.app.viewmodel.CampaignAdminViewModel
 import pe.rejuega.app.utils.convertirFechaAMillis
 import pe.rejuega.app.utils.convertirMillisAFecha
+import pe.rejuega.app.utils.fechaVisibleAIso
+import pe.rejuega.app.utils.isoAFechaVisible
+import pe.rejuega.app.viewmodel.CampaignAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,41 +56,31 @@ fun CampaignFormScreen(
     onSaved: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    // (nuevo) Observamos la lista de campañas para poder cargar los datos al editar.
     val campaigns by viewModel.campaigns.collectAsState()
 
-    // (nuevo) Campos del formulario.
     var titulo by rememberSaveable { mutableStateOf("") }
     var descripcion by rememberSaveable { mutableStateOf("") }
     var fechaInicio by rememberSaveable { mutableStateOf("") }
     var fechaFin by rememberSaveable { mutableStateOf("") }
     var imagenUrl by rememberSaveable { mutableStateOf("") }
 
-    // (nuevo) Controla qué DatePicker está visible: null, "inicio" o "fin".
     var mostrarDatePicker by remember { mutableStateOf<String?>(null) }
-
-    // (nuevo) Bandera para cargar los datos solo una vez al editar.
     var datosCargados by remember { mutableStateOf(false) }
 
-    // (modificado) Carga los datos cuando la lista de campañas esté disponible.
-    // (modificado) Antes fallaba porque la lista aún no se había cargado de Firestore.
     LaunchedEffect(campaigns) {
-        // (nuevo) Solo se ejecuta si es edición y los datos aún no se han cargado.
         if (campaignId != "new" && !datosCargados && campaigns.isNotEmpty()) {
             val campaign = campaigns.find { it.id == campaignId }
             campaign?.let { c ->
                 titulo = c.titulo
                 descripcion = c.descripcion
-                fechaInicio = c.fechaInicio
-                fechaFin = c.fechaFin
+                fechaInicio = isoAFechaVisible(c.fechaInicio)
+                fechaFin = isoAFechaVisible(c.fechaFin)
                 imagenUrl = c.imagenUrl
-                // (nuevo) Marcamos como cargado para no sobrescribir cambios del usuario.
                 datosCargados = true
             }
         }
     }
 
-    // (nuevo) Navega de vuelta al guardar con éxito.
     LaunchedEffect(uiState.mensajeExito) {
         if (uiState.mensajeExito != null) {
             viewModel.limpiarEstado()
@@ -126,14 +117,12 @@ fun CampaignFormScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // (nuevo) Campo título.
             OutlinedTextField(
                 value = titulo, onValueChange = { titulo = it },
                 label = { Text("Título") }, modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(12.dp))
 
-            // (nuevo) Campo descripción.
             OutlinedTextField(
                 value = descripcion, onValueChange = { descripcion = it },
                 label = { Text("Descripción") },
@@ -141,11 +130,10 @@ fun CampaignFormScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // (modificado) Campo fecha inicio con DatePicker.
             OutlinedTextField(
                 value = fechaInicio,
-                onValueChange = { /* readOnly: no se edita manualmente */ },
-                label = { Text("Fecha inicio") },
+                onValueChange = { fechaInicio = it },
+                label = { Text("Fecha inicio (dd/MM/yyyy)") },
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = { mostrarDatePicker = "inicio" }) {
@@ -158,11 +146,10 @@ fun CampaignFormScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // (modificado) Campo fecha fin con DatePicker.
             OutlinedTextField(
                 value = fechaFin,
-                onValueChange = { /* readOnly: no se edita manualmente */ },
-                label = { Text("Fecha fin") },
+                onValueChange = { fechaFin = it },
+                label = { Text("Fecha fin (dd/MM/yyyy)") },
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = { mostrarDatePicker = "fin" }) {
@@ -175,31 +162,30 @@ fun CampaignFormScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // (nuevo) Campo URL de imagen.
             OutlinedTextField(
                 value = imagenUrl, onValueChange = { imagenUrl = it },
                 label = { Text("URL de imagen") }, modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(16.dp))
 
-            // (nuevo) Muestra error si existe.
             if (uiState.error != null) {
                 Text(uiState.error!!, color = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.height(12.dp))
             }
 
-            // (nuevo) Botón guardar.
             Button(
                 onClick = {
+                    val fInicioIso = fechaVisibleAIso(fechaInicio)
+                    val fFinIso = fechaVisibleAIso(fechaFin)
                     if (campaignId == "new") {
-                        viewModel.crearCampaign(titulo, descripcion, fechaInicio, fechaFin, imagenUrl)
+                        viewModel.crearCampaign(titulo, descripcion, fInicioIso, fFinIso, imagenUrl)
                     } else {
                         val existente = viewModel.obtenerCampaignPorId(campaignId)
                         if (existente != null) {
                             viewModel.actualizarCampaign(
                                 existente.copy(
                                     titulo = titulo, descripcion = descripcion,
-                                    fechaInicio = fechaInicio, fechaFin = fechaFin,
+                                    fechaInicio = fInicioIso, fechaFin = fFinIso,
                                     imagenUrl = imagenUrl
                                 )
                             )
@@ -218,15 +204,12 @@ fun CampaignFormScreen(
         }
     }
 
-    // (nuevo) DatePickerDialog: se muestra cuando mostrarDatePicker no es null.
     if (mostrarDatePicker != null) {
-        // (nuevo) Determina si es fecha inicio o fin.
         val esInicio = mostrarDatePicker == "inicio"
-        // (nuevo) Fecha actual del campo (para abrir el DatePicker en esa fecha).
-        val fechaActual = if (esInicio) fechaInicio else fechaFin
-        val initialMillis = convertirFechaAMillis(fechaActual)
+        val fechaActualVisible = if (esInicio) fechaInicio else fechaFin
+        val fechaIso = fechaVisibleAIso(fechaActualVisible)
+        val initialMillis = convertirFechaAMillis(fechaIso)
 
-        // (nuevo) Estado del DatePicker con la fecha inicial.
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = initialMillis
         )
@@ -236,11 +219,11 @@ fun CampaignFormScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // (nuevo) Convierte los millis seleccionados a YYYY-MM-DD.
                         val millis = datePickerState.selectedDateMillis
                         if (millis != null) {
-                            val fecha = convertirMillisAFecha(millis)
-                            if (esInicio) fechaInicio = fecha else fechaFin = fecha
+                            val fechaIsoSelec = convertirMillisAFecha(millis)
+                            val fechaVis = isoAFechaVisible(fechaIsoSelec)
+                            if (esInicio) fechaInicio = fechaVis else fechaFin = fechaVis
                         }
                         mostrarDatePicker = null
                     }

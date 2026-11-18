@@ -116,6 +116,20 @@ class CampaignAdminViewModel(
         }
     }
 
+    // (nuevo) Eliminar campaña y recargar la lista.
+    fun eliminarCampaign(id: String) {
+        viewModelScope.launch {
+            _uiState.value = CampaignAdminUiState(isLoading = true)
+            try {
+                repository.eliminarCampaign(id)
+                _uiState.value = CampaignAdminUiState(mensajeExito = "Campaña eliminada.")
+                recargar()
+            } catch (e: Exception) {
+                _uiState.value = CampaignAdminUiState(error = "Error al eliminar: ${e.message}")
+            }
+        }
+    }
+
     // (nuevo) Busca una campaña por ID.
     fun obtenerCampaignPorId(id: String): CampaignFirestore? {
         return _campaigns.value.find { it.id == id }

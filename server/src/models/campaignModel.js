@@ -51,6 +51,12 @@ const CampaignModel = {
     updateEstado: async (id, estado) => {
         const [result] = await db.execute('UPDATE campaigns SET estado = ? WHERE id = ?', [estado, id]);
         return result.affectedRows;
+    },
+
+    delete: async (id) => {
+        // (nuevo) Borrado en cascada automático (FK ON DELETE CASCADE).
+        const [result] = await db.execute('DELETE FROM campaigns WHERE id = ?', [id]);
+        return result.affectedRows;
     }
 };
 

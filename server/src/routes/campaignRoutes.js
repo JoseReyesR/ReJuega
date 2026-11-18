@@ -8,5 +8,6 @@ router.get('/:id', CampaignController.getById);
 router.post('/', CampaignController.create);
 router.put('/:id', CampaignController.update);
 router.put('/:id/estado', CampaignController.updateEstado);
+router.delete('/:id', CampaignController.delete);
 
 module.exports = router;
