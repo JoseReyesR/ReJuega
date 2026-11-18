@@ -18,9 +18,24 @@ class MaterialEcoRepository {
     // (nuevo) Instancia del servicio Retrofit (obtenida del cliente singleton).
     private val service = RetrofitClient.getMaterialJugueteService()
 
-    // (nuevo) Lectura directa para el dropdown de materiales.
+    // (modificado) Node/MySQL primario; MockAPI queda como respaldo.
     suspend fun obtenerMaterialesUnaVez(): List<MaterialJugueteDto> {
-        return service.obtenerMateriales()
+        return try {
+            val resp = RetrofitClient.getNodeApiService().obtenerMateriales()
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            resp.body()?.data?.map { nodo ->
+                MaterialJugueteDto(
+                    id = nodo.id.toString(),
+                    tipoMaterial = nodo.tipoMaterial,
+                    co2AhorradoKg = nodo.co2AhorradoKg,
+                    descripcionImpacto = nodo.descripcionImpacto ?: "",
+                    imagenUrl = nodo.imagenUrl
+                )
+            } ?: emptyList()
+        } catch (e: Exception) {
+            // (respaldo) MockAPI como antes.
+            service.obtenerMateriales()
+        }
     }
 
     // (nuevo) Obtiene la lista de materiales desde la API REST.

@@ -1,16 +1,18 @@
-// (nuevo) Repository de campañas sobre Firestore.
+// (nuevo) Repository de campañas sobre Node (primario) y Firestore (respaldo).
 package pe.rejuega.app.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
-import pe.rejuega.app.data.remote.CampaignFirestore
-
 import pe.rejuega.app.data.local.Campaign
-// (nuevo) Gestiona el CRUD de campañas en Firestore.
+import pe.rejuega.app.data.remote.CampaignFirestore
+import pe.rejuega.app.data.remote.CampaignNodeDto
+import pe.rejuega.app.data.remote.RetrofitClient
+import java.io.IOException
+import java.util.UUID
+
+// (nuevo) Gestiona el CRUD de campañas en Node.js y Firestore.
 class CampaignFirestoreRepository(
     private val firestore: FirebaseFirestore
 ) {
@@ -18,51 +20,83 @@ class CampaignFirestoreRepository(
     // (nuevo) Referencia a la colección campaigns.
     private val collection = firestore.collection("campaigns")
 
-    // (nuevo) Obtiene todas las campañas en tiempo real.
-    // (nuevo) Se actualiza automáticamente si el Admin crea/edita una.
-    fun obtenerCampaigns(): Flow<List<CampaignFirestore>> = callbackFlow {
-        val listener = collection
-            .orderBy("fechaCreacion", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error al obtener campañas en tiempo real: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
+    // (nuevo) Cliente del servidor propio.
+    private val node = RetrofitClient.getNodeApiService()
+
+    // (modificado) Lectura: Node primario, Firestore respaldo.
+    fun obtenerCampaigns(): Flow<List<CampaignFirestore>> = flow {
+        emit(obtenerCampaignsUnaVez())
+    }
+
+    suspend fun obtenerCampaignsUnaVez(): List<CampaignFirestore> {
+        return try {
+            val resp = node.obtenerCampaigns()
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            resp.body()?.data?.map { it.aFirestore() } ?: emptyList()
+        } catch (e: Exception) {
+            // (respaldo) Firestore como antes.
+            try {
+                collection.get().await().documents.mapNotNull {
+                    it.toObject(CampaignFirestore::class.java)?.copy(id = it.id)
                 }
-                // (nuevo) Mapea documentos a objetos, asignando el ID del documento.
-                val campaigns = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(CampaignFirestore::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
-                trySend(campaigns)
-            }
-        awaitClose { listener.remove() }
+            } catch (e2: Exception) { emptyList() }
+        }
     }
 
-    // (nuevo) Crea una campaña nueva.
+    // (modificado) Detalle: Node primario, Firestore respaldo.
+    suspend fun obtenerPorId(id: String): CampaignFirestore? {
+        return try {
+            val resp = node.obtenerCampaignPorId(id)
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            resp.body()?.data?.aFirestore()
+        } catch (e: Exception) {
+            try {
+                collection.document(id).get().await()
+                    .toObject(CampaignFirestore::class.java)?.copy(id = id)
+            } catch (e2: Exception) { null }
+        }
+    }
+
+    // (modificado) Escritura: Node primario + copia de respaldo en Firestore.
     suspend fun crearCampaign(campaign: CampaignFirestore) {
-        collection.add(campaign).await()
+        val id = campaign.id.ifBlank { UUID.randomUUID().toString() }
+        try {
+            val resp = node.crearCampaign(campaign.aNode(id))
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            // (respaldo) Copia best-effort en Firestore.
+            try { collection.document(id).set(campaign.copy(id = id)).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            // (comportamiento viejo) Si Node falla, Firestore como antes.
+            collection.document(id).set(campaign.copy(id = id)).await()
+        }
     }
 
-    // (nuevo) Actualiza una campaña existente.
     suspend fun actualizarCampaign(campaign: CampaignFirestore) {
-        collection.document(campaign.id).set(campaign).await()
+        try {
+            val resp = node.actualizarCampaign(campaign.id, campaign.aNode(campaign.id))
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            try { collection.document(campaign.id).set(campaign).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            collection.document(campaign.id).set(campaign).await()
+        }
     }
 
-    // (nuevo) Cierra una campaña (cambia estado a "Cerrada").
     suspend fun cerrarCampaign(id: String) {
-        collection.document(id).update("estado", "Cerrada").await()
+        try {
+            val resp = node.cambiarEstadoCampaign(id, mapOf("estado" to "Cerrada"))
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            try { collection.document(id).update("estado", "Cerrada").await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            collection.document(id).update("estado", "Cerrada").await()
+        }
     }
 
     // (nuevo) Inserta campañas semilla en Firestore solo si la colección está vacía.
-    // (nuevo) Si ya hay datos (creados por el Admin), no inserta nada.
     suspend fun inicializarCampaignsSemilla(campaignsSeed: List<Campaign>) {
-        // (nuevo) Verificar si ya hay campañas en Firestore.
         val snapshot = collection.limit(1).get().await()
         if (!snapshot.isEmpty) {
-            // (nuevo) Ya hay datos reales, no insertar semilla.
             return
         }
-        // (nuevo) La colección está vacía: insertar datos semilla.
         campaignsSeed.forEach { seed ->
             val campaign = CampaignFirestore(
                 titulo = seed.titulo,
@@ -77,22 +111,17 @@ class CampaignFirestoreRepository(
             collection.add(campaign).await()
         }
     }
-
-
-    // (modificado) Obtiene todas las campañas (lectura única, no listener).
-    // (modificado) Se llama explícitamente cuando se necesita datos frescos.
-    suspend fun obtenerCampaignsUnaVez(): List<CampaignFirestore> {
-        return try {
-            val snapshot = collection
-                .orderBy("fechaCreacion", Query.Direction.DESCENDING)
-                .get()
-                .await()
-            snapshot.documents.mapNotNull { doc ->
-                doc.toObject(CampaignFirestore::class.java)?.copy(id = doc.id)
-            }
-        } catch (e: Exception) {
-            println("Error al obtener campañas: ${e.message}")
-            emptyList()
-        }
-    }
 }
+
+// (nuevo) Mapeos entre Node DTO y modelo de la app.
+private fun CampaignNodeDto.aFirestore(): CampaignFirestore = CampaignFirestore(
+    id = id, titulo = titulo, descripcion = descripcion ?: "",
+    fechaInicio = fechaInicio, fechaFin = fechaFin, estado = estado,
+    imagenUrl = imagenUrl ?: "", creadoPor = creadoPor ?: ""
+)
+
+private fun CampaignFirestore.aNode(conId: String): CampaignNodeDto = CampaignNodeDto(
+    id = conId, titulo = titulo, descripcion = descripcion,
+    fechaInicio = fechaInicio, fechaFin = fechaFin, estado = estado,
+    imagenUrl = imagenUrl, creadoPor = creadoPor
+)

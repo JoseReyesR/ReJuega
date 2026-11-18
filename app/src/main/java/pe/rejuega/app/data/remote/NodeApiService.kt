@@ -7,6 +7,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface NodeApiService {
 
@@ -25,4 +26,20 @@ interface NodeApiService {
     // (nuevo) GET 404 global: ruta inexistente para demostrar el manejo de errores.
     @GET("api/esto-no-existe")
     suspend fun rutaInexistente(): Response<ResponseBody>
+
+    // (nuevo) Endpoints de campañas.
+    @GET("api/campaigns")
+    suspend fun obtenerCampaigns(): Response<ApiListResponse<CampaignNodeDto>>
+
+    @GET("api/campaigns/{id}")
+    suspend fun obtenerCampaignPorId(@Path("id") id: String): Response<ApiObjectResponse<CampaignNodeDto>>
+
+    @POST("api/campaigns")
+    suspend fun crearCampaign(@Body body: CampaignNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/campaigns/{id}")
+    suspend fun actualizarCampaign(@Path("id") id: String, @Body body: CampaignNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/campaigns/{id}/estado")
+    suspend fun cambiarEstadoCampaign(@Path("id") id: String, @Body body: Map<String, String>): Response<ApiCreateResponse>
 }

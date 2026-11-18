@@ -41,3 +41,16 @@ data class MaterialCreateRequest(
     @SerializedName("descripcion_impacto") val descripcionImpacto: String? = null,
     @SerializedName("imagen_url") val imagenUrl: String? = null
 )
+
+// (nuevo) Campaña tal como la devuelve MySQL (snake_case).
+data class CampaignNodeDto(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("titulo") val titulo: String = "",
+    @SerializedName("descripcion") val descripcion: String? = null,
+    @SerializedName("fecha_inicio") val fechaInicio: String = "",
+    @SerializedName("fecha_fin") val fechaFin: String = "",
+    @SerializedName("estado") val estado: String = "Activa",
+    @SerializedName("imagen_url") val imagenUrl: String? = null,
+    @SerializedName("creado_por") val creadoPor: String? = null,
+    @SerializedName("fecha_creacion") val fechaCreacion: String? = null
+)
