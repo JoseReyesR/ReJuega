@@ -56,6 +56,17 @@ class CampaignAdminViewModel(
 
 
 
+    // (nuevo) Recarga la lista desde el servidor después de cualquier escritura.
+    private fun recargar() {
+        viewModelScope.launch {
+            try {
+                _campaigns.value = repository.obtenerCampaignsUnaVez()
+            } catch (e: Exception) {
+                // (nuevo) Si el servidor no responde, se mantiene la lista actual.
+            }
+        }
+    }
+
     // (nuevo) Crea una campaña.
     fun crearCampaign(
         titulo: String, descripcion: String,
@@ -71,6 +82,7 @@ class CampaignAdminViewModel(
                     creadoPor = uidAdmin, fechaCreacion = System.currentTimeMillis()
                 )
                 repository.crearCampaign(campaign)
+                recargar()
                 _uiState.value = CampaignAdminUiState(mensajeExito = "Campaña creada correctamente.")
             } catch (e: Exception) {
                 _uiState.value = CampaignAdminUiState(error = "Error al crear: ${e.message}")
@@ -84,6 +96,7 @@ class CampaignAdminViewModel(
             _uiState.value = CampaignAdminUiState(isLoading = true)
             try {
                 repository.actualizarCampaign(campaign)
+                recargar()
                 _uiState.value = CampaignAdminUiState(mensajeExito = "Campaña actualizada.")
             } catch (e: Exception) {
                 _uiState.value = CampaignAdminUiState(error = "Error al actualizar: ${e.message}")
@@ -96,6 +109,7 @@ class CampaignAdminViewModel(
         viewModelScope.launch {
             try {
                 repository.cerrarCampaign(id)
+                recargar()
             } catch (e: Exception) {
                 _uiState.value = CampaignAdminUiState(error = "Error al cerrar: ${e.message}")
             }

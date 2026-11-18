@@ -21,10 +21,21 @@ const CampaignModel = {
         return rows[0];
     },
 
+    // (nuevo) Verifica que el UID exista en users para no violar la FK.
+    usuarioExiste: async (uid) => {
+        if (!uid) return false;
+        const [rows] = await db.execute(
+            'SELECT firebase_uid FROM users WHERE firebase_uid = ?', [uid]
+        );
+        return rows.length > 0;
+    },
+
+    // (modificado) Si creado_por no existe en users, se guarda NULL (evita error de FK).
     create: async (id, titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url, creado_por) => {
+        const creadoValido = (await CampaignModel.usuarioExiste(creado_por)) ? creado_por : null;
         const [result] = await db.execute(
             'INSERT INTO campaigns (id, titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url, creado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url, creado_por]
+            [id, titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url, creadoValido]
         );
         return result.insertId;
     },

@@ -71,12 +71,20 @@ class CampaignFirestoreRepository(
         }
     }
 
+    // (modificado) Con logs de diagnóstico para ver por qué falla el PUT.
     suspend fun actualizarCampaign(campaign: CampaignFirestore) {
         try {
             val resp = node.actualizarCampaign(campaign.id, campaign.aNode(campaign.id))
-            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            if (!resp.isSuccessful) {
+                // (nuevo) Muestra el código y el mensaje exacto del servidor.
+                println(">>> CAMPAIGN PUT FAIL: HTTP ${resp.code()} | ${resp.errorBody()?.string()}")
+                throw IOException("HTTP ${resp.code()}")
+            }
+            println(">>> CAMPAIGN PUT OK: ${campaign.id}")
+            // (respaldo) Copia best-effort en Firestore.
             try { collection.document(campaign.id).set(campaign).await() } catch (_: Exception) {}
         } catch (e: Exception) {
+            println(">>> CAMPAIGN PUT EX: ${e.message} → uso respaldo Firestore")
             collection.document(campaign.id).set(campaign).await()
         }
     }

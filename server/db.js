@@ -2,6 +2,7 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+// (modificado) decimalNumbers: los DECIMAL llegan como número, no como string.
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -10,7 +11,8 @@ const pool = mysql.createPool({
     port: parseInt(process.env.DB_PORT) || 3306,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    decimalNumbers: true
 });
 
 // Prueba de conexión al iniciar

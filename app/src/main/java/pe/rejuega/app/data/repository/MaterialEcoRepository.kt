@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import pe.rejuega.app.data.remote.MaterialJugueteDto
 import pe.rejuega.app.data.remote.RetrofitClient
+import pe.rejuega.app.utils.DatosSemilla
 import retrofit2.HttpException
 import java.io.IOException
 // (nuevo) Import necesario para el DTO de impacto.
@@ -18,24 +19,44 @@ class MaterialEcoRepository {
     // (nuevo) Instancia del servicio Retrofit (obtenida del cliente singleton).
     private val service = RetrofitClient.getMaterialJugueteService()
 
-    // (modificado) Node/MySQL primario; MockAPI queda como respaldo.
+    // (modificado) Triple respaldo: Node -> MockAPI -> semilla local. Nunca devuelve vacío.
     suspend fun obtenerMaterialesUnaVez(): List<MaterialJugueteDto> {
-        return try {
+        // 1) Servidor Node propio (fuente primaria).
+        try {
             val resp = RetrofitClient.getNodeApiService().obtenerMateriales()
-            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
-            resp.body()?.data?.map { nodo ->
-                MaterialJugueteDto(
-                    id = nodo.id.toString(),
-                    tipoMaterial = nodo.tipoMaterial,
-                    co2AhorradoKg = nodo.co2AhorradoKg,
-                    descripcionImpacto = nodo.descripcionImpacto ?: "",
-                    imagenUrl = nodo.imagenUrl
-                )
-            } ?: emptyList()
+            if (resp.isSuccessful) {
+                val lista = resp.body()?.data?.map { nodo ->
+                    MaterialJugueteDto(
+                        id = nodo.id.toString(),
+                        tipoMaterial = nodo.tipoMaterial,
+                        co2AhorradoKg = nodo.co2AhorradoKg,
+                        descripcionImpacto = nodo.descripcionImpacto ?: "",
+                        imagenUrl = nodo.imagenUrl
+                    )
+                } ?: emptyList()
+                if (lista.isNotEmpty()) {
+                    println(">>> MATERIALES: fuente = NODE (${lista.size})")
+                    return lista
+                }
+            }
         } catch (e: Exception) {
-            // (respaldo) MockAPI como antes.
-            service.obtenerMateriales()
+            println(">>> MATERIALES: Node falló (${e.message}), pruebo MockAPI")
         }
+
+        // 2) MockAPI (respaldo remoto).
+        try {
+            val lista = service.obtenerMateriales()
+            if (lista.isNotEmpty()) {
+                println(">>> MATERIALES: fuente = MOCKAPI (${lista.size})")
+                return lista
+            }
+        } catch (e: Exception) {
+            println(">>> MATERIALES: MockAPI falló (${e.message}), uso semilla")
+        }
+
+        // 3) Semilla local (nunca deja el dropdown vacío).
+        println(">>> MATERIALES: fuente = SEMILLA LOCAL")
+        return DatosSemilla.listaMaterialesDto
     }
 
     // (nuevo) Obtiene la lista de materiales desde la API REST.
