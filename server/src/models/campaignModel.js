@@ -35,6 +35,11 @@ const CampaignModel = {
             [titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url, id]
         );
         return result.affectedRows;
+    },
+
+    updateEstado: async (id, estado) => {
+        const [result] = await db.execute('UPDATE campaigns SET estado = ? WHERE id = ?', [estado, id]);
+        return result.affectedRows;
     }
 };
 

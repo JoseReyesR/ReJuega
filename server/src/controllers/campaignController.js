@@ -76,6 +76,54 @@ const CampaignController = {
                 details: error.message
             });
         }
+    },
+
+    // PUT /api/campaigns/:id
+    update: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url } = req.body;
+
+            if (!titulo || !fecha_inicio || !fecha_fin) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Campos obligatorios faltantes',
+                    required: ['titulo', 'fecha_inicio', 'fecha_fin']
+                });
+            }
+
+            const affected = await CampaignModel.update(id, titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url);
+
+            if (affected === 0) {
+                return res.status(404).json({ success: false, error: 'Campaña no encontrada' });
+            }
+
+            res.status(200).json({ success: true, message: 'Campaña actualizada exitosamente' });
+        } catch (error) {
+            res.status(500).json({ success: false, error: 'Error al actualizar campaña', details: error.message });
+        }
+    },
+
+    // PUT /api/campaigns/:id/estado
+    updateEstado: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { estado } = req.body;
+
+            if (!['Activa', 'Cerrada'].includes(estado)) {
+                return res.status(400).json({ success: false, error: 'Estado no válido', validos: ['Activa', 'Cerrada'] });
+            }
+
+            const affected = await CampaignModel.updateEstado(id, estado);
+
+            if (affected === 0) {
+                return res.status(404).json({ success: false, error: 'Campaña no encontrada' });
+            }
+
+            res.status(200).json({ success: true, message: `Campaña ahora está: ${estado}` });
+        } catch (error) {
+            res.status(500).json({ success: false, error: 'Error al cambiar estado', details: error.message });
+        }
     }
 };
 
