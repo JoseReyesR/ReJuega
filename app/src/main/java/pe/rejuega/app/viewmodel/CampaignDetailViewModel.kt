@@ -1,6 +1,5 @@
 // (nuevo) Archivo: CampaignDetailViewModel.kt
-// (nuevo) Descripción: ViewModel para la pantalla de detalle de campaña.
-// (nuevo) Responsabilidad: Buscar una campaña por ID y exponer su estado a la UI.
+// (nuevo) Descripción: ViewModel para la pantalla de detalle de campaña (Node + MySQL).
 package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -10,52 +9,56 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import pe.rejuega.app.data.local.Campaign
-import pe.rejuega.app.data.repository.CampaignRepository
+import pe.rejuega.app.data.remote.CampaignFirestore
+import pe.rejuega.app.data.repository.CampaignFirestoreRepository
 import pe.rejuega.app.utils.UiState
 
-// (nuevo) ViewModel para mostrar el detalle de una campaña.
+// (modificado) Usa CampaignFirestoreRepository (Node + MySQL) en lugar de CampaignRepository (Room).
 class CampaignDetailViewModel(
-    private val campaignRepository: CampaignRepository,
-    private val campaignId: Long
+    private val campaignRepository: CampaignFirestoreRepository,
+    private val firestoreId: String
 ) : ViewModel() {
 
-    // (nuevo) Estado inicial de la pantalla: cargando.
-    private val _uiState = MutableStateFlow<UiState<Campaign>>(UiState.Loading)
-    val uiState: StateFlow<UiState<Campaign>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<CampaignFirestore>>(UiState.Loading)
+    val uiState: StateFlow<UiState<CampaignFirestore>> = _uiState.asStateFlow()
 
     init {
         cargarCampaign()
     }
 
-    // (modificado) Método público para recargar la campaña desde el repositorio.
     fun cargarCampaign() {
+        println(">>> REFRESH-D: recargando campaña firestoreId=$firestoreId")
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
-                val campaign = campaignRepository.obtenerCampaignPorId(campaignId)
-                if (campaign != null) {
-                    _uiState.value = UiState.Success(campaign)
+                println(">>> REFRESH-D: llamando a campaignRepository.obtenerPorId($firestoreId)")
+                val campaign = campaignRepository.obtenerPorId(firestoreId)
+                println(">>> REFRESH-D: resultado = ${if (campaign != null) "campaña encontrada: ${campaign.titulo}" else "NULL"}")
+                _uiState.value = if (campaign != null) {
+                    UiState.Success(campaign)
                 } else {
-                    _uiState.value = UiState.Error("No se encontró la campaña seleccionada.")
+                    UiState.Error("No se encontró la campaña seleccionada.")
                 }
+                println(">>> REFRESH-D: uiState actualizado a ${_uiState.value::class.simpleName}")
             } catch (e: Exception) {
+                println(">>> REFRESH-D: ERROR en cargarCampaign: ${e.message}")
+                e.printStackTrace()
                 _uiState.value = UiState.Error("Error al cargar la campaña: ${e.message}")
             }
         }
     }
 }
 
-// (nuevo) Factory para crear el ViewModel con dependencias y parámetros.
+// (modificado) Factory con firestoreId (String) en lugar de campaignId (Long).
 class CampaignDetailViewModelFactory(
-    private val campaignRepository: CampaignRepository,
-    private val campaignId: Long
+    private val campaignRepository: CampaignFirestoreRepository,
+    private val firestoreId: String
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CampaignDetailViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CampaignDetailViewModel(campaignRepository, campaignId) as T
+            return CampaignDetailViewModel(campaignRepository, firestoreId) as T
         }
         throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

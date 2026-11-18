@@ -41,7 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,10 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import pe.rejuega.app.data.remote.CampaignFirestore
+import pe.rejuega.app.utils.RefreshTrigger
 import pe.rejuega.app.utils.isoAFechaVisible
 import pe.rejuega.app.viewmodel.CampaignAdminViewModel
 
@@ -71,20 +69,12 @@ fun CampaignAdminScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     var campaignAEliminar by remember { mutableStateOf<CampaignFirestore?>(null) }
 
-    // (nuevo) REFRESH AUTOMÁTICO AL RETROCEDER.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var fueVisible by remember { mutableStateOf(false) }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && fueVisible) {
+    // (nuevo) Recarga la lista cuando el formulario notifica un guardado.
+    LaunchedEffect(Unit) {
+        RefreshTrigger.eventos.collect { marca ->
+            if (marca > 0) {
                 viewModel.refrescarCampaigns()
             }
-            if (event == Lifecycle.Event.ON_RESUME) fueVisible = true
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 

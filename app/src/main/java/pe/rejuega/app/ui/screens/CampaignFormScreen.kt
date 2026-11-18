@@ -45,6 +45,7 @@ import pe.rejuega.app.utils.convertirFechaAMillis
 import pe.rejuega.app.utils.convertirMillisAFecha
 import pe.rejuega.app.utils.fechaVisibleAIso
 import pe.rejuega.app.utils.isoAFechaVisible
+import pe.rejuega.app.utils.RefreshTrigger
 import pe.rejuega.app.viewmodel.CampaignAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +84,8 @@ fun CampaignFormScreen(
 
     LaunchedEffect(uiState.mensajeExito) {
         if (uiState.mensajeExito != null) {
+            println(">>> REFRESH-B: formulario guardó con éxito, notifico")
+            RefreshTrigger.notificar()
             viewModel.limpiarEstado()
             onSaved()
         }

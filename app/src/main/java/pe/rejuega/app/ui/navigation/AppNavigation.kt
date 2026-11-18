@@ -300,7 +300,8 @@ fun AppNavigation(
 
             val detailViewModel: CampaignDetailViewModel = viewModel(
                 factory = CampaignDetailViewModelFactory(
-                    appContainer.campaignRepository, campaignId
+                    appContainer.campaignFirestoreRepository,
+                    firestoreId
                 )
             )
 
@@ -330,7 +331,10 @@ fun AppNavigation(
                 esAdmin = esAdmin,
                 onEditarClick = { navController.navigate(Routes.campaignForm(firestoreId)) },
                 onGaleriaClick = { navController.navigate(Routes.campaignGallery(firestoreId, tituloCampaign)) },
-                onCerrarClick = { campaignAdminViewModel.cerrarCampaign(firestoreId) },
+                onCerrarClick = {
+                    campaignAdminViewModel.cerrarCampaign(firestoreId)
+                    pe.rejuega.app.utils.RefreshTrigger.notificar()
+                },
                 onBackClick = {
                     navController.popBackStack()
                 },
