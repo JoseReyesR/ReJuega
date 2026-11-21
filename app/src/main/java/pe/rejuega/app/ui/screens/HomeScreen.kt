@@ -21,8 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 // (nuevo) Ícono de hoja para impacto ambiental.
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -163,8 +166,26 @@ fun HomeScreen(
                             )
                         }
                     },
-                    // (nuevo) Cierre de sesión rápido en la esquina superior derecha.
+                    // (modificado) Campana con badge + logout en la esquina superior derecha.
                     actions = {
+                        // (nuevo) Campana de notificaciones con contador de no leídas.
+                        IconButton(onClick = onNotificationsClick) {
+                            BadgedBox(
+                                badge = {
+                                    if (notificacionesNoLeidas > 0) {
+                                        Badge { Text(notificacionesNoLeidas.toString()) }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notificaciones",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+
+                        // (existente) Cierre de sesión.
                         IconButton(onClick = onLogoutClick) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ExitToApp,
