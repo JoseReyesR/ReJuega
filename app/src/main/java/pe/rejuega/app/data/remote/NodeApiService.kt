@@ -9,6 +9,7 @@ import retrofit2.http.Path
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.DELETE
+import retrofit2.http.Query
 
 interface NodeApiService {
 
@@ -60,4 +61,23 @@ interface NodeApiService {
 
     @PUT("api/users/{uid}")
     suspend fun actualizarUsuario(@Path("uid") uid: String, @Body body: UserNodeDto): Response<ApiCreateResponse>
+
+    // (nuevo) Endpoints de donaciones.
+    @GET("api/donations")
+    suspend fun obtenerDonaciones(
+        @Query("user_id") userId: String? = null,
+        @Query("campaign_id") campaignId: String? = null
+    ): Response<ApiListResponse<DonationNodeDto>>
+
+    @GET("api/donations/{id}")
+    suspend fun obtenerDonacionPorId(@Path("id") id: String): Response<ApiObjectResponse<DonationNodeDto>>
+
+    @POST("api/donations")
+    suspend fun crearDonacion(@Body body: DonationNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/donations/{id}/estado")
+    suspend fun cambiarEstadoDonacion(
+        @Path("id") id: String,
+        @Body body: Map<String, String>
+    ): Response<ApiCreateResponse>
 }

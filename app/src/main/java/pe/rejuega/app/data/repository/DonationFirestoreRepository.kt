@@ -1,106 +1,150 @@
-// (nuevo) Repository para consultar y actualizar donaciones en Firestore.
+// (nuevo) Repository para consultar y actualizar donaciones en Node (primario) y Firestore (respaldo).
 package pe.rejuega.app.data.repository
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import pe.rejuega.app.data.remote.Donacion
-import com.google.firebase.firestore.FieldValue
+import pe.rejuega.app.data.remote.DonationNodeDto
+import pe.rejuega.app.data.remote.RetrofitClient
 
 class DonationFirestoreRepository(
     private val firestore: FirebaseFirestore
 ) {
     private val collection = firestore.collection("donations")
+    private val node = RetrofitClient.getNodeApiService()
 
-    // (modificado) obtenerTodas(): ahora conserva el ID del documento Firestore.
-    fun obtenerTodas(): Flow<List<Donacion>> = callbackFlow {
-        val listener = collection
-            .orderBy("fechaRegistro", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error escuchando donaciones: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val lista = snapshot?.documents?.mapNotNull { doc ->
-                    // (modificado) Antes: .copy() → perdía el docId.
-                    // (modificado) Ahora: .copy(id = doc.id) → cada Donacion conoce su documento.
-                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
+    // (modificado) Mapeos entre Node DTO y Donacion de la app.
+    private fun DonationNodeDto.aFirestore(): Donacion = Donacion(
+        id = id, uid = userId, campaignId = 0, campaignTitulo = "",
+        nombre = nombreJuguete, descripcion = descripcion ?: "",
+        estado = condicion, fotoUrl = fotoUrl,
+        estadoTrazabilidad = estadoTrazabilidad, motivoRechazo = motivoRechazo,
+        materialTipo = materialTipo ?: "", co2AhorradoKg = co2AhorradoKg
+    )
+
+    private fun Donacion.aNode(): DonationNodeDto = DonationNodeDto(
+        id = id, userId = uid, campaignId = campaignId.toString(),
+        nombreJuguete = nombre, descripcion = descripcion, condicion = estado,
+        fotoUrl = fotoUrl, estadoTrazabilidad = estadoTrazabilidad,
+        motivoRechazo = motivoRechazo, materialTipo = materialTipo,
+        co2AhorradoKg = co2AhorradoKg
+    )
+
+    // (modificado) Lectura: Node primario, Firestore respaldo.
+    fun obtenerTodas(): Flow<List<Donacion>> = flow {
+        emit(obtenerTodasUnaVez())
     }
 
+    suspend fun obtenerTodasUnaVez(): List<Donacion> {
+        return try {
+            val resp = node.obtenerDonaciones()
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            resp.body()?.data?.map { it.aFirestore() } ?: emptyList()
+        } catch (e: Exception) {
+            // (respaldo) Firestore.
+            try {
+                collection.get().await().documents.mapNotNull {
+                    it.toObject(Donacion::class.java)?.copy(id = it.id)
+                }
+            } catch (e2: Exception) { emptyList() }
+        }
+    }
 
-    // (modificado) Avanza el estado y agrega el hito al historial con fecha y autor.
+    // (modificado) Actualizar estado: Node primario + copia en Firestore.
     suspend fun actualizarEstado(docId: String, nuevoEstado: String, cambiadoPor: String) {
-        collection.document(docId).update(
-            mapOf(
-                "estadoTrazabilidad" to nuevoEstado,
-                // (nuevo) arrayUnion agrega sin pisar los hitos anteriores (RB-11).
-                "historialEstados" to FieldValue.arrayUnion(
+        try {
+            val resp = node.cambiarEstadoDonacion(
+                docId,
+                mapOf("estado_trazabilidad" to nuevoEstado, "cambiado_por" to cambiadoPor)
+            )
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> DONATION UPDATE OK: $docId → $nuevoEstado")
+            // (respaldo) Firestore.
+            try {
+                collection.document(docId).update(
                     mapOf(
-                        "estado" to nuevoEstado,
-                        "fecha" to System.currentTimeMillis(),
-                        "cambiadoPor" to cambiadoPor
+                        "estadoTrazabilidad" to nuevoEstado,
+                        "historialEstados" to FieldValue.arrayUnion(
+                            mapOf("estado" to nuevoEstado, "fecha" to System.currentTimeMillis(), "cambiadoPor" to cambiadoPor)
+                        )
+                    )
+                ).await()
+            } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> DONATION UPDATE FAIL: ${e.message} → uso Firestore")
+            collection.document(docId).update(
+                mapOf(
+                    "estadoTrazabilidad" to nuevoEstado,
+                    "historialEstados" to FieldValue.arrayUnion(
+                        mapOf("estado" to nuevoEstado, "fecha" to System.currentTimeMillis(), "cambiadoPor" to cambiadoPor)
                     )
                 )
-            )
-        ).await()
+            ).await()
+        }
     }
 
-    // (modificado) Rechaza con motivo y deja el hito en el historial.
+    // (modificado) Rechazar: Node primario + copia en Firestore.
     suspend fun rechazarDonacion(docId: String, motivo: String, cambiadoPor: String) {
-        collection.document(docId).update(
-            mapOf(
-                "estadoTrazabilidad" to "Rechazado",
-                "motivoRechazo" to motivo,
-                "historialEstados" to FieldValue.arrayUnion(
-                    mapOf(
-                        "estado" to "Rechazado",
-                        "fecha" to System.currentTimeMillis(),
-                        "cambiadoPor" to cambiadoPor
-                    )
+        try {
+            val resp = node.cambiarEstadoDonacion(
+                docId,
+                mapOf(
+                    "estado_trazabilidad" to "Rechazado",
+                    "motivo_rechazo" to motivo,
+                    "cambiado_por" to cambiadoPor
                 )
             )
-        ).await()
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> DONATION REJECT OK: $docId")
+            // (respaldo) Firestore.
+            try {
+                collection.document(docId).update(
+                    mapOf("estadoTrazabilidad" to "Rechazado", "motivoRechazo" to motivo)
+                ).await()
+            } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> DONATION REJECT FAIL: ${e.message} → uso Firestore")
+            collection.document(docId).update(
+                mapOf("estadoTrazabilidad" to "Rechazado", "motivoRechazo" to motivo)
+            ).await()
+        }
     }
 
-
-
-    // (nuevo) Observa solo las donaciones del usuario (trazabilidad del donante).
-    // (nuevo) Sin orderBy para no exigir índice compuesto.
-    fun obtenerPorUsuario(uid: String): Flow<List<Donacion>> = callbackFlow {
-        val listener = collection.whereEqualTo("uid", uid)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error escuchando donaciones del usuario: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val lista = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
+    // (modificado) Por usuario: Node primario, Firestore respaldo.
+    fun obtenerPorUsuario(uid: String): Flow<List<Donacion>> = flow {
+        try {
+            val resp = node.obtenerDonaciones(userId = uid)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            // (respaldo) Firestore.
+            try {
+                val snapshot = collection.whereEqualTo("uid", uid).get().await()
+                emit(snapshot.documents.mapNotNull {
+                    it.toObject(Donacion::class.java)?.copy(id = it.id)
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
+        }
     }
 
     // (nuevo) Consulta única para calcular el CO2 total de las donaciones del usuario.
     suspend fun obtenerPorUsuarioUnaVez(uid: String): List<Donacion> {
         return try {
-            val snapshot = collection.whereEqualTo("uid", uid).get().await()
-            snapshot.documents.mapNotNull { doc ->
-                doc.toObject(Donacion::class.java)?.copy(id = doc.id)
-            }
+            val resp = node.obtenerDonaciones(userId = uid)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            resp.body()?.data?.map { it.aFirestore() } ?: emptyList()
         } catch (e: Exception) {
-            emptyList()
+            try {
+                val snapshot = collection.whereEqualTo("uid", uid).get().await()
+                snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Donacion::class.java)?.copy(id = doc.id)
+                }
+            } catch (e2: Exception) {
+                emptyList()
+            }
         }
     }
-
-
 }

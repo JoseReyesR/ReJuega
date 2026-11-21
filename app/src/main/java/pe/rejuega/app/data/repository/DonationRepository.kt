@@ -18,6 +18,7 @@ import pe.rejuega.app.utils.ImageUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.UUID
 
 
 
@@ -116,8 +117,9 @@ class DonationRepository(
         tempFile.delete()
 
         // (nuevo) PASO 8: Crear el objeto Donacion con todos los datos.
-        // (nuevo) Este objeto se guardará en Firestore.
+        val id = UUID.randomUUID().toString()
         val donacion = Donacion(
+            id = id,
             uid = uid,
             campaignId = campaignId,
             campaignTitulo = campaignTitulo,   // (nuevo)
@@ -135,10 +137,28 @@ class DonationRepository(
             co2AhorradoKg = co2AhorradoKg
         )
 
-        // (nuevo) PASO 9: Guardar la donación en Firestore.
-        // (nuevo) .add() genera un ID automático para el documento.
-        // (nuevo) .await() suspende la corrutina hasta que Firestore confirme.
-        firestore.collection("donations").add(donacion).await()
+        // (nuevo) PASO 9: Guardar la donación en Node (primario) y Firestore (respaldo).
+        try {
+            val donacionNode = DonationNodeDto(
+                id = id,
+                userId = uid,
+                campaignId = campaignId.toString(),
+                nombreJuguete = nombre.trim(),
+                descripcion = descripcion.trim(),
+                condicion = estado,
+                fotoUrl = downloadUrl,
+                estadoTrazabilidad = "Pendiente",
+                materialTipo = materialTipo,
+                co2AhorradoKg = co2AhorradoKg
+            )
+            val resp = RetrofitClient.getNodeApiService().crearDonacion(donacionNode)
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+            println(">>> DONATION CREATE NODE OK: $id")
+            try { firestore.collection("donations").document(id).set(donacion).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> DONATION CREATE NODE FAIL: ${e.message} → uso Firestore")
+            firestore.collection("donations").document(id).set(donacion).await()
+        }
 
         // (nuevo) PASO 10: Guardar la donación en Room (base de datos local).
         // (nuevo) Esto permite que el usuario vea la donación en su trazabilidad

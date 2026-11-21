@@ -67,3 +67,19 @@ data class UserNodeDto(
     @SerializedName("genero") val genero: String? = null,
     @SerializedName("fcm_token") val fcmToken: String? = null
 )
+
+// (nuevo) Donación tal como la devuelve MySQL.
+data class DonationNodeDto(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("user_id") val userId: String = "",
+    @SerializedName("campaign_id") val campaignId: String = "",
+    @SerializedName("nombre_juguete") val nombreJuguete: String = "",
+    @SerializedName("descripcion") val descripcion: String? = null,
+    @SerializedName("condicion") val condicion: String = "Buen Estado",
+    @SerializedName("foto_url") val fotoUrl: String = "",
+    @SerializedName("estado_trazabilidad") val estadoTrazabilidad: String = "Pendiente",
+    @SerializedName("motivo_rechazo") val motivoRechazo: String? = null,
+    @SerializedName("material_tipo") val materialTipo: String? = null,
+    @SerializedName("co2_ahorrado_kg") val co2AhorradoKg: Double = 0.0,
+    @SerializedName("fecha_registro") val fechaRegistro: String? = null
+)
