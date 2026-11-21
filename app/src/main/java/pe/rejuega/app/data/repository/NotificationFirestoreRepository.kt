@@ -31,20 +31,25 @@ class NotificationFirestoreRepository(
 
     // (modificado) Observar notificaciones: Node primario, Firestore respaldo.
     fun observarPorUsuario(uid: String): Flow<List<Notificacion>> = flow {
+        println(">>> NOTIF READ: solicitando uid=$uid")
         try {
             val resp = node.obtenerNotificaciones(uid)
+            println(">>> NOTIF READ: HTTP ${resp.code()} count=${resp.body()?.count}")
             if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
-            emit(resp.body()?.data?.map { it.aFirestore() } ?: emptyList())
+            val lista = resp.body()?.data?.map { it.aFirestore() } ?: emptyList()
+            println(">>> NOTIF READ: mapeadas=${lista.size}")
+            emit(lista)
         } catch (e: Exception) {
-            // (respaldo) Firestore.
+            println(">>> NOTIF READ FAIL: ${e.message} → uso Firestore")
             try {
                 val snapshot = collection
                     .whereEqualTo("uidDestinatario", uid)
-                    .orderBy("fechaCreacion", Query.Direction.DESCENDING)
                     .get().await()
-                emit(snapshot.documents.mapNotNull {
+                val lista = snapshot.documents.mapNotNull {
                     it.toObject(Notificacion::class.java)?.copy(id = it.id)
-                })
+                }
+                println(">>> NOTIF READ (Firestore): ${lista.size}")
+                emit(lista)
             } catch (e2: Exception) { emit(emptyList()) }
         }
     }

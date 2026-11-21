@@ -41,6 +41,11 @@ class DonationAdminViewModel(
         observarDonaciones()
     }
 
+    // (nuevo) Recarga la lista de donaciones agrupadas.
+    fun recargar() {
+        observarDonaciones()
+    }
+
     private fun observarDonaciones() {
         viewModelScope.launch {
             repository.obtenerTodas().collect { lista ->

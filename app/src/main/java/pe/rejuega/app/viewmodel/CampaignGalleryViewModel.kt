@@ -29,9 +29,10 @@ class CampaignGalleryViewModel(
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
 
-    init { observar() }
+    init { recargar() }
 
-    private fun observar() {
+    // (nuevo) Re-lee las evidencias de la campaña.
+    fun recargar() {
         viewModelScope.launch {
             repository.observarPorCampaign(campaignId).collect {
                 _evidencias.value = it
@@ -59,6 +60,7 @@ class CampaignGalleryViewModel(
                 }
             }
             _isUploading.value = false
+            recargar()          // (nuevo) refresca la grilla al terminar la subida
             if (exitosas > 0) {
                 _mensaje.value = "$exitosas evidencias subidas correctamente."
             }
@@ -70,6 +72,7 @@ class CampaignGalleryViewModel(
         viewModelScope.launch {
             try {
                 repository.eliminar(id)
+                recargar()      // (nuevo)
             } catch (e: Exception) {
                 _mensaje.value = "Error al eliminar: ${e.message}"
             }

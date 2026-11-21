@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import pe.rejuega.app.viewmodel.DonationAdminUiState
 import pe.rejuega.app.viewmodel.DonationAdminViewModel
 import pe.rejuega.app.utils.EstadosTrazabilidad
+import pe.rejuega.app.utils.RefreshTrigger
 // (nuevo) Imports para el Snackbar de errores.
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -164,7 +165,10 @@ fun DonationDetailAdminScreen(
                     if (siguiente != null) {
                         Button(
                             // (modificado) Se pasa la donación completa para que el ViewModel cree la notificación.
-                            onClick = { viewModel.avanzarEstado(donacion.id, donacion.estadoTrazabilidad, donacion) },
+                            onClick = {
+                                viewModel.avanzarEstado(donacion.id, donacion.estadoTrazabilidad, donacion)
+                                RefreshTrigger.notificar()
+                            },
                             enabled = uiState !is DonationAdminUiState.Loading,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -225,6 +229,7 @@ fun DonationDetailAdminScreen(
                             // (modificado) Se usa el ID del documento Firestore.
                             // (modificado) Se pasa la donación completa para que el ViewModel cree la notificación.
                             viewModel.rechazar(donacion.id, motivoRechazo, donacion)
+                            RefreshTrigger.notificar()
                             mostrarDialogoRechazo = false
                             motivoRechazo = ""
                         }

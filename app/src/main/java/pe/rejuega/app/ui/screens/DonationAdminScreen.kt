@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pe.rejuega.app.data.remote.Donacion
+import pe.rejuega.app.utils.RefreshTrigger
 import pe.rejuega.app.viewmodel.DonationAdminViewModel
 
 // (nuevo) Opciones de filtro disponibles.
@@ -61,6 +63,13 @@ fun DonationAdminScreen(
     val donations by viewModel.donations.collectAsState()
     // (nuevo) Filtro activo; por defecto la cola de revisión.
     var filtro by rememberSaveable { mutableStateOf("Por revisar") }
+
+    // (nuevo) Recarga cuando el detalle notifica un cambio de estado.
+    LaunchedEffect(Unit) {
+        RefreshTrigger.eventos.collect { marca ->
+            if (marca > 0) viewModel.recargar()
+        }
+    }
 
     // (nuevo) Filtrado por estado. "Todas" muestra el historial completo:
     // (nuevo) nada desaparece, solo cambia la vista.
