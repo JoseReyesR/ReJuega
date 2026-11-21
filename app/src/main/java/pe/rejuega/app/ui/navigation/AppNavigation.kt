@@ -425,15 +425,6 @@ fun AppNavigation(
             // (nuevo) Obtenemos el UID del usuario actual de Firebase para pasarlo al ViewModel.
             val uidUsuario = FirebaseAuth.getInstance().currentUser?.uid ?: "usuario_anonimo"
 
-            // (nuevo) Creamos el ViewModel inyectando los repositorios y el UID.
-            val perfilViewModel: PerfilViewModel = viewModel(
-                factory = PerfilViewModelFactory(
-                    jugueteRepository = appContainer.jugueteRepository,
-                    materialEcoRepository = appContainer.materialEcoRepository,
-                    uidUsuario = uidUsuario
-                )
-            )
-
             val perfilUsuarioViewModel: PerfilUsuarioViewModel = viewModel(
                 factory = PerfilUsuarioViewModelFactory(
                     authRepository = appContainer.authRepository,
@@ -443,8 +434,7 @@ fun AppNavigation(
             )
 
             PerfilScreen(
-                viewModel = perfilViewModel,
-                perfilUsuarioViewModel = perfilUsuarioViewModel,
+                viewModel = perfilUsuarioViewModel,
                 onBackClick = {
                     navController.popBackStack()
                 }
