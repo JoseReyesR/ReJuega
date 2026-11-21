@@ -113,3 +113,13 @@ data class PickupEventNodeDto(
     @SerializedName("activo") val activo: Boolean = true,
     @SerializedName("creado_por") val creadoPor: String? = null
 )
+
+// (nuevo) Evidencia de campaña.
+data class CampaignEvidenceNodeDto(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("campaign_id") val campaignId: String = "",
+    @SerializedName("foto_url") val fotoUrl: String = "",
+    @SerializedName("descripcion") val descripcion: String? = null,
+    @SerializedName("subido_por") val subidoPor: String? = null,
+    @SerializedName("fecha_subida") val fechaSubida: String? = null
+)

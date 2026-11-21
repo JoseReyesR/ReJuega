@@ -1,22 +1,24 @@
-// (nuevo) Repository de galería de evidencias (HU-09).
+// (nuevo) Repository de galería de evidencias en Node (primario) y Firestore (respaldo).
 package pe.rejuega.app.data.repository
 
 import android.content.Context
 import android.net.Uri
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.channels.awaitClose
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import pe.rejuega.app.data.remote.CampaignEvidence
+import pe.rejuega.app.data.remote.CampaignEvidenceNodeDto
 import pe.rejuega.app.data.remote.RetrofitClient
 import pe.rejuega.app.utils.ImageUtils
 import java.io.File
 import java.io.IOException
+import java.util.UUID
 
 class CampaignGalleryRepository(
     private val firestore: FirebaseFirestore
@@ -27,26 +29,41 @@ class CampaignGalleryRepository(
     }
 
     private val collection = firestore.collection("campaignGallery")
+    private val node = RetrofitClient.getNodeApiService()
 
-    // (nuevo) Observa las evidencias de una campaña (ordenadas por fecha DESC en memoria).
-    fun observarPorCampaign(campaignId: String): Flow<List<CampaignEvidence>> = callbackFlow {
-        val listener = collection
-            .whereEqualTo("campaignId", campaignId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error observando galería: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val lista = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(CampaignEvidence::class.java)?.copy(id = doc.id)
-                }?.sortedByDescending { it.fechaSubida } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
+    // (modificado) Mapeos entre Node DTO y modelo de la app.
+    private fun CampaignEvidenceNodeDto.aFirestore(): CampaignEvidence = CampaignEvidence(
+        id = id, campaignId = campaignId, campaignTitulo = "",
+        fotoUrl = fotoUrl, descripcion = descripcion ?: "",
+        fechaSubida = fechaSubida?.toLongOrNull() ?: 0, subidoPor = subidoPor ?: ""
+    )
+
+    private fun CampaignEvidence.aNode(): CampaignEvidenceNodeDto = CampaignEvidenceNodeDto(
+        id = id, campaignId = campaignId, fotoUrl = fotoUrl,
+        descripcion = descripcion, subidoPor = subidoPor
+    )
+
+    // (modificado) Observar evidencias: Node primario, Firestore respaldo.
+    fun observarPorCampaign(campaignId: String): Flow<List<CampaignEvidence>> = flow {
+        try {
+            val resp = node.obtenerEvidencias(campaignId)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            // (respaldo) Firestore.
+            try {
+                val snapshot = collection
+                    .whereEqualTo("campaignId", campaignId)
+                    .orderBy("fechaSubida", Query.Direction.DESCENDING)
+                    .get().await()
+                emit(snapshot.documents.mapNotNull {
+                    it.toObject(CampaignEvidence::class.java)?.copy(id = it.id)
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
+        }
     }
 
-    // (nuevo) Sube una foto a Cloudinary y guarda el registro en Firestore.
+    // (modificado) Subir evidencia: Node primario + copia en Firestore.
     suspend fun subirEvidencia(
         context: Context,
         uidAdmin: String,
@@ -69,8 +86,9 @@ class CampaignGalleryRepository(
             .uploadImage(CLOUD_NAME, imagePart, presetBody)
         tempFile.delete()
 
-        // (nuevo) Guardar el registro en Firestore.
+        val id = UUID.randomUUID().toString()
         val evidencia = CampaignEvidence(
+            id = id,
             campaignId = campaignId,
             campaignTitulo = campaignTitulo,
             fotoUrl = response.secure_url,
@@ -78,11 +96,30 @@ class CampaignGalleryRepository(
             fechaSubida = System.currentTimeMillis(),
             subidoPor = uidAdmin
         )
-        collection.add(evidencia).await()
+
+        try {
+            // (nuevo) Escribe en Node.
+            val resp = node.crearEvidencia(evidencia.aNode())
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> GALLERY CREATE OK: $id")
+            // (respaldo) Firestore.
+            try { collection.document(id).set(evidencia).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> GALLERY CREATE FAIL: ${e.message} → uso Firestore")
+            collection.document(id).set(evidencia).await()
+        }
     }
 
-    // (nuevo) Baja lógica: marca la evidencia como inactiva (opcional, no implementado en UI).
+    // (modificado) Eliminar: Node primario + borrado en Firestore.
     suspend fun eliminar(id: String) {
-        collection.document(id).delete().await()
+        try {
+            val resp = node.eliminarEvidencia(id)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> GALLERY DELETE OK: $id")
+            try { collection.document(id).delete().await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> GALLERY DELETE FAIL: ${e.message} → uso Firestore")
+            collection.document(id).delete().await()
+        }
     }
 }

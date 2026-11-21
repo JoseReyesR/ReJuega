@@ -101,4 +101,14 @@ interface NodeApiService {
 
     @PUT("api/pickup-events/{id}")
     suspend fun actualizarEventoRecojo(@Path("id") id: String, @Body body: PickupEventNodeDto): Response<ApiCreateResponse>
+
+    // (nuevo) Endpoints de galería.
+    @GET("api/campaign-gallery/campaign/{campaignId}")
+    suspend fun obtenerEvidencias(@Path("campaignId") campaignId: String): Response<ApiListResponse<CampaignEvidenceNodeDto>>
+
+    @POST("api/campaign-gallery")
+    suspend fun crearEvidencia(@Body body: CampaignEvidenceNodeDto): Response<ApiCreateResponse>
+
+    @DELETE("api/campaign-gallery/{id}")
+    suspend fun eliminarEvidencia(@Path("id") id: String): Response<ApiCreateResponse>
 }
