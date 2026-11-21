@@ -1,6 +1,5 @@
-// (nuevo) Archivo: ImpactoAmbientalViewModel.kt
-// (nuevo) Descripción: ViewModel para la pantalla de impacto ambiental (HU-11).
-// (nuevo) Responsabilidad: consumir MockAPI y exponer el estado a la UI.
+// (nuevo) ViewModel independiente para la pantalla de Huella Ecológica.
+// (nuevo) Calcula el CO₂ real basado en donaciones APROBADAS/ENTREGADAS del usuario.
 package pe.rejuega.app.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -10,68 +9,64 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import pe.rejuega.app.data.remote.MaterialJugueteDto
-import pe.rejuega.app.data.repository.MaterialEcoRepository
-import pe.rejuega.app.utils.UiState
-import retrofit2.HttpException
-import java.io.IOException
+import pe.rejuega.app.data.repository.DonationFirestoreRepository
 
-// (nuevo) ViewModel que gestiona la carga de datos de impacto ambiental desde MockAPI.
+data class ImpactoAmbientalUiState(
+    val isLoading: Boolean = false,
+    val donacionesValidas: Int = 0,      // (nuevo) Solo Aprobadas o Entregadas
+    val co2TotalKg: Double = 0.0,        // (nuevo) Suma real del CO₂ ahorrado
+    val error: String? = null
+)
+
 class ImpactoAmbientalViewModel(
-    private val repository: MaterialEcoRepository
+    private val donationRepository: DonationFirestoreRepository,
+    private val uid: String
 ) : ViewModel() {
 
-    // (nuevo) Estado interno de la UI. Comienza en Loading.
-    private val _uiState = MutableStateFlow<UiState<List<MaterialJugueteDto>>>(UiState.Loading)
+    private val _state = MutableStateFlow(ImpactoAmbientalUiState(isLoading = true))
+    val state: StateFlow<ImpactoAmbientalUiState> = _state.asStateFlow()
 
-    // (nuevo) Estado público de solo lectura para la pantalla.
-    val uiState: StateFlow<UiState<List<MaterialJugueteDto>>> = _uiState.asStateFlow()
+    init { calcularImpacto() }
 
-    // (nuevo) Al crear el ViewModel, cargamos los materiales automáticamente.
-    init {
-        cargarMateriales()
-    }
-
-    // (nuevo) Función que consume la API REST y actualiza el estado de la UI.
-    fun cargarMateriales() {
+    // (nuevo) Calcula impacto real desde el servidor (con respaldo a Firestore).
+    private fun calcularImpacto() {
         viewModelScope.launch {
-            // (nuevo) Indicamos que estamos cargando.
-            _uiState.value = UiState.Loading
+            _state.value = ImpactoAmbientalUiState(isLoading = true)
+            try {
+                // (nuevo) Llama al repository que ya lee de Node con respaldo a Firestore.
+                val todasDonaciones = donationRepository.obtenerPorUsuarioUnaVez(uid)
 
-            // (nuevo) Observamos el Flow del repositorio.
-            repository.obtenerMateriales().collect { result ->
-                result.onSuccess { materiales ->
-                    // (nuevo) Si la lista está vacía, mostramos estado Empty.
-                    if (materiales.isEmpty()) {
-                        _uiState.value = UiState.Empty
-                    } else {
-                        // (nuevo) Si hay datos, mostramos Success.
-                        _uiState.value = UiState.Success(materiales)
-                    }
-                }.onFailure { error ->
-                    // (nuevo) Si hay error, mostramos un mensaje amigable según el tipo.
-                    val mensaje = when (error) {
-                        is IOException -> "Sin conexión a internet. Verifica tu red."
-                        is HttpException -> "Error del servidor: ${error.code()}"
-                        else -> "Error inesperado: ${error.message}"
-                    }
-                    _uiState.value = UiState.Error(mensaje)
+                // (nuevo) SOLO contar Aprobadas y Entregadas (las que realmente llegaron al niño).
+                val validas = todasDonaciones.filter {
+                    it.estadoTrazabilidad == "Aprobado" || it.estadoTrazabilidad == "Entregado"
                 }
+
+                val co2Total = validas.sumOf { it.co2AhorradoKg }
+
+                println(">>> IMPACTO: total=${todasDonaciones.size} validas=${validas.size} co2=$co2Total")
+
+                _state.value = ImpactoAmbientalUiState(
+                    donacionesValidas = validas.size,
+                    co2TotalKg = co2Total
+                )
+            } catch (e: Exception) {
+                _state.value = ImpactoAmbientalUiState(error = "Error al calcular impacto: ${e.message}")
             }
         }
     }
+
+    fun recalcular() = calcularImpacto()
 }
 
-// (nuevo) Factory para inyectar el repositorio al ViewModel.
 class ImpactoAmbientalViewModelFactory(
-    private val repository: MaterialEcoRepository
+    private val donationRepository: DonationFirestoreRepository,
+    private val uid: String
 ) : ViewModelProvider.Factory {
-
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ImpactoAmbientalViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ImpactoAmbientalViewModel(repository) as T
+            return ImpactoAmbientalViewModel(donationRepository, uid) as T
         }
-        throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
+        throw IllegalArgumentException("ViewModel desconocido")
     }
 }

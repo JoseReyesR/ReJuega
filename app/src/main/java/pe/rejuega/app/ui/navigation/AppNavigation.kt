@@ -401,16 +401,14 @@ fun AppNavigation(
         }
         // (nuevo) Destino: Pantalla de impacto ambiental (HU-11, ODS 12).
         composable(Routes.IMPACTO_AMBIENTAL) {
-
-            // (nuevo) Creamos el repositorio de materiales ecológicos.
-            val materialEcoRepository = MaterialEcoRepository()
-
-            // (nuevo) Creamos el ViewModel inyectando el repositorio.
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             val impactoViewModel: ImpactoAmbientalViewModel = viewModel(
-                factory = ImpactoAmbientalViewModelFactory(materialEcoRepository)
+                factory = ImpactoAmbientalViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    uid
+                )
             )
 
-            // (nuevo) Renderizamos la pantalla.
             ImpactoAmbientalScreen(
                 viewModel = impactoViewModel,
                 onBackClick = {
