@@ -135,6 +135,7 @@ fun MenuLateralReJuega(
             listOf(
                 DestinoMenu("trazabilidad", "Mis Donaciones", Icons.Default.History),
                 DestinoMenu("impacto", "Impacto Ambiental", Icons.Default.Eco),
+                DestinoMenu("huella", "Mi Huella Ecológica", Icons.Default.Eco),
                 DestinoMenu("perfil", "Mi Perfil", Icons.Default.Person)
             ).forEach { d ->
                 NavigationDrawerItem(

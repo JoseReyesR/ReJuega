@@ -34,8 +34,11 @@ import pe.rejuega.app.utils.UiState
 
 // (nuevo) Pantalla y ViewModel de impacto ambiental.
 import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
+import pe.rejuega.app.ui.screens.MiHuellaEcologicaScreen
 import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModel
 import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModelFactory
+import pe.rejuega.app.viewmodel.MiHuellaEcologicaViewModel
+import pe.rejuega.app.viewmodel.MiHuellaEcologicaViewModelFactory
 import pe.rejuega.app.data.repository.MaterialEcoRepository
 // (modificado) Archivo: AppNavigation.kt - imports
 import pe.rejuega.app.ui.screens.PerfilScreen
@@ -231,6 +234,9 @@ fun AppNavigation(
                 onImpactoClick = {
                     navController.navigate(Routes.IMPACTO_AMBIENTAL)
                 },
+                onHuellaClick = {
+                    navController.navigate(Routes.MI_HUELLA_ECOLOGICA)
+                },
 
                 // (nuevo) Conecta el ícono de perfil con la nueva pantalla.
                 onPerfilClick = {
@@ -399,22 +405,21 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
         }
-        // (nuevo) Destino: Pantalla de impacto ambiental (HU-11, ODS 12).
+        // (modificado) Impacto Ambiental → materiales (como antes).
         composable(Routes.IMPACTO_AMBIENTAL) {
-            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            val impactoViewModel: ImpactoAmbientalViewModel = viewModel(
-                factory = ImpactoAmbientalViewModelFactory(
-                    appContainer.donationFirestoreRepository,
-                    uid
-                )
+            val vm: ImpactoAmbientalViewModel = viewModel(
+                factory = ImpactoAmbientalViewModelFactory(appContainer.materialEcoRepository)
             )
+            ImpactoAmbientalScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
+        }
 
-            ImpactoAmbientalScreen(
-                viewModel = impactoViewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                }
+        // (nuevo) Mi Huella Ecológica → cálculo real.
+        composable(Routes.MI_HUELLA_ECOLOGICA) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: MiHuellaEcologicaViewModel = viewModel(
+                factory = MiHuellaEcologicaViewModelFactory(appContainer.donationFirestoreRepository, uid)
             )
+            MiHuellaEcologicaScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
         }
 
 

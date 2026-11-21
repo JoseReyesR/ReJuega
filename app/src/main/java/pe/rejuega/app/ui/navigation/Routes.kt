@@ -34,8 +34,10 @@ object Routes {
     // (nuevo) Pantalla del Panel de Administración (solo para rol Administrador).
     const val PANEL_ADMIN = "panel_admin"
 
-    // (nuevo) Pantalla de impacto ambiental (HU-11, ODS 12).
+    // (modificado) Impacto Ambiental = materiales (como antes).
     const val IMPACTO_AMBIENTAL = "impacto_ambiental"
+    // (nuevo) Mi Huella Ecológica = cálculo real de tus donaciones.
+    const val MI_HUELLA_ECOLOGICA = "mi_huella_ecologica"
 
     // (modificado) Archivo: Routes.kt - dentro del objeto Routes
     // (nuevo) Pantalla de Perfil e Impacto Acumulado (HU-12).

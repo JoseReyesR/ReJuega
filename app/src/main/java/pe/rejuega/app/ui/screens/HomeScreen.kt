@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Info
 // (nuevo) Ícono de hoja para impacto ambiental.
 import androidx.compose.material3.Badge
@@ -109,7 +110,9 @@ fun HomeScreen(
     // (nuevo) Acción para ver mapa de puntos de recojo.
     onMapaClick: () -> Unit = {},
     // (nuevo) Acción para ver pruebas del servidor.
-    onServidorClick: () -> Unit = {}
+    onServidorClick: () -> Unit = {},
+    // (nuevo) Acción para ver Mi Huella Ecológica.
+    onHuellaClick: () -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -143,6 +146,7 @@ fun HomeScreen(
                         "trazabilidad" -> onTraceabilityClick()
                         "mapa" -> onMapaClick()
                         "impacto" -> onImpactoClick()
+                        "huella" -> onHuellaClick()
                         "notificaciones" -> onNotificationsClick()
                         "perfil" -> onPerfilClick()
                         "logout" -> onLogoutClick()
@@ -168,6 +172,15 @@ fun HomeScreen(
                     },
                     // (modificado) Campana con badge + logout en la esquina superior derecha.
                     actions = {
+                        // (nuevo) Ícono de huella ecológica.
+                        IconButton(onClick = onHuellaClick) {
+                            Icon(
+                                imageVector = Icons.Default.Eco,
+                                contentDescription = "Mi Huella Ecológica",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+
                         // (nuevo) Campana de notificaciones con contador de no leídas.
                         IconButton(onClick = onNotificationsClick) {
                             BadgedBox(
