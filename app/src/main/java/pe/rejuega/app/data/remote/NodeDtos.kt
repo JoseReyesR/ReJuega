@@ -83,3 +83,33 @@ data class DonationNodeDto(
     @SerializedName("co2_ahorrado_kg") val co2AhorradoKg: Double = 0.0,
     @SerializedName("fecha_registro") val fechaRegistro: String? = null
 )
+
+// (nuevo) Punto de entrega.
+data class DeliveryPointNodeDto(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("nombre") val nombre: String = "",
+    @SerializedName("direccion") val direccion: String = "",
+    @SerializedName("horario") val horario: String? = null,
+    @SerializedName("dias_atencion") val diasAtencion: String? = null,
+    @SerializedName("hora_inicio") val horaInicio: String? = null,
+    @SerializedName("hora_fin") val horaFin: String? = null,
+    @SerializedName("latitud") val latitud: Double = 0.0,
+    @SerializedName("longitud") val longitud: Double = 0.0,
+    @SerializedName("activo") val activo: Boolean = true,
+    @SerializedName("creado_por") val creadoPor: String? = null
+)
+
+// (nuevo) Evento de recojo.
+data class PickupEventNodeDto(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("campaign_id") val campaignId: String = "",
+    @SerializedName("nombre") val nombre: String = "",
+    @SerializedName("lugar") val lugar: String? = null,
+    @SerializedName("direccion") val direccion: String? = null,
+    @SerializedName("fecha") val fecha: String = "",
+    @SerializedName("hora") val hora: String = "",
+    @SerializedName("latitud") val latitud: Double = 0.0,
+    @SerializedName("longitud") val longitud: Double = 0.0,
+    @SerializedName("activo") val activo: Boolean = true,
+    @SerializedName("creado_por") val creadoPor: String? = null
+)

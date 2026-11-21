@@ -1,107 +1,167 @@
-// (nuevo) Repository de puntos fijos y eventos de recojo (HU-04, HU-14).
+// (nuevo) Repository de puntos fijos y eventos de recojo en Node (primario) y Firestore (respaldo).
 package pe.rejuega.app.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import pe.rejuega.app.data.remote.DeliveryPointNodeDto
 import pe.rejuega.app.data.remote.PickupEventFirestore
+import pe.rejuega.app.data.remote.PickupEventNodeDto
 import pe.rejuega.app.data.remote.PuntoEntregaFirestore
+import pe.rejuega.app.data.remote.RetrofitClient
+import java.util.UUID
 
 class PuntoRecojoFirestoreRepository(
     private val firestore: FirebaseFirestore
 ) {
     private val puntosCol = firestore.collection("deliveryPoints")
     private val eventosCol = firestore.collection("pickupEvents")
+    private val node = RetrofitClient.getNodeApiService()
 
-    // (nuevo) Todos los puntos fijos (Admin ve también inactivos).
-    fun observarPuntos(): Flow<List<PuntoEntregaFirestore>> = callbackFlow {
-        val listener = puntosCol.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                println("Error observando puntos: ${error.message}")
-                trySend(emptyList())
-                return@addSnapshotListener
-            }
-            val lista = snapshot?.documents?.mapNotNull {
-                it.toObject(PuntoEntregaFirestore::class.java)?.copy(id = it.id)
-            } ?: emptyList()
-            trySend(lista)
-        }
-        awaitClose { listener.remove() }
-    }
+    // (modificado) Mapeos entre Node DTO y modelos de la app.
+    private fun DeliveryPointNodeDto.aFirestore(): PuntoEntregaFirestore = PuntoEntregaFirestore(
+        id = id, nombre = nombre, direccion = direccion, horario = horario ?: "",
+        dias = diasAtencion?.split(",") ?: emptyList(),
+        horaInicio = horaInicio ?: "", horaFin = horaFin ?: "",
+        latitud = latitud, longitud = longitud, activo = activo, creadoPor = creadoPor ?: ""
+    )
 
-    // (nuevo) Solo puntos activos (para donante/mapa).
-    fun observarPuntosActivos(): Flow<List<PuntoEntregaFirestore>> = callbackFlow {
-        val listener = puntosCol.whereEqualTo("activo", true)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error observando puntos activos: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val lista = snapshot?.documents?.mapNotNull {
+    private fun PuntoEntregaFirestore.aNode(): DeliveryPointNodeDto = DeliveryPointNodeDto(
+        id = id, nombre = nombre, direccion = direccion, horario = horario,
+        diasAtencion = dias.joinToString(","), horaInicio = horaInicio, horaFin = horaFin,
+        latitud = latitud, longitud = longitud, activo = activo, creadoPor = creadoPor
+    )
+
+    private fun PickupEventNodeDto.aFirestore(): PickupEventFirestore = PickupEventFirestore(
+        id = id, campaignId = campaignId, nombre = nombre, lugar = lugar ?: "",
+        direccion = direccion ?: "", fecha = fecha, hora = hora,
+        latitud = latitud, longitud = longitud, activo = activo, creadoPor = creadoPor ?: ""
+    )
+
+    private fun PickupEventFirestore.aNode(): PickupEventNodeDto = PickupEventNodeDto(
+        id = id, campaignId = campaignId, nombre = nombre, lugar = lugar,
+        direccion = direccion, fecha = fecha, hora = hora,
+        latitud = latitud, longitud = longitud, activo = activo, creadoPor = creadoPor
+    )
+
+    // (modificado) Todos los puntos (Admin ve también inactivos).
+    fun observarPuntos(): Flow<List<PuntoEntregaFirestore>> = flow {
+        try {
+            val resp = node.obtenerPuntosEntrega()
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            try {
+                val snapshot = puntosCol.get().await()
+                emit(snapshot.documents.mapNotNull {
                     it.toObject(PuntoEntregaFirestore::class.java)?.copy(id = it.id)
-                } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
-    }
-
-    // (nuevo) Todos los eventos de recojo.
-    fun observarEventos(): Flow<List<PickupEventFirestore>> = callbackFlow {
-        val listener = eventosCol.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                println("Error observando eventos: ${error.message}")
-                trySend(emptyList())
-                return@addSnapshotListener
-            }
-            val lista = snapshot?.documents?.mapNotNull {
-                it.toObject(PickupEventFirestore::class.java)?.copy(id = it.id)
-            } ?: emptyList()
-            trySend(lista)
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
         }
-        awaitClose { listener.remove() }
     }
 
-    // (nuevo) Eventos activos de una campaña (vista del donante).
-    fun observarEventosPorCampaign(campaignId: String): Flow<List<PickupEventFirestore>> = callbackFlow {
-        val listener = eventosCol
-            .whereEqualTo("campaignId", campaignId)
-            .whereEqualTo("activo", true)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error observando eventos por campaña: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val lista = snapshot?.documents?.mapNotNull {
+    // (modificado) Solo puntos activos (para donante/mapa).
+    fun observarPuntosActivos(): Flow<List<PuntoEntregaFirestore>> = flow {
+        try {
+            val resp = node.obtenerPuntosEntrega()
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.filter { it.activo }?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            try {
+                val snapshot = puntosCol.whereEqualTo("activo", true).get().await()
+                emit(snapshot.documents.mapNotNull {
+                    it.toObject(PuntoEntregaFirestore::class.java)?.copy(id = it.id)
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
+        }
+    }
+
+    // (modificado) Todos los eventos de recojo.
+    fun observarEventos(): Flow<List<PickupEventFirestore>> = flow {
+        try {
+            val resp = node.obtenerEventosRecojo()
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            try {
+                val snapshot = eventosCol.get().await()
+                emit(snapshot.documents.mapNotNull {
                     it.toObject(PickupEventFirestore::class.java)?.copy(id = it.id)
-                } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
+        }
     }
 
-    // (nuevo) Crear o actualizar punto fijo.
+    // (modificado) Eventos activos de una campaña (vista del donante).
+    fun observarEventosPorCampaign(campaignId: String): Flow<List<PickupEventFirestore>> = flow {
+        try {
+            val resp = node.obtenerEventosRecojo(campaignId = campaignId)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.filter { it.activo }?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            try {
+                val snapshot = eventosCol
+                    .whereEqualTo("campaignId", campaignId)
+                    .whereEqualTo("activo", true).get().await()
+                emit(snapshot.documents.mapNotNull {
+                    it.toObject(PickupEventFirestore::class.java)?.copy(id = it.id)
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
+        }
+    }
+
+    // (modificado) Crear o actualizar punto fijo.
     suspend fun guardarPunto(punto: PuntoEntregaFirestore) {
-        if (punto.id.isBlank()) puntosCol.add(punto).await()
-        else puntosCol.document(punto.id).set(punto).await()
+        val id = punto.id.ifBlank { UUID.randomUUID().toString() }
+        val puntoConId = punto.copy(id = id)
+        try {
+            val resp = if (punto.id.isBlank()) node.crearPuntoEntrega(puntoConId.aNode()) else node.actualizarPuntoEntrega(id, puntoConId.aNode())
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> POINT SAVE OK: $id")
+            try { puntosCol.document(id).set(puntoConId).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> POINT SAVE FAIL: ${e.message} → uso Firestore")
+            puntosCol.document(id).set(puntoConId).await()
+        }
     }
 
-    // (nuevo) Activar/desactivar punto fijo (baja lógica).
+    // (modificado) Crear punto directo.
+    suspend fun crearPunto(punto: PuntoEntregaFirestore) {
+        guardarPunto(punto)
+    }
+
+    // (nuevo) Activar/desactivar punto fijo.
     suspend fun cambiarEstadoPunto(id: String, activo: Boolean) {
-        puntosCol.document(id).update("activo", activo).await()
+        try {
+            puntosCol.document(id).update("activo", activo).await()
+        } catch (_: Exception) {}
     }
 
-    // (nuevo) Crear o actualizar evento de recojo.
+    // (modificado) Crear o actualizar evento de recojo.
     suspend fun guardarEvento(evento: PickupEventFirestore) {
-        if (evento.id.isBlank()) eventosCol.add(evento).await()
-        else eventosCol.document(evento.id).set(evento).await()
+        val id = evento.id.ifBlank { UUID.randomUUID().toString() }
+        val eventoConId = evento.copy(id = id)
+        try {
+            val resp = if (evento.id.isBlank()) node.crearEventoRecojo(eventoConId.aNode()) else node.actualizarEventoRecojo(id, eventoConId.aNode())
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> EVENT SAVE OK: $id")
+            try { eventosCol.document(id).set(eventoConId).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> EVENT SAVE FAIL: ${e.message} → uso Firestore")
+            eventosCol.document(id).set(eventoConId).await()
+        }
+    }
+
+    // (modificado) Crear evento directo.
+    suspend fun crearEvento(evento: PickupEventFirestore) {
+        guardarEvento(evento)
     }
 
     // (nuevo) Activar/desactivar evento.
     suspend fun cambiarEstadoEvento(id: String, activo: Boolean) {
-        eventosCol.document(id).update("activo", activo).await()
+        try {
+            eventosCol.document(id).update("activo", activo).await()
+        } catch (_: Exception) {}
     }
 }

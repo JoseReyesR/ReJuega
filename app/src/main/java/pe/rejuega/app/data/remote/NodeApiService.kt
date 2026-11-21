@@ -80,4 +80,25 @@ interface NodeApiService {
         @Path("id") id: String,
         @Body body: Map<String, String>
     ): Response<ApiCreateResponse>
+
+    // (nuevo) Endpoints de puntos y eventos.
+    @GET("api/delivery-points")
+    suspend fun obtenerPuntosEntrega(): Response<ApiListResponse<DeliveryPointNodeDto>>
+
+    @POST("api/delivery-points")
+    suspend fun crearPuntoEntrega(@Body body: DeliveryPointNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/delivery-points/{id}")
+    suspend fun actualizarPuntoEntrega(@Path("id") id: String, @Body body: DeliveryPointNodeDto): Response<ApiCreateResponse>
+
+    @GET("api/pickup-events")
+    suspend fun obtenerEventosRecojo(
+        @Query("campaign_id") campaignId: String? = null
+    ): Response<ApiListResponse<PickupEventNodeDto>>
+
+    @POST("api/pickup-events")
+    suspend fun crearEventoRecojo(@Body body: PickupEventNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/pickup-events/{id}")
+    suspend fun actualizarEventoRecojo(@Path("id") id: String, @Body body: PickupEventNodeDto): Response<ApiCreateResponse>
 }
