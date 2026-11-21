@@ -47,4 +47,17 @@ interface NodeApiService {
     // (nuevo) DELETE /api/campaigns/:id
     @DELETE("api/campaigns/{id}")
     suspend fun eliminarCampaign(@Path("id") id: String): Response<ApiCreateResponse>
+
+    // (nuevo) Endpoints de usuarios.
+    @GET("api/users")
+    suspend fun obtenerUsuarios(): Response<ApiListResponse<UserNodeDto>>
+
+    @GET("api/users/{uid}")
+    suspend fun obtenerUsuarioPorUid(@Path("uid") uid: String): Response<ApiObjectResponse<UserNodeDto>>
+
+    @POST("api/users/sync")
+    suspend fun sincronizarUsuario(@Body body: UserNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/users/{uid}")
+    suspend fun actualizarUsuario(@Path("uid") uid: String, @Body body: UserNodeDto): Response<ApiCreateResponse>
 }

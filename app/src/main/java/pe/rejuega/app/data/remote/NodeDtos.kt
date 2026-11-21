@@ -54,3 +54,16 @@ data class CampaignNodeDto(
     @SerializedName("creado_por") val creadoPor: String? = null,
     @SerializedName("fecha_creacion") val fechaCreacion: String? = null
 )
+
+// (nuevo) Usuario tal como lo devuelve MySQL.
+data class UserNodeDto(
+    @SerializedName("firebase_uid") val firebaseUid: String = "",
+    @SerializedName("nombre") val nombre: String = "",
+    @SerializedName("correo") val correo: String = "",
+    @SerializedName("rol") val rol: String = "Donante",
+    @SerializedName("direccion") val direccion: String? = null,
+    @SerializedName("telefono") val telefono: String? = null,
+    @SerializedName("ciudad") val ciudad: String? = null,
+    @SerializedName("genero") val genero: String? = null,
+    @SerializedName("fcm_token") val fcmToken: String? = null
+)

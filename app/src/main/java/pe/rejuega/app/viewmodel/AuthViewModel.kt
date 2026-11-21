@@ -83,6 +83,9 @@ class AuthViewModel(
                 // (nuevo) Llamamos al repositorio.
                 authRepository.iniciarSesion(correo.trim(), password)
 
+                // (nuevo) Sincronizamos usuario en MySQL.
+                try { authRepository.sincronizarUsuarioActual() } catch (_: Exception) {}
+
                 // (nuevo) Obtenemos el perfil del usuario desde Firestore.
                 val usuario = authRepository.obtenerUsuarioActual()
 
@@ -128,6 +131,9 @@ class AuthViewModel(
                     correo = correo.trim(),
                     password = password
                 )
+
+                // (nuevo) Sincronizamos usuario en MySQL.
+                try { authRepository.sincronizarUsuarioActual() } catch (_: Exception) {}
 
                 // (nuevo) Después del registro, obtenemos el usuario actual.
                 val usuario = authRepository.obtenerUsuarioActual()

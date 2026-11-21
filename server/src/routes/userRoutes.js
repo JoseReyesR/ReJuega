@@ -6,6 +6,7 @@ const UserController = require('../controllers/userController');
 router.get('/', UserController.getAll);
 router.get('/:uid', UserController.getByUid);
 router.post('/', UserController.create);
+router.post('/sync', UserController.syncFromFirebase);
 router.put('/:uid', UserController.update);
 router.put('/:uid/fcm-token', UserController.updateFcmToken);
 

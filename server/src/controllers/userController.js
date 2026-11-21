@@ -149,6 +149,47 @@ const UserController = {
                 details: error.message
             });
         }
+    },
+
+    // (nuevo) Sincroniza usuario desde Firebase Auth a MySQL.
+    syncFromFirebase: async (req, res) => {
+        try {
+            const { firebase_uid, nombre, correo, rol } = req.body;
+
+            if (!firebase_uid || !correo) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'firebase_uid y correo son obligatorios'
+                });
+            }
+
+            // (nuevo) Verifica si ya existe.
+            const existente = await UserModel.getByUid(firebase_uid);
+
+            if (existente) {
+                // (nuevo) Actualiza solo nombre y rol si cambiaron.
+                await UserModel.update(firebase_uid, { nombre, rol });
+                return res.status(200).json({
+                    success: true,
+                    message: 'Usuario actualizado',
+                    data: { firebase_uid, nombre, correo, rol }
+                });
+            } else {
+                // (nuevo) Crea nuevo usuario.
+                await UserModel.create(firebase_uid, nombre, correo, rol || 'Donante', '', '', '', '');
+                return res.status(201).json({
+                    success: true,
+                    message: 'Usuario creado',
+                    data: { firebase_uid, nombre, correo, rol }
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Error al sincronizar usuario',
+                details: error.message
+            });
+        }
     }
 };
 
