@@ -111,4 +111,20 @@ interface NodeApiService {
 
     @DELETE("api/campaign-gallery/{id}")
     suspend fun eliminarEvidencia(@Path("id") id: String): Response<ApiCreateResponse>
+
+    // (nuevo) Endpoints de notificaciones.
+    @GET("api/notifications/user/{userId}")
+    suspend fun obtenerNotificaciones(@Path("userId") userId: String): Response<ApiListResponse<NotificationNodeDto>>
+
+    @POST("api/notifications")
+    suspend fun crearNotificacion(@Body body: NotificationNodeDto): Response<ApiCreateResponse>
+
+    @PUT("api/notifications/{id}/read")
+    suspend fun marcarNotificacionLeida(@Path("id") id: String): Response<ApiCreateResponse>
+
+    @PUT("api/notifications/user/{userId}/read-all")
+    suspend fun marcarTodasLeidas(@Path("userId") userId: String): Response<ApiCreateResponse>
+
+    @GET("api/notifications/user/{userId}/unread-count")
+    suspend fun contarNoLeidas(@Path("userId") userId: String): Response<ApiObjectResponse<Map<String, Int>>>
 }

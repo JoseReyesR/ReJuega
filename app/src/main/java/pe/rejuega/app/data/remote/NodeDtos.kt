@@ -123,3 +123,15 @@ data class CampaignEvidenceNodeDto(
     @SerializedName("subido_por") val subidoPor: String? = null,
     @SerializedName("fecha_subida") val fechaSubida: String? = null
 )
+
+// (nuevo) Notificación.
+data class NotificationNodeDto(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("user_id") val userId: String = "",
+    @SerializedName("titulo") val titulo: String = "",
+    @SerializedName("mensaje") val mensaje: String = "",
+    @SerializedName("donation_id") val donationId: String? = null,
+    @SerializedName("tipo") val tipo: String = "general",
+    @SerializedName("leida") val leida: Boolean = false,
+    @SerializedName("fecha_creacion") val fechaCreacion: String? = null
+)

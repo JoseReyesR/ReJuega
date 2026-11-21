@@ -1,69 +1,121 @@
-// (nuevo) Repository de notificaciones (HU-08).
+// (nuevo) Repository de notificaciones en Node (primario) y Firestore (respaldo).
 package pe.rejuega.app.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.channels.awaitClose
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import pe.rejuega.app.data.remote.Notificacion
+import pe.rejuega.app.data.remote.NotificationNodeDto
+import pe.rejuega.app.data.remote.RetrofitClient
+import java.util.UUID
 
 class NotificationFirestoreRepository(
     private val firestore: FirebaseFirestore
 ) {
     private val collection = firestore.collection("notifications")
+    private val node = RetrofitClient.getNodeApiService()
 
-    // (nuevo) Observa las notificaciones del usuario (listener en tiempo real).
-    // (modificado) Se ordena en Kotlin para no exigir un índice compuesto en Firestore.
-    fun observarPorUsuario(uid: String): Flow<List<Notificacion>> = callbackFlow {
-        val listener = collection
-            .whereEqualTo("uidDestinatario", uid)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error observando notificaciones: ${error.message}")
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val lista = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Notificacion::class.java)?.copy(id = doc.id)
-                }?.sortedByDescending { it.fechaCreacion } ?: emptyList()
-                trySend(lista)
-            }
-        awaitClose { listener.remove() }
+    // (modificado) Mapeos entre Node DTO y Notificacion de la app.
+    private fun NotificationNodeDto.aFirestore(): Notificacion = Notificacion(
+        id = id, uidDestinatario = userId, titulo = titulo, mensaje = mensaje,
+        donacionId = donationId ?: "", tipo = tipo, leida = leida,
+        fechaCreacion = fechaCreacion?.toLongOrNull() ?: 0
+    )
+
+    private fun Notificacion.aNode(): NotificationNodeDto = NotificationNodeDto(
+        id = id, userId = uidDestinatario, titulo = titulo, mensaje = mensaje,
+        donationId = donacionId, tipo = tipo, leida = leida
+    )
+
+    // (modificado) Observar notificaciones: Node primario, Firestore respaldo.
+    fun observarPorUsuario(uid: String): Flow<List<Notificacion>> = flow {
+        try {
+            val resp = node.obtenerNotificaciones(uid)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.map { it.aFirestore() } ?: emptyList())
+        } catch (e: Exception) {
+            // (respaldo) Firestore.
+            try {
+                val snapshot = collection
+                    .whereEqualTo("uidDestinatario", uid)
+                    .orderBy("fechaCreacion", Query.Direction.DESCENDING)
+                    .get().await()
+                emit(snapshot.documents.mapNotNull {
+                    it.toObject(Notificacion::class.java)?.copy(id = it.id)
+                })
+            } catch (e2: Exception) { emit(emptyList()) }
+        }
     }
 
-    // (nuevo) Cuenta las notificaciones no leídas (para el badge del Home).
-    fun contarNoLeidas(uid: String): Flow<Int> = callbackFlow {
-        val listener = collection
-            .whereEqualTo("uidDestinatario", uid)
-            .whereEqualTo("leida", false)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    println("Error contando no leídas: ${error.message}")
-                    trySend(0)
-                    return@addSnapshotListener
-                }
-                trySend(snapshot?.size() ?: 0)
-            }
-        awaitClose { listener.remove() }
+    // (modificado) Contar no leídas: Node primario, Firestore respaldo.
+    fun contarNoLeidas(uid: String): Flow<Int> = flow {
+        try {
+            val resp = node.contarNoLeidas(uid)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            emit(resp.body()?.data?.get("count") ?: 0)
+        } catch (e: Exception) {
+            // (respaldo) Firestore.
+            try {
+                val snapshot = collection
+                    .whereEqualTo("uidDestinatario", uid)
+                    .whereEqualTo("leida", false)
+                    .get().await()
+                emit(snapshot.size())
+            } catch (e2: Exception) { emit(0) }
+        }
     }
 
-    // (nuevo) Crea una notificación (lo llama el Admin al cambiar estado).
+    // (modificado) Crear notificación: Node primario + copia en Firestore.
     suspend fun crear(notificacion: Notificacion) {
-        collection.add(notificacion).await()
+        val id = notificacion.id.ifBlank { UUID.randomUUID().toString() }
+        try {
+            val resp = node.crearNotificacion(notificacion.copy(id = id).aNode())
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> NOTIF CREATE OK: $id")
+            try { collection.document(id).set(notificacion.copy(id = id)).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> NOTIF CREATE FAIL: ${e.message} → uso Firestore")
+            firestore.collection("notifications").document(id).set(notificacion.copy(id = id)).await()
+        }
     }
 
-    // (nuevo) Marca una notificación como leída.
+    // (modificado) Marcar leída: Node primario + copia en Firestore.
     suspend fun marcarLeida(id: String) {
-        collection.document(id).update("leida", true).await()
+        try {
+            val resp = node.marcarNotificacionLeida(id)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> NOTIF READ OK: $id")
+            try { collection.document(id).update("leida", true).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> NOTIF READ FAIL: ${e.message} → uso Firestore")
+            collection.document(id).update("leida", true).await()
+        }
     }
 
-    // (nuevo) Marca todas las del usuario como leídas.
+    // (modificado) Marcar todas leídas: Node primario + copia en Firestore.
     suspend fun marcarTodasLeidas(uid: String) {
-        val snapshot = collection.whereEqualTo("uidDestinatario", uid)
-            .whereEqualTo("leida", false).get().await()
-        snapshot.documents.forEach {
-            collection.document(it.id).update("leida", true).await()
+        try {
+            val resp = node.marcarTodasLeidas(uid)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> NOTIF READ-ALL OK: $uid")
+            try {
+                val snapshot = collection
+                    .whereEqualTo("uidDestinatario", uid)
+                    .whereEqualTo("leida", false).get().await()
+                snapshot.documents.forEach {
+                    collection.document(it.id).update("leida", true).await()
+                }
+            } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> NOTIF READ-ALL FAIL: ${e.message} → uso Firestore")
+            val snapshot = collection
+                .whereEqualTo("uidDestinatario", uid)
+                .whereEqualTo("leida", false).get().await()
+            snapshot.documents.forEach {
+                collection.document(it.id).update("leida", true).await()
+            }
         }
     }
 }
