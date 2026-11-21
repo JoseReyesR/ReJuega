@@ -92,6 +92,9 @@ class AuthRepository(
             .document(uid)
             .set(usuario)
             .await()
+
+        // (nuevo) Sincroniza a MySQL con el UID real que acabamos de obtener.
+        try { sincronizarUsuarioActual() } catch (_: Exception) {}
     }
 
     // (nuevo) Inicia sesión con correo y contraseña.

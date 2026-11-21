@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "seed:to-firebase": "node scripts/seed-to-firebase.js",
+    "sync:from-firebase": "node scripts/sync-from-firebase.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,6 +18,7 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.10",
     "express": "^5.3.0",
+    "firebase-admin": "^14.5.1",
     "mysql2": "^3.24.6",
     "uuid": "^9.0.1"
   },

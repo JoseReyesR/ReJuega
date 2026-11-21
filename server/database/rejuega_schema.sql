@@ -156,15 +156,15 @@ CREATE INDEX idx_pickup_events_campaign ON pickup_events(campaign_id);
 -- ⚠️ Reemplaza los firebase_uid con los reales de tu Firebase Console
 INSERT INTO users (firebase_uid, nombre, correo, rol, ciudad, telefono, direccion, genero) VALUES
 -- Administradores
-('uid_admin_001', 'Admin Principal', 'admin@rejuega.app', 'Administrador', 'Trujillo', '999888777', 'Av. España 1234', 'Masculino'),
-('uid_admin_002', 'Admin Secundario', 'admin2@rejuega.app', 'Administrador', 'Lima', '999888778', 'Jr. Cusco 456', 'Femenino'),
+('Ayt5Te7pZnd8PDf7nzO1b7kCBxx1', 'Admin Principal', 'admin@rejuega.app', 'Administrador', 'Trujillo', '999888777', 'Av. España 1234', 'Masculino'),
+('yPF3eKmDSaW7qcCd0yJ2WEcrlY93', 'Admin Secundario', 'admin2@rejuega.app', 'Administrador', 'Lima', '999888778', 'Jr. Cusco 456', 'Femenino'),
 -- Donantes
-('oOGfsylEcgcVtEqZgrqwZOHiv9F3', 'Donante Prueba', 'donante@rejuega.app', 'Donante', 'Trujillo', '999111222', 'Av. América 100', 'Femenino'),
-('uid_donante_002', 'María García López', 'maria.garcia@correo.com', 'Donante', 'Trujillo', '987654321', 'Calle Los Pinos 234', 'Femenino'),
-('uid_donante_003', 'Carlos Mendoza Ruiz', 'carlos.mendoza@correo.com', 'Donante', 'Lima', '987654322', 'Av. Javier Prado 567', 'Masculino'),
-('uid_donante_004', 'Ana Torres Vargas', 'ana.torres@correo.com', 'Donante', 'Trujillo', '987654323', 'Jr. Pizarro 890', 'Femenino'),
-('uid_donante_005', 'Luis Ramírez Paredes', 'luis.ramirez@correo.com', 'Donante', 'Chiclayo', '987654324', 'Av. Salaverry 123', 'Masculino'),
-('uid_donante_006', 'Sofía Herrera Díaz', 'sofia.herrera@correo.com', 'Donante', 'Trujillo', '987654325', 'Calle San Martín 456', 'Femenino');
+('nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'Donante Prueba', 'donante@rejuega.app', 'Donante', 'Trujillo', '999111222', 'Av. América 100', 'Femenino'),
+('rAxn9a0bTMSLmrBztM8GQrb8l4V2', 'María García López', 'maria.garcia@correo.com', 'Donante', 'Trujillo', '987654321', 'Calle Los Pinos 234', 'Femenino'),
+('jASUEPn8r8OJCCE8rDGMhWn3fxu2', 'Carlos Mendoza Ruiz', 'carlos.mendoza@correo.com', 'Donante', 'Lima', '987654322', 'Av. Javier Prado 567', 'Masculino'),
+('bBrdlUGRUXYKUupvklpr8Abxe6s2', 'Ana Torres Vargas', 'ana.torres@correo.com', 'Donante', 'Trujillo', '987654323', 'Jr. Pizarro 890', 'Femenino'),
+('dx6Q1ynS5HQz1YSDBKF6ACac5nI3', 'Luis Ramírez Paredes', 'luis.ramirez@correo.com', 'Donante', 'Chiclayo', '987654324', 'Av. Salaverry 123', 'Masculino'),
+('POWGjAklUIP7XWVfg3LOgyATYpv1', 'Sofía Herrera Díaz', 'sofia.herrera@correo.com', 'Donante', 'Trujillo', '987654325', 'Calle San Martín 456', 'Femenino');
 
 -- =====================================================
 -- SECCIÓN 5: DATOS SEMILLA - MATERIALES
@@ -182,93 +182,93 @@ INSERT INTO materials (tipo_material, co2_ahorrado_kg, descripcion_impacto, imag
 -- SECCIÓN 6: DATOS SEMILLA - CAMPAÑAS (5)
 -- =====================================================
 INSERT INTO campaigns (id, titulo, descripcion, fecha_inicio, fecha_fin, estado, imagen_url, creado_por) VALUES
-('camp_001', 'Navidad Circular 2026', 'Campaña de recolección de juguetes para comedores populares de Trujillo. Todos los juguetes serán revisados y entregados a niños en situación vulnerable.', '2026-11-01', '2026-12-24', 'Activa', 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=600', 'uid_admin_001'),
-('camp_002', 'ReJuega en tu Colegio', 'Recolección en instituciones educativas de la región La Libertad. Los estudiantes traerán juguetes en buen estado para donar.', '2026-10-15', '2026-11-30', 'Cerrada', 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600', 'uid_admin_001'),
-('camp_003', 'Día del Niño Solidario 2027', 'Campaña especial para el Día del Niño. Recolección de juguetes educativos y didácticos para comunidades rurales.', '2027-04-01', '2027-04-30', 'Activa', 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=600', 'uid_admin_002'),
-('camp_004', 'Juguetes que Vuelan', 'Campaña de recolección de juguetes para niños en hospitales pediátricos. Buscamos juguetes que alegren su estancia.', '2026-12-01', '2027-01-15', 'Activa', 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=600', 'uid_admin_001'),
-('camp_005', 'ReJuega Verano 2027', 'Campaña de verano para recolectar juguetes de playa y aire libre. Donaciones para comunidades costeras.', '2027-01-15', '2027-02-28', 'Activa', 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=600', 'uid_admin_002');
+('camp_001', 'Navidad Circular 2026', 'Campaña de recolección de juguetes para comedores populares de Trujillo. Todos los juguetes serán revisados y entregados a niños en situación vulnerable.', '2026-11-01', '2026-12-24', 'Activa', 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=600', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('camp_002', 'ReJuega en tu Colegio', 'Recolección en instituciones educativas de la región La Libertad. Los estudiantes traerán juguetes en buen estado para donar.', '2026-10-15', '2026-11-30', 'Cerrada', 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('camp_003', 'Día del Niño Solidario 2027', 'Campaña especial para el Día del Niño. Recolección de juguetes educativos y didácticos para comunidades rurales.', '2027-04-01', '2027-04-30', 'Activa', 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=600', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93'),
+('camp_004', 'Juguetes que Vuelan', 'Campaña de recolección de juguetes para niños en hospitales pediátricos. Buscamos juguetes que alegren su estancia.', '2026-12-01', '2027-01-15', 'Activa', 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=600', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('camp_005', 'ReJuega Verano 2027', 'Campaña de verano para recolectar juguetes de playa y aire libre. Donaciones para comunidades costeras.', '2027-01-15', '2027-02-28', 'Activa', 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=600', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93');
 
 -- =====================================================
 -- SECCIÓN 7: DATOS SEMILLA - PUNTOS DE ENTREGA (3)
 -- =====================================================
 INSERT INTO delivery_points (id, nombre, direccion, horario, dias_atencion, hora_inicio, hora_fin, latitud, longitud, activo, creado_por) VALUES
-('point_001', 'Sede Fundación Juguete Vivo', 'Av. España 1234, Trujillo', 'Lun, Mié, Vie de 09:00 a 18:00', 'Lun,Mié,Vie', '09:00', '18:00', -8.1116, -79.0288, TRUE, 'uid_admin_001'),
-('point_002', 'Centro Comunitario El Porvenir', 'Av. América Sur 567, El Porvenir, Trujillo', 'Mar, Jue de 10:00 a 17:00', 'Mar,Jue', '10:00', '17:00', -8.1450, -79.0350, TRUE, 'uid_admin_001'),
-('point_003', 'Municipalidad de La Esperanza', 'Jr. Los Olivos 890, La Esperanza, Trujillo', 'Lun a Vie de 08:00 a 16:00', 'Lun,Mar,Mié,Jue,Vie', '08:00', '16:00', -8.0890, -79.0420, TRUE, 'uid_admin_002');
+('point_001', 'Sede Fundación Juguete Vivo', 'Av. España 1234, Trujillo', 'Lun, Mié, Vie de 09:00 a 18:00', 'Lun,Mié,Vie', '09:00', '18:00', -8.1116, -79.0288, TRUE, 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('point_002', 'Centro Comunitario El Porvenir', 'Av. América Sur 567, El Porvenir, Trujillo', 'Mar, Jue de 10:00 a 17:00', 'Mar,Jue', '10:00', '17:00', -8.1450, -79.0350, TRUE, 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('point_003', 'Municipalidad de La Esperanza', 'Jr. Los Olivos 890, La Esperanza, Trujillo', 'Lun a Vie de 08:00 a 16:00', 'Lun,Mar,Mié,Jue,Vie', '08:00', '16:00', -8.0890, -79.0420, TRUE, 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93');
 
 -- =====================================================
 -- SECCIÓN 8: DATOS SEMILLA - EVENTOS DE RECOJO (3)
 -- =====================================================
 INSERT INTO pickup_events (id, campaign_id, nombre, lugar, direccion, fecha, hora, latitud, longitud, activo, creado_por) VALUES
-('event_001', 'camp_001', 'Recojo masivo Navidad Circular', 'Parque Central de Trujillo', 'Jr. Pizarro 500, Trujillo', '2026-12-15', '10:00:00', -8.1120, -79.0280, TRUE, 'uid_admin_001'),
-('event_002', 'camp_001', 'Recojo en Mercado Mayorista', 'Mercado Mayorista de Trujillo', 'Av. España 2000, Trujillo', '2026-12-20', '14:00:00', -8.1150, -79.0320, TRUE, 'uid_admin_001'),
-('event_003', 'camp_003', 'Recojo escolar Día del Niño', 'Colegio Nacional San Juan', 'Av. América 1000, Trujillo', '2027-04-15', '09:00:00', -8.1090, -79.0250, TRUE, 'uid_admin_002');
+('event_001', 'camp_001', 'Recojo masivo Navidad Circular', 'Parque Central de Trujillo', 'Jr. Pizarro 500, Trujillo', '2026-12-15', '10:00:00', -8.1120, -79.0280, TRUE, 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('event_002', 'camp_001', 'Recojo en Mercado Mayorista', 'Mercado Mayorista de Trujillo', 'Av. España 2000, Trujillo', '2026-12-20', '14:00:00', -8.1150, -79.0320, TRUE, 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('event_003', 'camp_003', 'Recojo escolar Día del Niño', 'Colegio Nacional San Juan', 'Av. América 1000, Trujillo', '2027-04-15', '09:00:00', -8.1090, -79.0250, TRUE, 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93');
 
 -- =====================================================
 -- SECCIÓN 9: DATOS SEMILLA - DONACIONES (10+)
 -- =====================================================
 INSERT INTO donations (id, user_id, campaign_id, nombre_juguete, descripcion, condicion, foto_url, estado_trazabilidad, material_tipo, co2_ahorrado_kg) VALUES
 -- Donaciones del donante de prueba
-('don_001', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3', 'camp_001', 'Carrito de madera', 'Carrito artesanal en buen estado, pintado a mano.', 'Buen Estado', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', 'Aprobado', 'Madera', 1.80),
-('don_002', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3', 'camp_001', 'Muñeca de peluche', 'Muñeca de peluche limpia, sin roturas.', 'Nuevo', 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=400', 'En Revision', 'Peluche / Textil', 1.50),
-('don_003', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3', 'camp_002', 'Bloques de construcción', 'Set completo con caja original, 120 piezas.', 'Buen Estado', 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400', 'Entregado', 'Plástico ABS', 2.50),
+('don_001', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'camp_001', 'Carrito de madera', 'Carrito artesanal en buen estado, pintado a mano.', 'Buen Estado', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', 'Aprobado', 'Madera', 1.80),
+('don_002', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'camp_001', 'Muñeca de peluche', 'Muñeca de peluche limpia, sin roturas.', 'Nuevo', 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=400', 'En Revision', 'Peluche / Textil', 1.50),
+('don_003', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'camp_002', 'Bloques de construcción', 'Set completo con caja original, 120 piezas.', 'Buen Estado', 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400', 'Entregado', 'Plástico ABS', 2.50),
 -- Donaciones de otros donantes
-('don_004', 'uid_donante_002', 'camp_001', 'Oso de peluche grande', 'Oso de peluche tamaño mediano, muy suave.', 'Buen Estado', 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=400', 'Pendiente', 'Peluche / Textil', 1.50),
-('don_005', 'uid_donante_003', 'camp_003', 'Rompecabezas educativo', 'Rompecabezas de 100 piezas, tema animales.', 'Nuevo', 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400', 'Aprobado', 'Cartón / Papel', 0.90),
-('don_006', 'uid_donante_004', 'camp_004', 'Auto de metal a escala', 'Auto de colección en perfecto estado.', 'Nuevo', 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400', 'En Revision', 'Metal', 3.20),
-('don_007', 'uid_donante_005', 'camp_005', 'Pelota de silicona', 'Pelota rebotadora de silicona, como nueva.', 'Buen Estado', 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400', 'Rechazado', 'Silicona / Goma', 2.10),
-('don_008', 'uid_donante_006', 'camp_001', 'Muñeco de acción', 'Muñeco de acción con todos sus accesorios.', 'Buen Estado', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', 'Pendiente', 'Plástico ABS', 2.50),
-('don_009', 'uid_donante_002', 'camp_003', 'Libro de cuentos', 'Libro de cuentos ilustrados para niños de 3-5 años.', 'Nuevo', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400', 'Aprobado', 'Cartón / Papel', 0.90),
-('don_010', 'uid_donante_003', 'camp_004', 'Tela reciclada - Muñeco', 'Muñeco hecho a mano con tela reciclada.', 'Buen Estado', 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=400', 'Entregado', 'Tela reciclada', 1.20);
+('don_004', 'rAxn9a0bTMSLmrBztM8GQrb8l4V2', 'camp_001', 'Oso de peluche grande', 'Oso de peluche tamaño mediano, muy suave.', 'Buen Estado', 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=400', 'Pendiente', 'Peluche / Textil', 1.50),
+('don_005', 'jASUEPn8r8OJCCE8rDGMhWn3fxu2', 'camp_003', 'Rompecabezas educativo', 'Rompecabezas de 100 piezas, tema animales.', 'Nuevo', 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400', 'Aprobado', 'Cartón / Papel', 0.90),
+('don_006', 'bBrdlUGRUXYKUupvklpr8Abxe6s2', 'camp_004', 'Auto de metal a escala', 'Auto de colección en perfecto estado.', 'Nuevo', 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400', 'En Revision', 'Metal', 3.20),
+('don_007', 'dx6Q1ynS5HQz1YSDBKF6ACac5nI3', 'camp_005', 'Pelota de silicona', 'Pelota rebotadora de silicona, como nueva.', 'Buen Estado', 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400', 'Rechazado', 'Silicona / Goma', 2.10),
+('don_008', 'POWGjAklUIP7XWVfg3LOgyATYpv1', 'camp_001', 'Muñeco de acción', 'Muñeco de acción con todos sus accesorios.', 'Buen Estado', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', 'Pendiente', 'Plástico ABS', 2.50),
+('don_009', 'rAxn9a0bTMSLmrBztM8GQrb8l4V2', 'camp_003', 'Libro de cuentos', 'Libro de cuentos ilustrados para niños de 3-5 años.', 'Nuevo', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400', 'Aprobado', 'Cartón / Papel', 0.90),
+('don_010', 'jASUEPn8r8OJCCE8rDGMhWn3fxu2', 'camp_004', 'Tela reciclada - Muñeco', 'Muñeco hecho a mano con tela reciclada.', 'Buen Estado', 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=400', 'Entregado', 'Tela reciclada', 1.20);
 
 -- =====================================================
 -- SECCIÓN 10: DATOS SEMILLA - HISTORIAL DE TRAZABILIDAD
 -- =====================================================
 INSERT INTO donation_history (donation_id, estado, cambiado_por) VALUES
-('don_001', 'Pendiente', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3'),
-('don_001', 'En Revision', 'uid_admin_001'),
-('don_001', 'Aprobado', 'uid_admin_001'),
-('don_002', 'Pendiente', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3'),
-('don_002', 'En Revision', 'uid_admin_001'),
-('don_003', 'Pendiente', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3'),
-('don_003', 'En Revision', 'uid_admin_001'),
-('don_003', 'Aprobado', 'uid_admin_001'),
-('don_003', 'Entregado', 'uid_admin_001'),
-('don_005', 'Pendiente', 'uid_donante_003'),
-('don_005', 'En Revision', 'uid_admin_002'),
-('don_005', 'Aprobado', 'uid_admin_002'),
-('don_006', 'Pendiente', 'uid_donante_004'),
-('don_006', 'En Revision', 'uid_admin_001'),
-('don_007', 'Pendiente', 'uid_donante_005'),
-('don_007', 'En Revision', 'uid_admin_001'),
-('don_007', 'Rechazado', 'uid_admin_001'),
-('don_009', 'Pendiente', 'uid_donante_002'),
-('don_009', 'En Revision', 'uid_admin_002'),
-('don_009', 'Aprobado', 'uid_admin_002'),
-('don_010', 'Pendiente', 'uid_donante_003'),
-('don_010', 'En Revision', 'uid_admin_001'),
-('don_010', 'Aprobado', 'uid_admin_001'),
-('don_010', 'Entregado', 'uid_admin_001');
+('don_001', 'Pendiente', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1'),
+('don_001', 'En Revision', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_001', 'Aprobado', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_002', 'Pendiente', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1'),
+('don_002', 'En Revision', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_003', 'Pendiente', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1'),
+('don_003', 'En Revision', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_003', 'Aprobado', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_003', 'Entregado', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_005', 'Pendiente', 'jASUEPn8r8OJCCE8rDGMhWn3fxu2'),
+('don_005', 'En Revision', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93'),
+('don_005', 'Aprobado', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93'),
+('don_006', 'Pendiente', 'bBrdlUGRUXYKUupvklpr8Abxe6s2'),
+('don_006', 'En Revision', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_007', 'Pendiente', 'dx6Q1ynS5HQz1YSDBKF6ACac5nI3'),
+('don_007', 'En Revision', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_007', 'Rechazado', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_009', 'Pendiente', 'rAxn9a0bTMSLmrBztM8GQrb8l4V2'),
+('don_009', 'En Revision', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93'),
+('don_009', 'Aprobado', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93'),
+('don_010', 'Pendiente', 'jASUEPn8r8OJCCE8rDGMhWn3fxu2'),
+('don_010', 'En Revision', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_010', 'Aprobado', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('don_010', 'Entregado', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1');
 
 -- =====================================================
 -- SECCIÓN 11: DATOS SEMILLA - GALERÍA DE EVIDENCIAS
 -- =====================================================
 INSERT INTO campaign_gallery (id, campaign_id, foto_url, descripcion, subido_por) VALUES
-('gal_001', 'camp_002', 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=600', 'Entrega de juguetes en colegio San Juan', 'uid_admin_001'),
-('gal_002', 'camp_002', 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600', 'Niños recibiendo sus juguetes', 'uid_admin_001'),
-('gal_003', 'camp_002', 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=600', 'Voluntarios organizando donaciones', 'uid_admin_002'),
-('gal_004', 'camp_001', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600', 'Inicio de campaña Navidad Circular', 'uid_admin_001'),
-('gal_005', 'camp_001', 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=600', 'Recolección en centro comercial', 'uid_admin_001');
+('gal_001', 'camp_002', 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=600', 'Entrega de juguetes en colegio San Juan', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('gal_002', 'camp_002', 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600', 'Niños recibiendo sus juguetes', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('gal_003', 'camp_002', 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=600', 'Voluntarios organizando donaciones', 'yPF3eKmDSaW7qcCd0yJ2WEcrlY93'),
+('gal_004', 'camp_001', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600', 'Inicio de campaña Navidad Circular', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1'),
+('gal_005', 'camp_001', 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=600', 'Recolección en centro comercial', 'Ayt5Te7pZnd8PDf7nzO1b7kCBxx1');
 
 -- =====================================================
 -- SECCIÓN 12: DATOS SEMILLA - NOTIFICACIONES
 -- =====================================================
 INSERT INTO notifications (id, user_id, titulo, mensaje, donation_id, tipo, leida) VALUES
-('not_001', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3', 'Tu donación fue aprobada', 'El juguete "Carrito de madera" pasó al estado Aprobado.', 'don_001', 'estado', TRUE),
-('not_002', 'oOGfsylEcgcVtEqZgrqwZOHiv9F3', 'Tu donación está en revisión', 'El juguete "Muñeca de peluche" está siendo revisado por nuestro equipo.', 'don_002', 'estado', FALSE),
-('not_003', 'uid_donante_003', 'Tu donación fue aprobada', 'El "Rompecabezas educativo" fue aprobado. ¡Gracias por tu aporte!', 'don_005', 'estado', TRUE),
-('not_004', 'uid_donante_005', 'Tu donación fue rechazada', 'La "Pelota de silicona" fue rechazada. Motivo: Presenta desgaste excesivo.', 'don_007', 'rechazo', TRUE),
-('not_005', 'uid_donante_002', 'Tu donación fue aprobada', 'El "Libro de cuentos" fue aprobado.', 'don_009', 'estado', FALSE);
+('not_001', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'Tu donación fue aprobada', 'El juguete "Carrito de madera" pasó al estado Aprobado.', 'don_001', 'estado', TRUE),
+('not_002', 'nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'Tu donación está en revisión', 'El juguete "Muñeca de peluche" está siendo revisado por nuestro equipo.', 'don_002', 'estado', FALSE),
+('not_003', 'jASUEPn8r8OJCCE8rDGMhWn3fxu2', 'Tu donación fue aprobada', 'El "Rompecabezas educativo" fue aprobado. ¡Gracias por tu aporte!', 'don_005', 'estado', TRUE),
+('not_004', 'dx6Q1ynS5HQz1YSDBKF6ACac5nI3', 'Tu donación fue rechazada', 'La "Pelota de silicona" fue rechazada. Motivo: Presenta desgaste excesivo.', 'don_007', 'rechazo', TRUE),
+('not_005', 'rAxn9a0bTMSLmrBztM8GQrb8l4V2', 'Tu donación fue aprobada', 'El "Libro de cuentos" fue aprobado.', 'don_009', 'estado', FALSE);
 
 -- =====================================================
 -- SECCIÓN 13: EXTENSIONES (Espacio para agregar más tablas)
