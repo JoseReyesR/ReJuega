@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import pe.rejuega.app.data.remote.PickupEventFirestore
 import pe.rejuega.app.ui.components.SelectorDireccion
 import pe.rejuega.app.ui.components.TimeDropdown
+import pe.rejuega.app.utils.RefreshTrigger
 import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
 import pe.rejuega.app.utils.convertirFechaAMillis
 import pe.rejuega.app.utils.convertirMillisAFecha
@@ -94,7 +95,11 @@ fun PickupEventFormScreen(
     }
 
     LaunchedEffect(uiState.mensaje) {
-        if (uiState.mensaje != null) { viewModel.limpiarEstado(); onSaved() }
+        if (uiState.mensaje != null) {
+            RefreshTrigger.notificar()
+            viewModel.limpiarEstado()
+            onSaved()
+        }
     }
 
     Scaffold(

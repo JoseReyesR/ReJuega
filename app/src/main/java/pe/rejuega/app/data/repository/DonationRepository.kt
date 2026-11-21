@@ -59,7 +59,8 @@ class DonationRepository(
     suspend fun registrarPropuesta(
         context: Context, uid: String, campaignId: Long, campaignTitulo: String,
         nombre: String, descripcion: String, estado: String, fotoUri: Uri,
-        materialTipo: String = "", co2AhorradoKg: Double = 0.0
+        materialTipo: String = "", co2AhorradoKg: Double = 0.0,
+        campaignFirestoreId: String = ""
     ): String {
         // (nuevo) VALIDACIÓN PREVIA: verificar que exista un usuario autenticado.
         // (nuevo) Motivo: las reglas de Firestore exigen que el campo uid coincida
@@ -142,7 +143,7 @@ class DonationRepository(
             val donacionNode = DonationNodeDto(
                 id = id,
                 userId = uid,
-                campaignId = campaignId.toString(),
+                campaignId = campaignFirestoreId.ifBlank { campaignId.toString() },
                 nombreJuguete = nombre.trim(),
                 descripcion = descripcion.trim(),
                 condicion = estado,

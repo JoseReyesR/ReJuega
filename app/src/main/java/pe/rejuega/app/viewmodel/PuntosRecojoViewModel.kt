@@ -49,9 +49,10 @@ class PuntosRecojoViewModel(
     private val _uiState = MutableStateFlow(PuntosRecojoUiState())
     val uiState: StateFlow<PuntosRecojoUiState> = _uiState.asStateFlow()
 
-    init { observar() }
+    init { recargar() }
 
-    private fun observar() {
+    // (modificado) recargar() re-ejecuta las lecturas (ahora son de una sola emisión).
+    fun recargar() {
         viewModelScope.launch {
             try {
                 repository.observarPuntos().collect { lista ->

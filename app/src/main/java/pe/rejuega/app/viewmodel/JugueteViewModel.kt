@@ -40,7 +40,8 @@ class JugueteViewModel(
     private val donationRepository: DonationRepository,
     private val materialEcoRepository: MaterialEcoRepository,
     private val campaignId: Long,
-    private val campaignTitulo: String      // (nuevo)
+    private val campaignTitulo: String,
+    private val campaignFirestoreId: String     // (nuevo)
 ) : AndroidViewModel(application) {
 
     // (modificado) Estado interno del formulario.
@@ -166,7 +167,8 @@ class JugueteViewModel(
                     estado = estadoActual.estado,
                     fotoUri = estadoActual.fotoUri!!,
                     materialTipo = material.tipoMaterial,
-                    co2AhorradoKg = material.co2AhorradoKg
+                    co2AhorradoKg = material.co2AhorradoKg,
+                    campaignFirestoreId = campaignFirestoreId     // (nuevo)
                 )
 
                 // (modificado) Si todo sale bien, marcamos éxito.
@@ -194,14 +196,15 @@ class JugueteViewModelFactory(
     private val donationRepository: DonationRepository,
     private val materialEcoRepository: MaterialEcoRepository,
     private val campaignId: Long,
-    private val campaignTitulo: String     // (nuevo)
+    private val campaignTitulo: String,
+    private val campaignFirestoreId: String     // (nuevo)
 ) : ViewModelProvider.Factory {
 
     // (modificado) Android llama a este método cuando necesita crear el ViewModel.
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(JugueteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return JugueteViewModel(application, donationRepository, materialEcoRepository, campaignId, campaignTitulo) as T
+            return JugueteViewModel(application, donationRepository, materialEcoRepository, campaignId, campaignTitulo, campaignFirestoreId) as T
         }
         throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

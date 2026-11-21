@@ -9,7 +9,7 @@ const fs = admin.firestore();
 fs.settings({ ignoreUndefinedProperties: true });
 
 // true = NO subir users (se gestionan por Auth + sync de login).
-const SKIP_USERS = true;
+const SKIP_USERS = true; // (modificado) ahora los UIDs son reales: sí subir users
 
 const aMillis = (s) => s ? new Date(String(s).replace(' ', 'T')).getTime() : Date.now();
 

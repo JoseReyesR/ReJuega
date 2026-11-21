@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pe.rejuega.app.data.remote.PickupEventFirestore
 import pe.rejuega.app.data.remote.PuntoEntregaFirestore
+import pe.rejuega.app.utils.RefreshTrigger
 import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,6 +67,13 @@ fun PuntosRecojoAdminScreen(
     val uiState by viewModel.uiState.collectAsState()
     var tab by rememberSaveable { mutableStateOf("Puntos fijos") }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // (nuevo) Recarga cuando un formulario notifica un guardado.
+    LaunchedEffect(Unit) {
+        RefreshTrigger.eventos.collect { marca ->
+            if (marca > 0) viewModel.recargar()
+        }
+    }
 
     LaunchedEffect(uiState.mensaje, uiState.error) {
         uiState.mensaje?.let { snackbarHostState.showSnackbar(it); viewModel.limpiarEstado() }

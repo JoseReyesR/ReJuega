@@ -36,6 +36,7 @@ import pe.rejuega.app.data.remote.PuntoEntregaFirestore
 import pe.rejuega.app.ui.components.HorarioPicker
 import pe.rejuega.app.ui.components.SelectorDireccion
 import pe.rejuega.app.ui.components.construirHorario
+import pe.rejuega.app.utils.RefreshTrigger
 import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +84,11 @@ fun PuntoEntregaFormScreen(
     }
 
     LaunchedEffect(uiState.mensaje) {
-        if (uiState.mensaje != null) { viewModel.limpiarEstado(); onSaved() }
+        if (uiState.mensaje != null) {
+            RefreshTrigger.notificar()
+            viewModel.limpiarEstado()
+            onSaved()
+        }
     }
 
     Scaffold(

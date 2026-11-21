@@ -15,8 +15,8 @@ object Routes {
     // (modificado) Detalle de campaña. Recibe el ID local y el ID de Firestore.
     const val CAMPAIGN_DETAIL = "campaign_detail/{campaignId}/{firestoreId}"
 
-    // (modificado) La ruta de registro ahora lleva también el título de la campaña.
-    const val REGISTER_TOY = "register_toy/{campaignId}/{campaignTitulo}"
+    // (modificado) La ruta de registro ahora lleva también el título de la campaña y el firestoreId.
+    const val REGISTER_TOY = "register_toy/{campaignId}/{campaignTitulo}/{campaignFirestoreId}"
 
     // (modificado) Pantalla de trazabilidad. Se implementará más adelante.
     const val TRACEABILITY = "traceability"
@@ -76,9 +76,9 @@ object Routes {
         return "campaign_detail/$campaignId/$idValido"
     }
 
-    // (modificado) Se codifica el título para que espacios y tildes no rompan la URL.
-    fun registerToy(campaignId: Long, campaignTitulo: String): String =
-        "register_toy/$campaignId/${android.net.Uri.encode(campaignTitulo)}"
+    // (modificado) Se codifica el título y firestoreId para que la donación se vincule bien en MySQL.
+    fun registerToy(campaignId: Long, campaignTitulo: String, campaignFirestoreId: String): String =
+        "register_toy/$campaignId/${android.net.Uri.encode(campaignTitulo)}/${android.net.Uri.encode(campaignFirestoreId)}"
 
     fun donationDetailAdmin(donacionUid: String): String = "donation_detail_admin/$donacionUid"
 }

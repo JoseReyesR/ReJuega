@@ -338,9 +338,9 @@ fun AppNavigation(
                 onBackClick = {
                     navController.popBackStack()
                 },
-                // (modificado) Navega con el ID y el título de la campaña.
+                // (modificado) Pasa también el firestoreId para que la donación se vincule bien en MySQL.
                 onDonateClick = { titulo ->
-                    navController.navigate(Routes.registerToy(campaignId, titulo))
+                    navController.navigate(Routes.registerToy(campaignId, titulo, firestoreId))
                 }
             )
         }
@@ -349,20 +349,18 @@ fun AppNavigation(
         composable(
             route = Routes.REGISTER_TOY,
             arguments = listOf(
-                navArgument("campaignId") {
-                    type = NavType.LongType
-                }
+                navArgument("campaignId") { type = NavType.LongType },
+                navArgument("campaignTitulo") { type = NavType.StringType },
+                navArgument("campaignFirestoreId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
 
             val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
-            // (nuevo) Título de la campaña (viene codificado y Navigation lo decodifica).
             val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
-            // (nuevo) Obtenemos el contexto de la aplicación para el AndroidViewModel.
+            val campaignFirestoreId = backStackEntry.arguments?.getString("campaignFirestoreId") ?: ""
+
             val context = LocalContext.current
             val application = context.applicationContext as Application
-            // (nuevo) Obtenemos el UID del usuario autenticado en Firebase.
-            // (nuevo) Este UID se guardará junto con la donación en Firestore.
             val uidUsuario = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
             val jugueteViewModel: JugueteViewModel = viewModel(
@@ -371,7 +369,8 @@ fun AppNavigation(
                     donationRepository = appContainer.donationRepository,
                     materialEcoRepository = appContainer.materialEcoRepository,
                     campaignId = campaignId,
-                    campaignTitulo = campaignTitulo   // (nuevo)
+                    campaignTitulo = campaignTitulo,
+                    campaignFirestoreId = campaignFirestoreId
                 )
             )
 
