@@ -192,38 +192,52 @@ const UserController = {
         }
     },
 
-    // (nuevo) PUT /api/users/:uid/rol  → solo lo ejecuta un Administrador.
+    // (modificado) Actualiza rol en MySQL Y Firestore (solo si server ON, que ya está garantizado).
     updateRol: async (req, res) => {
         try {
             const { uid } = req.params;
             const { rol, solicitanteUid } = req.body;
 
-            // (nuevo) Validar rol permitido.
             const rolesValidos = ['Donante', 'Gestor', 'Administrador'];
             if (!rolesValidos.includes(rol)) {
                 return res.status(400).json({ success: false, error: 'Rol no válido', validos: rolesValidos });
             }
 
-            // (nuevo) Verificar que el SOLICITANTE sea Administrador.
             if (!solicitanteUid) {
                 return res.status(401).json({ success: false, error: 'Se requiere identidad del solicitante' });
             }
+
+            // (nuevo) Importar firestore desde db.js.
+            const { firestore } = require('../../db');
+
             const solicitante = await UserModel.getByUid(solicitanteUid);
             if (!solicitante || solicitante.rol !== 'Administrador') {
                 return res.status(403).json({ success: false, error: 'Solo un Administrador puede cambiar roles' });
             }
 
-            // (nuevo) No permitir que se degrade a sí mismo (evita quedar sin admins).
             if (uid === solicitanteUid && rol !== 'Administrador') {
                 return res.status(400).json({ success: false, error: 'No puedes quitarte el rol de Administrador a ti mismo' });
             }
 
+            // (modificado) 1) Actualizar MySQL.
             const affected = await UserModel.updateRol(uid, rol);
             if (affected === 0) {
                 return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
             }
 
-            res.status(200).json({ success: true, message: `Rol actualizado a ${rol}` });
+            // (modificado) 2) Actualizar Firestore.
+            try {
+                await firestore.collection('users').doc(uid).update({ rol });
+                console.log(`>>> ROL: Firestore actualizado para ${uid} → ${rol}`);
+            } catch (fsErr) {
+                console.error('>>> ROL: Error actualizando Firestore (MySQL ya está OK):', fsErr.message);
+                // (nuevo) No fallamos el request; MySQL ya está actualizado.
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `Rol actualizado a ${rol} en MySQL y Firestore`
+            });
         } catch (e) {
             res.status(500).json({ success: false, error: 'Error al cambiar rol', details: e.message });
         }

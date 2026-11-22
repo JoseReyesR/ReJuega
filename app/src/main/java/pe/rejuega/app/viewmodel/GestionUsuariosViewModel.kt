@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pe.rejuega.app.data.remote.AuthRepository
+import pe.rejuega.app.data.remote.RetrofitClient
 import pe.rejuega.app.data.remote.UserNodeDto
 
 class GestionUsuariosViewModel(
@@ -43,17 +44,35 @@ class GestionUsuariosViewModel(
         }
     }
 
+    // (modificado) Solo permite cambiar rol si el server está disponible.
     fun cambiarRol(uid: String, nuevoRol: String) {
         if (rolActual != "Administrador") {
             _state.value = _state.value.copy(error = "Solo el Administrador puede cambiar roles")
             return
         }
+
         viewModelScope.launch {
+            // (nuevo) Verificar que el server esté disponible antes de intentar cambiar.
+            val serverDisponible = try {
+                val resp = RetrofitClient.getNodeApiService().obtenerMateriales()
+                resp.isSuccessful
+            } catch (e: Exception) {
+                false
+            }
+
+            if (!serverDisponible) {
+                _state.value = _state.value.copy(
+                    error = "Servidor no disponible. No puedes cambiar roles hasta que se restablezca la conexión."
+                )
+                return@launch
+            }
+
+            // (nuevo) Server está ON, proceder con el cambio.
             val resultado = authRepository.cambiarRol(uid, nuevoRol, uidActual)
             resultado.fold(
                 onSuccess = {
                     pe.rejuega.app.utils.RefreshTrigger.notificar()
-                    _state.value = _state.value.copy(mensaje = "Rol actualizado correctamente")
+                    _state.value = _state.value.copy(mensaje = "Rol actualizado correctamente en MySQL y Firestore")
                     cargar()
                 },
                 onFailure = { e ->

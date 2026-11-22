@@ -1,8 +1,11 @@
-// db.js - Pool de conexiones a MySQL
+// db.js - Pool de conexiones a MySQL y Firebase Admin
 require('dotenv').config();
 const mysql = require('mysql2/promise');
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+const serviceAccount = require('./firebase-service-account.json');
 
-// (modificado) decimalNumbers: los DECIMAL llegan como número, no como string.
+// Pool de MySQL.
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -25,4 +28,12 @@ pool.getConnection()
         console.error('❌ Error conectando a MySQL:', err.message);
     });
 
-module.exports = pool;
+// (nuevo) Firebase Admin para escribir en Firestore desde el servidor.
+if (!getApps().length) {
+    initializeApp({
+        credential: cert(serviceAccount)
+    });
+}
+const firestore = getFirestore();
+
+module.exports = { pool, execute: pool.execute.bind(pool), firestore };
