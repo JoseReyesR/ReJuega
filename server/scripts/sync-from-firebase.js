@@ -1,19 +1,27 @@
 // (nuevo) Reconcilia: integra a MySQL lo que quedó solo en Firestore (escrito durante una caída).
-require('dotenv').config();
-const admin = require('firebase-admin');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 const mysql = require('mysql2/promise');
 const serviceAccount = require('../firebase-service-account.json');
 
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-const fs = admin.firestore();
+initializeApp({ credential: cert(serviceAccount) });
+const fs = getFirestore();
+
 
 const aFecha = (ms) => ms ? new Date(Number(ms)).toISOString().slice(0, 10) : null;
 const aDateTime = (ms) => ms ? new Date(Number(ms)).toISOString().slice(0, 19).replace('T', ' ') : null;
 
 async function main() {
     const conn = await mysql.createConnection({
-        host: process.env.DB_HOST, user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD, database: process.env.DB_NAME
+
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 3306,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
     });
 
     // (nuevo) Asegura que un usuario exista para no violar FK.
