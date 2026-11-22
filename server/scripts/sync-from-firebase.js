@@ -61,14 +61,19 @@ async function reconcileFromFirebase() {
     const snapD = await fs.collection('donations').get();
     for (const doc of snapD.docs) {
         const d = doc.data();
+
+        // (nuevo) Prioriza campaignFirestoreId; si no existe, usa campaignId (compatibilidad).
+        const campaignRef = d.campaignFirestoreId || d.campaignId?.toString() || null;
+
         await ensureUser(d.uid);
-        await ensureCampaign(d.campaignId, d.campaignTitulo);
+        await ensureCampaign(campaignRef, d.campaignTitulo);
+
         const [r] = await conn.execute(
-            `INSERT IGNORE INTO donations (id,user_id,campaign_id,nombre_juguete,descripcion,condicion,foto_url,estado_trazabilidad,motivo_rechazo,material_tipo,co2_ahorrado_kg)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-            [doc.id, d.uid, d.campaignId, d.nombre, d.descripcion || '', d.estado || 'Buen Estado',
+            `INSERT IGNORE INTO donations (id,user_id,campaign_id,nombre_juguete,descripcion,condicion,foto_url,estado_trazabilidad,motivo_rechazo,material_tipo,co2_ahorrado_kg,fecha_registro)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+            [doc.id, d.uid, campaignRef, d.nombre, d.descripcion || '', d.estado || 'Buen Estado',
              d.fotoUrl, d.estadoTrazabilidad || 'Pendiente', d.motivoRechazo || null,
-             d.materialTipo || '', Number(d.co2AhorradoKg) || 0]
+             d.materialTipo || '', Number(d.co2AhorradoKg) || 0, d.fechaRegistro ? new Date(Number(d.fechaRegistro)).toISOString().slice(0, 19).replace('T', ' ') : null]
         );
         if (r.affectedRows > 0 && Array.isArray(d.historialEstados)) {
             for (const h of d.historialEstados) {

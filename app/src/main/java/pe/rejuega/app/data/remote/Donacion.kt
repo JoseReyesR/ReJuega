@@ -8,6 +8,7 @@ data class Donacion(
     val id: String = "",                 // ID del documento Firestore
     val uid: String = "",                // UID del donante dueño
     val campaignId: Long = 0,            // ID local de campaña (legado)
+    val campaignFirestoreId: String = "",// (nuevo) String para Firestore/Node
     val campaignTitulo: String = "",     // Campaña elegida (desnormalizado)
     val nombre: String = "",
     val descripcion: String = "",

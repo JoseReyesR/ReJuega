@@ -123,6 +123,7 @@ class DonationRepository(
             id = id,
             uid = uid,
             campaignId = campaignId,
+            campaignFirestoreId = campaignFirestoreId,
             campaignTitulo = campaignTitulo,   // (nuevo)
             nombre = nombre.trim(),
             descripcion = descripcion.trim(),

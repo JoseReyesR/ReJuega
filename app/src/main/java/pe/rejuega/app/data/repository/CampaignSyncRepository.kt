@@ -17,11 +17,13 @@ class CampaignSyncRepository(
     private val firestore: FirebaseFirestore
 ) {
 
-    // (nuevo) Lectura remota: Node primario, Firestore respaldo.
+    // (modificado) Lee de Node; si falla, lee de Firestore (respaldo real, no Room).
     private suspend fun obtenerRemotas(): List<Campaign> {
         return try {
+            // (nuevo) Intenta Node primero.
             val resp = RetrofitClient.getNodeApiService().obtenerCampaigns()
             if (!resp.isSuccessful) throw IOException("HTTP ${resp.code()}")
+
             resp.body()?.data?.map { n ->
                 Campaign(
                     firestoreId = n.id,
@@ -34,22 +36,30 @@ class CampaignSyncRepository(
                     ultimaSincronizacion = System.currentTimeMillis()
                 )
             } ?: emptyList()
+
         } catch (e: Exception) {
-            // (respaldo) Firestore como antes.
-            val snapshot = firestore.collection("campaigns").get().await()
-            snapshot.documents.mapNotNull { doc ->
-                doc.toObject(CampaignFirestore::class.java)?.let { cf ->
-                    Campaign(
-                        firestoreId = doc.id,
-                        titulo = cf.titulo,
-                        descripcion = cf.descripcion,
-                        fechaInicio = cf.fechaInicio,
-                        fechaFin = cf.fechaFin,
-                        estado = cf.estado,
-                        imagenUrl = cf.imagenUrl,
-                        ultimaSincronizacion = System.currentTimeMillis()
-                    )
+            println(">>> CAMPAIGNS: Node falló (${e.message}), leo de Firestore")
+
+            // (nuevo) Respaldo: leer de Firestore (NO de Room).
+            try {
+                val snapshot = firestore.collection("campaigns").get().await()
+                snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(CampaignFirestore::class.java)?.let { cf ->
+                        Campaign(
+                            firestoreId = doc.id,
+                            titulo = cf.titulo,
+                            descripcion = cf.descripcion,
+                            fechaInicio = cf.fechaInicio,
+                            fechaFin = cf.fechaFin,
+                            estado = cf.estado,
+                            imagenUrl = cf.imagenUrl,
+                            ultimaSincronizacion = System.currentTimeMillis()
+                        )
+                    }
                 }
+            } catch (e2: Exception) {
+                println(">>> CAMPAIGNS: Firestore también falló (${e2.message})")
+                emptyList()
             }
         }
     }
