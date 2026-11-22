@@ -81,7 +81,7 @@ data class DonationNodeDto(
     @SerializedName("motivo_rechazo") val motivoRechazo: String? = null,
     @SerializedName("material_tipo") val materialTipo: String? = null,
     @SerializedName("co2_ahorrado_kg") val co2AhorradoKg: Double = 0.0,
-    @SerializedName("fecha_registro") val fechaRegistro: String? = null
+    @SerializedName("fecha_registro") val fechaRegistro: Long? = null
 )
 
 // (nuevo) Punto de entrega.

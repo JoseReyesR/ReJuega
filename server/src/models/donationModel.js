@@ -68,6 +68,19 @@ const DonationModel = {
             [donation_id]
         );
         return rows;
+    },
+
+    update: async (id, nombre_juguete, descripcion, condicion, material_tipo, co2_ahorrado_kg) => {
+        const [result] = await db.execute(
+            'UPDATE donations SET nombre_juguete=?, descripcion=?, condicion=?, material_tipo=?, co2_ahorrado_kg=? WHERE id=?',
+            [nombre_juguete, descripcion, condicion, material_tipo, co2_ahorrado_kg, id]
+        );
+        return result.affectedRows;
+    },
+
+    delete: async (id) => {
+        const [result] = await db.execute('DELETE FROM donations WHERE id = ?', [id]);
+        return result.affectedRows;
     }
 };
 

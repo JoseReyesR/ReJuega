@@ -28,6 +28,22 @@ class TraceabilityViewModel(
 
     init { observar() }
 
+    fun recargar() {
+        observar()
+    }
+
+    fun eliminarDonacion(id: String) {
+        viewModelScope.launch {
+            try {
+                repository.eliminarDonacion(id)
+                pe.rejuega.app.utils.RefreshTrigger.notificar()
+                recargar()
+            } catch (e: Exception) {
+                _error.value = "Error al eliminar donación: ${e.message}"
+            }
+        }
+    }
+
     private fun observar() {
         viewModelScope.launch {
             try {

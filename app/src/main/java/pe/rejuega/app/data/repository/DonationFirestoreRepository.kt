@@ -22,7 +22,8 @@ class DonationFirestoreRepository(
         nombre = nombreJuguete, descripcion = descripcion ?: "",
         estado = condicion, fotoUrl = fotoUrl,
         estadoTrazabilidad = estadoTrazabilidad, motivoRechazo = motivoRechazo,
-        materialTipo = materialTipo ?: "", co2AhorradoKg = co2AhorradoKg
+        materialTipo = materialTipo ?: "", co2AhorradoKg = co2AhorradoKg,
+        fechaRegistro = this.fechaRegistro ?: 0L
     )
 
     private fun Donacion.aNode(): DonationNodeDto = DonationNodeDto(
@@ -145,6 +146,46 @@ class DonationFirestoreRepository(
             } catch (e2: Exception) {
                 emptyList()
             }
+        }
+    }
+
+    // (nuevo) Obtener una donación por su ID (Node primario, Firestore respaldo).
+    suspend fun obtenerPorIdUnaVez(id: String): Donacion? {
+        return try {
+            val resp = node.obtenerDonacionPorId(id)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            resp.body()?.data?.aFirestore()
+        } catch (e: Exception) {
+            try {
+                collection.document(id).get().await()
+                    .toObject(Donacion::class.java)?.copy(id = id)
+            } catch (e2: Exception) { null }
+        }
+    }
+
+    // (nuevo) Editar donación (Node primario + Firestore respaldo).
+    suspend fun actualizarDonacion(d: Donacion) {
+        try {
+            val resp = node.actualizarDonacion(d.id, d.aNode())
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> DONATION UPDATE OK: ${d.id}")
+            try { collection.document(d.id).set(d).await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> DONATION UPDATE FAIL: ${e.message} → uso Firestore")
+            collection.document(d.id).set(d).await()
+        }
+    }
+
+    // (nuevo) Eliminar donación (Node primario + Firestore respaldo).
+    suspend fun eliminarDonacion(id: String) {
+        try {
+            val resp = node.eliminarDonacion(id)
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            println(">>> DONATION DELETE OK: $id")
+            try { collection.document(id).delete().await() } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println(">>> DONATION DELETE FAIL: ${e.message} → uso Firestore")
+            collection.document(id).delete().await()
         }
     }
 }

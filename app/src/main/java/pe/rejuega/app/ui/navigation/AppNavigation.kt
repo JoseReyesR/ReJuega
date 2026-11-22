@@ -33,8 +33,11 @@ import pe.rejuega.app.viewmodel.TraceabilityViewModelFactory
 import pe.rejuega.app.utils.UiState
 
 // (nuevo) Pantalla y ViewModel de impacto ambiental.
+import pe.rejuega.app.ui.screens.EditarDonacionScreen
 import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
 import pe.rejuega.app.ui.screens.MiHuellaEcologicaScreen
+import pe.rejuega.app.viewmodel.EditarDonacionViewModel
+import pe.rejuega.app.viewmodel.EditarDonacionViewModelFactory
 import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModel
 import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModelFactory
 import pe.rejuega.app.viewmodel.MiHuellaEcologicaViewModel
@@ -402,7 +405,10 @@ fun AppNavigation(
             )
             TraceabilityScreen(
                 viewModel = traceabilityViewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onEditarDonacion = { d ->
+                    navController.navigate(Routes.editarDonacion(d.id, d.campaignId, d.campaignTitulo, d.fotoUrl))
+                }
             )
         }
         // (modificado) Impacto Ambiental → materiales (como antes).
@@ -528,6 +534,27 @@ fun AppNavigation(
                 )
             )
             NotificationScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
+        }
+
+        composable(Routes.EDITAR_DONACION) { backStackEntry ->
+            val donationId = backStackEntry.arguments?.getString("donationId") ?: ""
+            val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
+            val fotoUrl = backStackEntry.arguments?.getString("fotoUrl") ?: ""
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+            val vm: EditarDonacionViewModel = viewModel(
+                factory = EditarDonacionViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    appContainer.materialEcoRepository,
+                    donationId
+                )
+            )
+            EditarDonacionScreen(
+                viewModel = vm, uid = uid, campaignId = campaignId,
+                campaignTitulo = campaignTitulo, fotoUrl = fotoUrl,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         // (nuevo) Destino: Galería de evidencias de una campaña (HU-09).

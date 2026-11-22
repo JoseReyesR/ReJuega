@@ -116,20 +116,24 @@ fun MiHuellaEcologicaScreen(
                             )
                         ) {
                             Column(
-                                Modifier.padding(20.dp),
+                                Modifier.padding(20.dp).fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
                                     state.donacionesValidas.toString(),
                                     style = MaterialTheme.typography.displayLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                                 Text(
                                     if (state.donacionesValidas == 1) "juguete donado con éxito"
                                     else "juguetes donados con éxito",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
@@ -144,19 +148,23 @@ fun MiHuellaEcologicaScreen(
                             )
                         ) {
                             Column(
-                                Modifier.padding(20.dp),
+                                Modifier.padding(20.dp).fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
                                     String.format(Locale.US, "%.2f", state.co2TotalKg),
                                     style = MaterialTheme.typography.displayMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                                 Text(
                                     "kg de CO₂ evitados",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
@@ -235,30 +243,34 @@ fun MiHuellaEcologicaScreen(
                         ) {
                             Card(Modifier.weight(1f)) {
                                 Column(
-                                    Modifier.padding(12.dp),
+                                    Modifier.padding(12.dp).fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
                                         String.format(Locale.US, "%.1f", arbolesEquivalentes),
                                         style = MaterialTheme.typography.headlineSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
                                     )
-                                    Text("árboles en 1 año", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                                    Text("árboles en 1 año", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                                 }
                             }
                             Card(Modifier.weight(1f)) {
                                 Column(
-                                    Modifier.padding(12.dp),
+                                    Modifier.padding(12.dp).fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
                                         String.format(Locale.US, "%.0f", kmAutoEquivalentes),
                                         style = MaterialTheme.typography.headlineSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
                                     )
-                                    Text("km en auto evitados", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                                    Text("km en auto evitados", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                                 }
                             }
                         }

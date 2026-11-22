@@ -83,4 +83,8 @@ object Routes {
         "register_toy/$campaignId/${android.net.Uri.encode(campaignTitulo)}/${android.net.Uri.encode(campaignFirestoreId)}"
 
     fun donationDetailAdmin(donacionUid: String): String = "donation_detail_admin/$donacionUid"
+
+    const val EDITAR_DONACION = "editar_donacion/{donationId}/{campaignId}/{campaignTitulo}/{fotoUrl}"
+    fun editarDonacion(donationId: String, campaignId: Long, campaignTitulo: String, fotoUrl: String): String =
+        "editar_donacion/$donationId/$campaignId/${android.net.Uri.encode(campaignTitulo)}/${android.net.Uri.encode(fotoUrl)}"
 }

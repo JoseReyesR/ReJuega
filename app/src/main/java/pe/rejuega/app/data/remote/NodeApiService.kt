@@ -81,6 +81,12 @@ interface NodeApiService {
         @Body body: Map<String, String>
     ): Response<ApiCreateResponse>
 
+    @PUT("api/donations/{id}")
+    suspend fun actualizarDonacion(@Path("id") id: String, @Body body: DonationNodeDto): Response<ApiCreateResponse>
+
+    @DELETE("api/donations/{id}")
+    suspend fun eliminarDonacion(@Path("id") id: String): Response<ApiCreateResponse>
+
     // (nuevo) Endpoints de puntos y eventos.
     @GET("api/delivery-points")
     suspend fun obtenerPuntosEntrega(): Response<ApiListResponse<DeliveryPointNodeDto>>

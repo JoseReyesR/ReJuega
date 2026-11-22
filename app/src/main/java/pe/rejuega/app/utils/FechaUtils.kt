@@ -29,8 +29,11 @@ fun convertirFechaAMillis(fecha: String): Long? {
 
 // (nuevo) Formatea millis a fecha y hora legible en zona local.
 fun formatarFechaHora(millis: Long): String {
-    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    return sdf.format(Date(millis))
+    if (millis <= 0) return "Sin fecha"
+    return try {
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        sdf.format(Date(millis))
+    } catch (e: Exception) { "Sin fecha" }
 }
 
 // (nuevo) Convierte ISO 8601 o YYYY-MM-DD a formato visible dd/MM/yyyy.
