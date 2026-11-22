@@ -210,8 +210,8 @@ fun AppNavigation(
             }
             HomeScreen(
                 viewModel = campaignViewModel,
-                // (nuevo) Pasamos si el usuario es admin para mostrar/ocultar el Panel Admin.
-                esAdministrador = sessionViewModel.esAdministrador(),
+                // (modificado) Pasamos el rol completo como String, no un boolean.
+                rolActual = sessionViewModel.obtenerRolActual(),
                 nombreUsuario = sessionState.usuario?.nombre ?: "",
                 // (nuevo) Pasamos el estado de sincronización.
                 estaSincronizado = estaSincronizado,
@@ -266,21 +266,14 @@ fun AppNavigation(
 
         }
 
-        // (nuevo) Destino: Panel de Administración (solo para rol Administrador).
-// (nuevo) Implementa RN-04: se verifica el rol antes de mostrar la pantalla.
+        // (modificado) Destino: Panel de Administración (para rol Gestor o Administrador).
         composable(Routes.PANEL_ADMIN) {
-
-            // (nuevo) PROTECCIÓN POR ROL: verificamos que el usuario sea Administrador.
-            // (nuevo) Si no es admin, regresamos inmediatamente sin mostrar la pantalla.
-            // (nuevo) Esto es una segunda capa de protección (la primera es ocultar el botón en el Home).
-            if (!sessionViewModel.esAdministrador()) {
-                // (nuevo) El usuario no es admin, lo regresamos sin renderizar el panel.
+            if (!sessionViewModel.esGestorOAdmin()) {
                 LaunchedEffect(Unit) {
                     navController.popBackStack()
                 }
             } else {
-                // (nuevo) El usuario es admin, mostramos el panel.
-                val nombreAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.nombre ?: "Admin"
+                val nombreAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.nombre ?: "Gestor"
 
                 PanelAdminScreen(
                     nombreAdmin = nombreAdmin,
@@ -665,10 +658,12 @@ fun AppNavigation(
             )
         }
 
-        // (nuevo) Destino de gestión de usuarios (solo Admin).
+        // (modificado) Destino de gestión de usuarios: usa el rol real de SessionViewModel.
         composable(Routes.GESTION_USUARIOS) {
             val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            val rol = if (sessionViewModel.esAdministrador()) "Administrador" else "Donante"
+            val rol = sessionViewModel.obtenerRolActual()
+            println(">>> GESTION_USUARIOS: uid=$uid rol='$rol'")
+
             val vm: GestionUsuariosViewModel = viewModel(
                 factory = GestionUsuariosViewModelFactory(appContainer.authRepository, uid, rol)
             )

@@ -77,8 +77,8 @@ import androidx.compose.material3.Button
 @Composable
 fun HomeScreen(
     viewModel: CampaignViewModel,
-    //  Indica si el usuario actual tiene rol Administrador.
-    esAdministrador: Boolean = false,
+    // (modificado) Rol como String en lugar de boolean.
+    rolActual: String = "Donante",
     //  Nombre del usuario actual (para mostrar en la UI si se desea).
     nombreUsuario: String = "",
     // (nuevo) Indica si hay sincronización activa.
@@ -135,7 +135,7 @@ fun HomeScreen(
         drawerContent = {
             MenuLateralReJuega(
                 nombreUsuario = nombreUsuario,
-                esAdmin = esAdministrador,
+                rolActual = rolActual,
                 notificacionesNoLeidas = notificacionesNoLeidas,
                 onSeleccion = { destino ->
                     scope.launch { drawerState.close() }

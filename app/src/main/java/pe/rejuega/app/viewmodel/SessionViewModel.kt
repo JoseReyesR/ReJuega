@@ -75,6 +75,17 @@ class SessionViewModel(
         return _sessionState.value.usuario?.esAdministrador() == true
     }
 
+    // (nuevo) Devuelve el rol actual como String ("Donante", "Gestor" o "Administrador").
+    fun obtenerRolActual(): String {
+        return _sessionState.value.usuario?.rol ?: "Donante"
+    }
+
+    // (nuevo) ¿Es Gestor o Administrador? (ambos ven el panel de gestión).
+    fun esGestorOAdmin(): Boolean {
+        val rol = obtenerRolActual()
+        return rol == "Gestor" || rol == "Administrador"
+    }
+
     // (nuevo) Limpia la sesión (se llama al cerrar sesión).
     fun cerrarSesion() {
         _sessionState.update {

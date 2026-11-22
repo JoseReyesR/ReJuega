@@ -56,10 +56,13 @@ private fun SectionTitle(texto: String) {
 @Composable
 fun MenuLateralReJuega(
     nombreUsuario: String,
-    esAdmin: Boolean,
+    rolActual: String = "Donante",
     notificacionesNoLeidas: Int,
     onSeleccion: (String) -> Unit
 ) {
+    val esGestor = rolActual == "Gestor"
+    val esAdmin = rolActual == "Administrador"
+    val esGestorOAdmin = esGestor || esAdmin
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
 
         // (nuevo) Encabezado colorido con logo, rol y usuario.
@@ -90,7 +93,7 @@ fun MenuLateralReJuega(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        if (esAdmin) "Administrador" else "Donante",
+                        rolActual,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
@@ -105,17 +108,19 @@ fun MenuLateralReJuega(
             )
         }
 
-        // (nuevo) Secciones según rol: el Admin NO ve opciones del donante.
-        if (esAdmin) {
+        // (nuevo) Secciones según rol: Admin y Gestor ven gestión de la ONG.
+        if (esGestorOAdmin) {
             SectionTitle("GESTIÓN DE LA ONG")
-            listOf(
-                DestinoMenu("panel", "Panel de Administración", Icons.Default.AdminPanelSettings),
-                DestinoMenu("campaigns", "Gestión de Campañas", Icons.Default.Campaign),
-                DestinoMenu("donations", "Revisión de Donaciones", Icons.Default.CheckCircle),
-                DestinoMenu("puntos", "Gestión de Puntos de Recojo", Icons.Default.Place),
-                DestinoMenu("usuarios", "Gestión de Usuarios", Icons.Default.People),
-                DestinoMenu("servidor", "Pruebas del Servidor", Icons.Default.Dns)
-            ).forEach { d ->
+            buildList {
+                add(DestinoMenu("panel", "Panel de Administración", Icons.Default.AdminPanelSettings))
+                add(DestinoMenu("campaigns", "Gestión de Campañas", Icons.Default.Campaign))
+                add(DestinoMenu("donations", "Revisión de Donaciones", Icons.Default.CheckCircle))
+                add(DestinoMenu("puntos", "Gestión de Puntos de Recojo", Icons.Default.Place))
+                if (esAdmin) {
+                    add(DestinoMenu("usuarios", "Gestión de Usuarios", Icons.Default.People))
+                }
+                add(DestinoMenu("servidor", "Pruebas del Servidor", Icons.Default.Dns))
+            }.forEach { d ->
                 NavigationDrawerItem(
                     label = { Text(d.nombre) },
                     icon = { Icon(d.icono, null, tint = MaterialTheme.colorScheme.primary) },
