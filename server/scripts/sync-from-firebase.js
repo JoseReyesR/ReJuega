@@ -14,7 +14,8 @@ const fs = getFirestore();
 const aFecha = (ms) => ms ? new Date(Number(ms)).toISOString().slice(0, 10) : null;
 const aDateTime = (ms) => ms ? new Date(Number(ms)).toISOString().slice(0, 19).replace('T', ' ') : null;
 
-async function main() {
+// (modificado) Nombre exportable para reusar desde server.js.
+async function reconcileFromFirebase() {
     const conn = await mysql.createConnection({
 
         host: process.env.DB_HOST,
@@ -137,7 +138,15 @@ async function main() {
 
     await conn.end();
     console.log(`✅ Reconciliación completada: ${n} registros integrados a MySQL`);
-    process.exit(0);
+    return n;
 }
 
-main().catch(e => { console.error('❌', e); process.exit(1); });
+// (modificado) Si se ejecuta directo (npm run sync:from-firebase) → corre y sale.
+// Si se importa desde server.js → solo exporta la función.
+if (require.main === module) {
+    reconcileFromFirebase()
+        .then(() => process.exit(0))
+        .catch(e => { console.error('❌', e); process.exit(1); });
+}
+
+module.exports = { reconcileFromFirebase };

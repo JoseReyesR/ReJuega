@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+// (nuevo) Auto-reconciliación Firestore → MySQL al arrancar.
+const { reconcileFromFirebase } = require('./scripts/sync-from-firebase');
+
 // Importar todas las rutas
 const materialRoutes = require('./src/routes/materialRoutes');
 const campaignRoutes = require('./src/routes/campaignRoutes');
@@ -91,4 +94,12 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   - GET/POST /api/pickup-events`);
     console.log(`   - GET/POST /api/campaign-gallery`);
     console.log(`   - GET/POST /api/notifications`);
+
+    // (nuevo) Auto-reconciliación: integra lo que quedó en Firestore durante una caída.
+    setTimeout(() => {
+        console.log('🔄 Auto-reconciliación Firestore → MySQL iniciada...');
+        reconcileFromFirebase()
+            .then((n) => console.log(`✅ Auto-reconciliación completada: ${n} registros integrados`))
+            .catch(err => console.error('⚠️ Auto-reconciliación falló (no crítico, el servidor sigue activo):', err.message));
+    }, 2500);
 });
