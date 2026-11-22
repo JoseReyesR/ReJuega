@@ -34,10 +34,13 @@ import pe.rejuega.app.utils.UiState
 
 // (nuevo) Pantalla y ViewModel de impacto ambiental.
 import pe.rejuega.app.ui.screens.EditarDonacionScreen
+import pe.rejuega.app.ui.screens.GestionUsuariosScreen
 import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
 import pe.rejuega.app.ui.screens.MiHuellaEcologicaScreen
 import pe.rejuega.app.viewmodel.EditarDonacionViewModel
 import pe.rejuega.app.viewmodel.EditarDonacionViewModelFactory
+import pe.rejuega.app.viewmodel.GestionUsuariosViewModel
+import pe.rejuega.app.viewmodel.GestionUsuariosViewModelFactory
 import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModel
 import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModelFactory
 import pe.rejuega.app.viewmodel.MiHuellaEcologicaViewModel
@@ -252,6 +255,7 @@ fun AppNavigation(
                 onCampaignAdminClick = { navController.navigate(Routes.CAMPAIGN_ADMIN) },
                 onDonationAdminClick = { navController.navigate(Routes.DONATION_ADMIN) },
                 onPuntosRecojoAdminClick = { navController.navigate(Routes.PUNTOS_RECOJO_ADMIN) },
+                onUsuariosClick = { navController.navigate(Routes.GESTION_USUARIOS) },
                 notificacionesNoLeidas = noLeidas,
                 onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) },
                 onMapaClick = { navController.navigate(Routes.MAPA_PUNTOS_RECOJO) },
@@ -656,6 +660,19 @@ fun AppNavigation(
                 factory = ApiTestViewModelFactory(appContainer.nodeApiRepository)
             )
             ApiTestScreen(
+                viewModel = vm,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Destino de gestión de usuarios (solo Admin).
+        composable(Routes.GESTION_USUARIOS) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val rol = if (sessionViewModel.esAdministrador()) "Administrador" else "Donante"
+            val vm: GestionUsuariosViewModel = viewModel(
+                factory = GestionUsuariosViewModelFactory(appContainer.authRepository, uid, rol)
+            )
+            GestionUsuariosScreen(
                 viewModel = vm,
                 onBackClick = { navController.popBackStack() }
             )

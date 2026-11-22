@@ -62,6 +62,12 @@ interface NodeApiService {
     @PUT("api/users/{uid}")
     suspend fun actualizarUsuario(@Path("uid") uid: String, @Body body: UserNodeDto): Response<ApiCreateResponse>
 
+    @PUT("api/users/{uid}/rol")
+    suspend fun cambiarRol(
+        @Path("uid") uid: String,
+        @Body body: Map<String, String>
+    ): Response<ApiCreateResponse>
+
     // (nuevo) Endpoints de donaciones.
     @GET("api/donations")
     suspend fun obtenerDonaciones(

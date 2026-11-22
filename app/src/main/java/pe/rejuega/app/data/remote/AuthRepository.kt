@@ -179,6 +179,45 @@ class AuthRepository(
         }
     }
 
+    // (nuevo) Lista usuarios desde Node (respaldo Firestore).
+    suspend fun obtenerUsuariosUnaVez(): List<UserNodeDto> {
+        return try {
+            val resp = RetrofitClient.getNodeApiService().obtenerUsuarios()
+            if (!resp.isSuccessful) throw Exception("HTTP ${resp.code()}")
+            resp.body()?.data ?: emptyList()
+        } catch (e: Exception) {
+            // (respaldo) Firestore
+            try {
+                firestore.collection("users").get().await().documents.mapNotNull { doc ->
+                    UserNodeDto(
+                        firebaseUid = doc.id,
+                        nombre = doc.getString("nombre") ?: "",
+                        correo = doc.getString("correo") ?: "",
+                        rol = doc.getString("rol") ?: "Donante"
+                    )
+                }
+            } catch (e2: Exception) { emptyList() }
+        }
+    }
+
+    // (nuevo) Cambia rol en Node + Firestore (solo Admin).
+    suspend fun cambiarRol(uid: String, nuevoRol: String, solicitanteUid: String): Result<Unit> {
+        return try {
+            val resp = RetrofitClient.getNodeApiService().cambiarRol(
+                uid, mapOf("rol" to nuevoRol, "solicitanteUid" to solicitanteUid)
+            )
+            if (!resp.isSuccessful) {
+                val msg = resp.errorBody()?.string() ?: "HTTP ${resp.code()}"
+                throw Exception(msg)
+            }
+            // (respaldo) Firestore
+            try { firestore.collection("users").document(uid).update("rol", nuevoRol).await() } catch (_: Exception) {}
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     // (nuevo) Cambio de contraseña con re-autenticación (exigencia de Firebase).
     suspend fun cambiarContrasena(actual: String, nueva: String): Result<Unit> = try {
         val user = auth.currentUser ?: throw Exception("No hay sesión activa.")

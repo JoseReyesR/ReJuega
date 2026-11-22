@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Toys
 import androidx.compose.material3.HorizontalDivider
@@ -112,6 +113,7 @@ fun MenuLateralReJuega(
                 DestinoMenu("campaigns", "Gestión de Campañas", Icons.Default.Campaign),
                 DestinoMenu("donations", "Revisión de Donaciones", Icons.Default.CheckCircle),
                 DestinoMenu("puntos", "Gestión de Puntos de Recojo", Icons.Default.Place),
+                DestinoMenu("usuarios", "Gestión de Usuarios", Icons.Default.People),
                 DestinoMenu("servidor", "Pruebas del Servidor", Icons.Default.Dns)
             ).forEach { d ->
                 NavigationDrawerItem(

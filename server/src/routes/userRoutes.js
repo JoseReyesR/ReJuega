@@ -9,5 +9,6 @@ router.post('/', UserController.create);
 router.post('/sync', UserController.syncFromFirebase);
 router.put('/:uid', UserController.update);
 router.put('/:uid/fcm-token', UserController.updateFcmToken);
+router.put('/:uid/rol', UserController.updateRol);
 
 module.exports = router;

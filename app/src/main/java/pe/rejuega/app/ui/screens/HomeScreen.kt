@@ -112,7 +112,9 @@ fun HomeScreen(
     // (nuevo) Acción para ver pruebas del servidor.
     onServidorClick: () -> Unit = {},
     // (nuevo) Acción para ver Mi Huella Ecológica.
-    onHuellaClick: () -> Unit = {}
+    onHuellaClick: () -> Unit = {},
+    // (nuevo) Acción para ver gestión de usuarios.
+    onUsuariosClick: () -> Unit = {}
 ) {
     // (nuevo) Observamos el estado del ViewModel como State de Compose.
     // (nuevo) Cada vez que el ViewModel emita un nuevo estado, esta pantalla se recompondrá automáticamente.
@@ -142,6 +144,7 @@ fun HomeScreen(
                         "campaigns" -> onCampaignAdminClick()
                         "donations" -> onDonationAdminClick()
                         "puntos" -> onPuntosRecojoAdminClick()
+                        "usuarios" -> onUsuariosClick()
                         "servidor" -> onServidorClick()
                         "trazabilidad" -> onTraceabilityClick()
                         "mapa" -> onMapaClick()

@@ -49,6 +49,18 @@ const UserModel = {
             [fcm_token, firebase_uid]
         );
         return result.affectedRows;
+    },
+
+    updateRol: async (firebase_uid, rol) => {
+        const [result] = await db.execute(
+            'UPDATE users SET rol = ? WHERE firebase_uid = ?', [rol, firebase_uid]
+        );
+        return result.affectedRows;
+    },
+
+    getByCorreo: async (correo) => {
+        const [rows] = await db.execute('SELECT * FROM users WHERE correo = ?', [correo]);
+        return rows[0];
     }
 };
 

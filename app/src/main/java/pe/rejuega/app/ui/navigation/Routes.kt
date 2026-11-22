@@ -56,6 +56,8 @@ object Routes {
     const val MAPA_PUNTOS_RECOJO = "mapa_puntos_recojo"
     // (nuevo) Ruta de pruebas del servidor.
     const val SERVIDOR_TEST = "servidor_test"
+    // (nuevo) Ruta de gestión de usuarios (solo Admin/Gestor).
+    const val GESTION_USUARIOS = "gestion_usuarios"
 
     // (nuevo) Rutas de gestión de puntos de recojo (HU-04, HU-14).
     const val PUNTOS_RECOJO_ADMIN = "puntos_recojo_admin"

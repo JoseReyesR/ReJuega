@@ -19,7 +19,7 @@ CREATE TABLE users (
     firebase_uid VARCHAR(128) PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(100) NOT NULL UNIQUE,
-    rol ENUM('Donante', 'Administrador') NOT NULL DEFAULT 'Donante',
+    rol ENUM('Donante', 'Gestor', 'Administrador') NOT NULL DEFAULT 'Donante',   -- (modificado)
     direccion TEXT,
     telefono VARCHAR(20),
     ciudad VARCHAR(50),
@@ -158,11 +158,11 @@ INSERT INTO users (firebase_uid, nombre, correo, rol, ciudad, telefono, direccio
 -- Administradores
 ('Ayt5Te7pZnd8PDf7nzO1b7kCBxx1', 'Admin Principal', 'admin@rejuega.app', 'Administrador', 'Trujillo', '999888777', 'Av. España 1234', 'Masculino'),
 ('yPF3eKmDSaW7qcCd0yJ2WEcrlY93', 'Admin Secundario', 'admin2@rejuega.app', 'Administrador', 'Lima', '999888778', 'Jr. Cusco 456', 'Femenino'),
--- Donantes
+-- Donantes y gestores
 ('nl6wsvuqrRSYTu8IRyAHpG5uilp1', 'Donante Prueba', 'donante@rejuega.app', 'Donante', 'Trujillo', '999111222', 'Av. América 100', 'Femenino'),
 ('rAxn9a0bTMSLmrBztM8GQrb8l4V2', 'María García López', 'maria.garcia@correo.com', 'Donante', 'Trujillo', '987654321', 'Calle Los Pinos 234', 'Femenino'),
 ('jASUEPn8r8OJCCE8rDGMhWn3fxu2', 'Carlos Mendoza Ruiz', 'carlos.mendoza@correo.com', 'Donante', 'Lima', '987654322', 'Av. Javier Prado 567', 'Masculino'),
-('bBrdlUGRUXYKUupvklpr8Abxe6s2', 'Ana Torres Vargas', 'ana.torres@correo.com', 'Donante', 'Trujillo', '987654323', 'Jr. Pizarro 890', 'Femenino'),
+('bBrdlUGRUXYKUupvklpr8Abxe6s2', 'Ana Torres Vargas', 'ana.torres@correo.com', 'Gestor', 'Trujillo', '987654323', 'Jr. Pizarro 890', 'Femenino'),
 ('dx6Q1ynS5HQz1YSDBKF6ACac5nI3', 'Luis Ramírez Paredes', 'luis.ramirez@correo.com', 'Donante', 'Chiclayo', '987654324', 'Av. Salaverry 123', 'Masculino'),
 ('POWGjAklUIP7XWVfg3LOgyATYpv1', 'Sofía Herrera Díaz', 'sofia.herrera@correo.com', 'Donante', 'Trujillo', '987654325', 'Calle San Martín 456', 'Femenino');
 
