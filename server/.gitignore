@@ -1,0 +1,16 @@
+# Dependencias de Node
+node_modules/
+
+# Variables de entorno (contraseñas, URLs)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Secrets
+firebase-service-account.json
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

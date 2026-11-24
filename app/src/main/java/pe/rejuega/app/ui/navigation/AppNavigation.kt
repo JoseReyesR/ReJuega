@@ -1,0 +1,678 @@
+// (modificado) Archivo: AppNavigation.kt
+// (modificado) Descripción: NavHost principal de ReJuega.
+// (modificado) Cambio: Se agrega Login, sesión inicial y cierre de sesión.
+package pe.rejuega.app.ui.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
+import pe.rejuega.app.di.AppContainer
+import pe.rejuega.app.ui.screens.CampaignDetailScreen
+import pe.rejuega.app.ui.screens.HomeScreen
+import pe.rejuega.app.ui.screens.LoginScreen
+import pe.rejuega.app.ui.screens.RegisterToyScreen
+import pe.rejuega.app.ui.screens.TraceabilityScreen
+import pe.rejuega.app.viewmodel.AuthViewModel
+import pe.rejuega.app.viewmodel.AuthViewModelFactory
+import pe.rejuega.app.viewmodel.CampaignDetailViewModel
+import pe.rejuega.app.viewmodel.CampaignDetailViewModelFactory
+import pe.rejuega.app.viewmodel.EventosRecojoViewModel
+import pe.rejuega.app.viewmodel.EventosRecojoViewModelFactory
+import pe.rejuega.app.viewmodel.CampaignViewModel
+import pe.rejuega.app.viewmodel.CampaignViewModelFactory
+import pe.rejuega.app.viewmodel.JugueteViewModel
+import pe.rejuega.app.viewmodel.JugueteViewModelFactory
+import pe.rejuega.app.viewmodel.TraceabilityViewModel
+import pe.rejuega.app.viewmodel.TraceabilityViewModelFactory
+import pe.rejuega.app.utils.UiState
+
+// (nuevo) Pantalla y ViewModel de impacto ambiental.
+import pe.rejuega.app.ui.screens.EditarDonacionScreen
+import pe.rejuega.app.ui.screens.GestionUsuariosScreen
+import pe.rejuega.app.ui.screens.ImpactoAmbientalScreen
+import pe.rejuega.app.ui.screens.MiHuellaEcologicaScreen
+import pe.rejuega.app.viewmodel.EditarDonacionViewModel
+import pe.rejuega.app.viewmodel.EditarDonacionViewModelFactory
+import pe.rejuega.app.viewmodel.GestionUsuariosViewModel
+import pe.rejuega.app.viewmodel.GestionUsuariosViewModelFactory
+import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModel
+import pe.rejuega.app.viewmodel.ImpactoAmbientalViewModelFactory
+import pe.rejuega.app.viewmodel.MiHuellaEcologicaViewModel
+import pe.rejuega.app.viewmodel.MiHuellaEcologicaViewModelFactory
+import pe.rejuega.app.data.repository.MaterialEcoRepository
+// (modificado) Archivo: AppNavigation.kt - imports
+import pe.rejuega.app.ui.screens.PerfilScreen
+import pe.rejuega.app.ui.screens.ApiTestScreen
+import pe.rejuega.app.viewmodel.PerfilViewModel
+import pe.rejuega.app.viewmodel.PerfilViewModelFactory
+import pe.rejuega.app.viewmodel.PerfilUsuarioViewModel
+import pe.rejuega.app.viewmodel.PerfilUsuarioViewModelFactory
+import pe.rejuega.app.viewmodel.ApiTestViewModel
+import pe.rejuega.app.viewmodel.ApiTestViewModelFactory
+
+// (nuevo) Imports necesarios para el nuevo factory del JugueteViewModel.
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
+
+// (nuevo) Imports para el SessionViewModel y el Panel Admin.
+import androidx.compose.runtime.LaunchedEffect
+import pe.rejuega.app.ui.screens.PanelAdminScreen
+import pe.rejuega.app.viewmodel.SessionViewModel
+import pe.rejuega.app.viewmodel.SessionViewModelFactory
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
+
+import pe.rejuega.app.ui.screens.CampaignAdminScreen
+import pe.rejuega.app.ui.screens.CampaignGalleryScreen
+import pe.rejuega.app.viewmodel.CampaignGalleryViewModel
+import pe.rejuega.app.viewmodel.CampaignGalleryViewModelFactory
+import pe.rejuega.app.ui.screens.PuntosRecojoAdminScreen
+import pe.rejuega.app.ui.screens.PuntoEntregaFormScreen
+import pe.rejuega.app.ui.screens.PickupEventFormScreen
+import pe.rejuega.app.ui.screens.MapaPuntosRecojoScreen
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModel
+import pe.rejuega.app.viewmodel.PuntosRecojoViewModelFactory
+import pe.rejuega.app.viewmodel.MapaViewModel
+import pe.rejuega.app.viewmodel.MapaViewModelFactory
+import pe.rejuega.app.ui.screens.CampaignFormScreen
+import pe.rejuega.app.viewmodel.CampaignAdminViewModel
+import pe.rejuega.app.viewmodel.CampaignAdminViewModelFactory
+
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+
+import pe.rejuega.app.ui.screens.DonationAdminScreen
+import pe.rejuega.app.ui.screens.DonationDetailAdminScreen
+import pe.rejuega.app.viewmodel.DonationAdminViewModel
+import pe.rejuega.app.viewmodel.DonationAdminViewModelFactory
+
+
+import pe.rejuega.app.ui.screens.NotificationScreen
+import pe.rejuega.app.viewmodel.NotificationViewModel
+import pe.rejuega.app.viewmodel.NotificationViewModelFactory
+
+
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+
+// (modificado) Composable principal de navegación.
+
+@Composable
+fun AppNavigation(
+    navController: NavHostController,
+    appContainer: AppContainer
+) {
+
+    // (nuevo) Creamos el SessionViewModel a nivel de navegación.
+    // (nuevo) Este ViewModel mantiene el usuario actual y su rol disponibles para todas las pantallas que lo necesiten.
+
+    val sessionViewModel: SessionViewModel = viewModel(
+        factory = SessionViewModelFactory(appContainer.authRepository)
+    )
+    // (nuevo) Observamos el estado de la sesión para saber si hay usuario.
+    val sessionState by sessionViewModel.sessionState.collectAsState()
+
+    // (nuevo) Verificamos si Firebase ya tiene una sesión activa.
+    val existeSesion = remember {
+        FirebaseAuth.getInstance().currentUser != null
+    }
+
+
+    // (nuevo) Definimos la pantalla inicial según el estado de sesión.
+    val startDestination = if (existeSesion) {
+        Routes.HOME
+    } else {
+        Routes.LOGIN
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+
+        // (nuevo) Destino: Login.
+        composable(Routes.LOGIN) {
+
+            val authViewModel: AuthViewModel = viewModel(
+                factory = AuthViewModelFactory(appContainer.authRepository)
+            )
+
+            LoginScreen(
+                viewModel = authViewModel,
+                onAuthenticated = {
+                    // (nuevo) Después de autenticarse, vamos al Home.
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
+        // (modificado) Destino: Home.
+        composable(Routes.HOME) {
+            // (nuevo) Cargamos el usuario actual cuando se muestra el Home.
+            // (nuevo) Esto asegura que el rol esté disponible después del login.
+            LaunchedEffect(Unit) {
+                sessionViewModel.cargarUsuarioActual()
+            }
+
+            val campaignViewModel: CampaignViewModel = viewModel(
+                factory = CampaignViewModelFactory(
+                    appContainer.campaignSyncRepository
+                )
+            )
+            // (nuevo) Refresca las campañas cada vez que el Home vuelve a estar visible.
+            // (nuevo) Resuelve el problema de que el Home no se actualiza al regresar
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        campaignViewModel.refrescar()
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
+            // (nuevo) Observamos el estado de la sesión para obtener el rol.
+            val sessionState by sessionViewModel.sessionState.collectAsState()
+            // (nuevo) Observamos el estado de sincronización para el aviso offline.
+            val estaSincronizado by campaignViewModel.estaSincronizado.collectAsState()
+            // (nuevo) Filtro de campañas.
+            val filtro by campaignViewModel.filtro.collectAsState()
+
+            // (nuevo) Observa el conteo de no leídas.
+            val uidUsuario = sessionState.usuario?.uid ?: ""
+            val notificationRepository = appContainer.notificationFirestoreRepository
+            var noLeidas by remember { mutableIntStateOf(0) }
+            LaunchedEffect(uidUsuario) {
+                if (uidUsuario.isNotBlank()) {
+                    try {
+                        notificationRepository.contarNoLeidas(uidUsuario).collect { noLeidas = it }
+                    } catch (e: Exception) {
+                        noLeidas = 0
+                    }
+                } else {
+                    noLeidas = 0
+                }
+            }
+            HomeScreen(
+                viewModel = campaignViewModel,
+                // (modificado) Pasamos el rol completo como String, no un boolean.
+                rolActual = sessionViewModel.obtenerRolActual(),
+                nombreUsuario = sessionState.usuario?.nombre ?: "",
+                // (nuevo) Pasamos el estado de sincronización.
+                estaSincronizado = estaSincronizado,
+                filtroEstado = filtro,
+                onFiltroChange = { campaignViewModel.cambiarFiltro(it) },
+                onVerEvidenciasClick = { campaign ->
+                    navController.navigate(Routes.campaignGallery(campaign.firestoreId, campaign.titulo))
+                },
+                onCampaignClick = { campaign ->
+                    navController.navigate(Routes.campaignDetail(campaign.id, campaign.firestoreId))
+                },
+                onTraceabilityClick = {
+                    navController.navigate(Routes.TRACEABILITY)
+                },
+                // (nuevo) Cierre de sesión.
+                onLogoutClick = {
+                    appContainer.authRepository.cerrarSesion()
+                    // (nuevo) Limpiamos la sesión en el SessionViewModel.
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.HOME) {
+                            inclusive = true
+                        }
+                    }
+                },
+                // (nuevo) Conecta el ícono de impacto con la nueva pantalla.
+                onImpactoClick = {
+                    navController.navigate(Routes.IMPACTO_AMBIENTAL)
+                },
+                onHuellaClick = {
+                    navController.navigate(Routes.MI_HUELLA_ECOLOGICA)
+                },
+
+                // (nuevo) Conecta el ícono de perfil con la nueva pantalla.
+                onPerfilClick = {
+                    navController.navigate(Routes.PERFIL)
+                },
+                // (nuevo) Conecta el ícono de panel admin con la nueva pantalla.
+                onPanelAdminClick = {
+                    navController.navigate(Routes.PANEL_ADMIN)
+                },
+                onCampaignAdminClick = { navController.navigate(Routes.CAMPAIGN_ADMIN) },
+                onDonationAdminClick = { navController.navigate(Routes.DONATION_ADMIN) },
+                onPuntosRecojoAdminClick = { navController.navigate(Routes.PUNTOS_RECOJO_ADMIN) },
+                onUsuariosClick = { navController.navigate(Routes.GESTION_USUARIOS) },
+                notificacionesNoLeidas = noLeidas,
+                onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) },
+                onMapaClick = { navController.navigate(Routes.MAPA_PUNTOS_RECOJO) },
+                onServidorClick = { navController.navigate(Routes.SERVIDOR_TEST) }
+
+            )
+
+
+        }
+
+        // (modificado) Destino: Panel de Administración (para rol Gestor o Administrador).
+        composable(Routes.PANEL_ADMIN) {
+            if (!sessionViewModel.esGestorOAdmin()) {
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+            } else {
+                val nombreAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.nombre ?: "Gestor"
+
+                PanelAdminScreen(
+                    nombreAdmin = nombreAdmin,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    // (nuevo) Navega a gestión de campañas.
+                    onGestionarCampaigns = {
+                        navController.navigate(Routes.CAMPAIGN_ADMIN)
+                    },
+                    // (nuevo) Navegación a revisar donaciones.
+                    onRevisarDonaciones = { navController.navigate(Routes.DONATION_ADMIN) },
+                    onGaleriaEvidencias = { navController.navigate(Routes.CAMPAIGN_ADMIN) },
+                    onPuntosRecojoClick = { navController.navigate(Routes.PUNTOS_RECOJO_ADMIN) }
+
+                )
+            }
+        }
+
+        // (modificado) Destino de detalle con eventos de recojo independientes.
+        composable(
+            route = Routes.CAMPAIGN_DETAIL,
+            arguments = listOf(
+                navArgument("campaignId") { type = NavType.LongType },
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: ""
+
+            val detailViewModel: CampaignDetailViewModel = viewModel(
+                factory = CampaignDetailViewModelFactory(
+                    appContainer.campaignFirestoreRepository,
+                    firestoreId
+                )
+            )
+
+            val eventosRecojoViewModel: EventosRecojoViewModel = viewModel(
+                factory = EventosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository, firestoreId
+                )
+            )
+            val eventosRecojo by eventosRecojoViewModel.eventos.collectAsState()
+
+            println(">>> DETALLE: firestoreId=$firestoreId eventos=${eventosRecojo.size}")
+
+            val esAdmin = sessionViewModel.esAdministrador()
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val campaignAdminViewModel: CampaignAdminViewModel = viewModel(
+                factory = CampaignAdminViewModelFactory(
+                    appContainer.campaignFirestoreRepository, uidAdmin
+                )
+            )
+
+            val detailState by detailViewModel.uiState.collectAsState()
+            val tituloCampaign = (detailState as? UiState.Success)?.data?.titulo ?: ""
+
+            CampaignDetailScreen(
+                viewModel = detailViewModel,
+                eventosRecojo = eventosRecojo,
+                esAdmin = esAdmin,
+                onEditarClick = { navController.navigate(Routes.campaignForm(firestoreId)) },
+                onGaleriaClick = { navController.navigate(Routes.campaignGallery(firestoreId, tituloCampaign)) },
+                onCerrarClick = {
+                    campaignAdminViewModel.cerrarCampaign(firestoreId)
+                    pe.rejuega.app.utils.RefreshTrigger.notificar()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                // (modificado) Pasa también el firestoreId para que la donación se vincule bien en MySQL.
+                onDonateClick = { titulo ->
+                    navController.navigate(Routes.registerToy(campaignId, titulo, firestoreId))
+                }
+            )
+        }
+
+        // (modificado) Destino: Registro de juguete.
+        composable(
+            route = Routes.REGISTER_TOY,
+            arguments = listOf(
+                navArgument("campaignId") { type = NavType.LongType },
+                navArgument("campaignTitulo") { type = NavType.StringType },
+                navArgument("campaignFirestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+
+            val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
+            val campaignFirestoreId = backStackEntry.arguments?.getString("campaignFirestoreId") ?: ""
+
+            val context = LocalContext.current
+            val application = context.applicationContext as Application
+            val uidUsuario = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+            val jugueteViewModel: JugueteViewModel = viewModel(
+                factory = JugueteViewModelFactory(
+                    application = application,
+                    donationRepository = appContainer.donationRepository,
+                    materialEcoRepository = appContainer.materialEcoRepository,
+                    campaignId = campaignId,
+                    campaignTitulo = campaignTitulo,
+                    campaignFirestoreId = campaignFirestoreId
+                )
+            )
+
+            RegisterToyScreen(
+                viewModel = jugueteViewModel,
+                uidUsuario = uidUsuario,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onSaved = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // (modificado) Trazabilidad con uid real y repository de Firestore.
+        composable(Routes.TRACEABILITY) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val traceabilityViewModel: TraceabilityViewModel = viewModel(
+                factory = TraceabilityViewModelFactory(
+                    appContainer.donationFirestoreRepository, uid
+                )
+            )
+            TraceabilityScreen(
+                viewModel = traceabilityViewModel,
+                onBackClick = { navController.popBackStack() },
+                onEditarDonacion = { d ->
+                    navController.navigate(Routes.editarDonacion(d.id, d.campaignId, d.campaignTitulo, d.fotoUrl))
+                }
+            )
+        }
+        // (modificado) Impacto Ambiental → materiales (como antes).
+        composable(Routes.IMPACTO_AMBIENTAL) {
+            val vm: ImpactoAmbientalViewModel = viewModel(
+                factory = ImpactoAmbientalViewModelFactory(appContainer.materialEcoRepository)
+            )
+            ImpactoAmbientalScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
+        }
+
+        // (nuevo) Mi Huella Ecológica → cálculo real.
+        composable(Routes.MI_HUELLA_ECOLOGICA) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: MiHuellaEcologicaViewModel = viewModel(
+                factory = MiHuellaEcologicaViewModelFactory(appContainer.donationFirestoreRepository, uid)
+            )
+            MiHuellaEcologicaScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
+        }
+
+
+
+        // (nuevo) Destino: Pantalla de Perfil (HU-12).
+        composable(Routes.PERFIL) {
+
+            // (nuevo) Obtenemos el UID del usuario actual de Firebase para pasarlo al ViewModel.
+            val uidUsuario = FirebaseAuth.getInstance().currentUser?.uid ?: "usuario_anonimo"
+
+            val perfilUsuarioViewModel: PerfilUsuarioViewModel = viewModel(
+                factory = PerfilUsuarioViewModelFactory(
+                    authRepository = appContainer.authRepository,
+                    donationRepository = appContainer.donationFirestoreRepository,
+                    uid = uidUsuario
+                )
+            )
+
+            PerfilScreen(
+                viewModel = perfilUsuarioViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // (nuevo) Destino: gestión de campañas (Admin).
+        composable(Routes.CAMPAIGN_ADMIN) {
+            val uidAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.uid ?: ""
+            val campaignAdminViewModel: CampaignAdminViewModel = viewModel(
+                factory = CampaignAdminViewModelFactory(
+                    appContainer.campaignFirestoreRepository, uidAdmin
+                )
+            )
+            CampaignAdminScreen(
+                viewModel = campaignAdminViewModel,
+                onBackClick = { navController.popBackStack() },
+                onCrearClick = { navController.navigate(Routes.campaignForm("new")) },
+                onEditarClick = { id -> navController.navigate(Routes.campaignForm(id)) },
+                onVerGaleriaClick = { id, titulo ->
+                    navController.navigate(Routes.campaignGallery(id, titulo))
+                }
+            )
+        }
+
+        // (nuevo) Destino: formulario de campaña.
+        composable(Routes.CAMPAIGN_FORM) { backStackEntry ->
+            val campaignId = backStackEntry.arguments?.getString("campaignId") ?: "new"
+            val uidAdmin = sessionViewModel.sessionState.collectAsState().value.usuario?.uid ?: ""
+            val campaignAdminViewModel: CampaignAdminViewModel = viewModel(
+                factory = CampaignAdminViewModelFactory(
+                    appContainer.campaignFirestoreRepository, uidAdmin
+                )
+            )
+            CampaignFormScreen(
+                viewModel = campaignAdminViewModel,
+                campaignId = campaignId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+        // (nuevo) Destino: lista de donaciones pendientes.
+        composable(Routes.DONATION_ADMIN) {
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val donationAdminViewModel: DonationAdminViewModel = viewModel(
+                factory = DonationAdminViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    appContainer.notificationFirestoreRepository,
+                    uidAdmin
+                )
+            )
+            DonationAdminScreen(
+                viewModel = donationAdminViewModel,
+                onBackClick = { navController.popBackStack() },
+                onDonacionClick = { donacion ->
+                    // (modificado) Se navega con el ID del documento Firestore, no con el uid del donante.
+                    navController.navigate(Routes.donationDetailAdmin(donacion.id))
+                }
+            )
+        }
+
+// (nuevo) Destino: detalle de donación.
+        composable(Routes.DONATION_DETAIL_ADMIN) { backStackEntry ->
+            val donacionUid = backStackEntry.arguments?.getString("donacionUid") ?: ""
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val donationAdminViewModel: DonationAdminViewModel = viewModel(
+                factory = DonationAdminViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    appContainer.notificationFirestoreRepository,
+                    uidAdmin
+                )
+            )
+            DonationDetailAdminScreen(
+                viewModel = donationAdminViewModel,
+                donacionId = donacionUid,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.NOTIFICATIONS) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: NotificationViewModel = viewModel(
+                factory = NotificationViewModelFactory(
+                    appContainer.notificationFirestoreRepository, uid
+                )
+            )
+            NotificationScreen(viewModel = vm, onBackClick = { navController.popBackStack() })
+        }
+
+        composable(Routes.EDITAR_DONACION) { backStackEntry ->
+            val donationId = backStackEntry.arguments?.getString("donationId") ?: ""
+            val campaignId = backStackEntry.arguments?.getLong("campaignId") ?: 0L
+            val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
+            val fotoUrl = backStackEntry.arguments?.getString("fotoUrl") ?: ""
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+            val vm: EditarDonacionViewModel = viewModel(
+                factory = EditarDonacionViewModelFactory(
+                    appContainer.donationFirestoreRepository,
+                    appContainer.materialEcoRepository,
+                    donationId
+                )
+            )
+            EditarDonacionScreen(
+                viewModel = vm, uid = uid, campaignId = campaignId,
+                campaignTitulo = campaignTitulo, fotoUrl = fotoUrl,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Destino: Galería de evidencias de una campaña (HU-09).
+        composable(Routes.CAMPAIGN_GALLERY) { backStackEntry ->
+            val campaignId = backStackEntry.arguments?.getString("campaignId") ?: ""
+            val campaignTitulo = backStackEntry.arguments?.getString("campaignTitulo") ?: ""
+            val esAdmin = sessionViewModel.esAdministrador()
+            val uidAdmin = if (esAdmin) FirebaseAuth.getInstance().currentUser?.uid else null
+
+            val galleryViewModel: CampaignGalleryViewModel = viewModel(
+                factory = CampaignGalleryViewModelFactory(
+                    repository = appContainer.campaignGalleryRepository,
+                    campaignId = campaignId,
+                    campaignTitulo = campaignTitulo,
+                    uidAdmin = uidAdmin
+                )
+            )
+
+            CampaignGalleryScreen(
+                viewModel = galleryViewModel,
+                esAdmin = esAdmin,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Lista de puntos y eventos (HU-04, HU-14).
+        composable(Routes.PUNTOS_RECOJO_ADMIN) {
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: PuntosRecojoViewModel = viewModel(
+                factory = PuntosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository,
+                    appContainer.campaignFirestoreRepository,
+                    appContainer.geocodingRepository,
+                    uidAdmin
+                )
+            )
+            PuntosRecojoAdminScreen(
+                viewModel = vm,
+                onBackClick = { navController.popBackStack() },
+                onCrearPunto = { navController.navigate(Routes.puntoEntregaForm("new")) },
+                onCrearEvento = { navController.navigate(Routes.pickupEventForm("new")) },
+                onEditarPunto = { id -> navController.navigate(Routes.puntoEntregaForm(id)) },
+                onEditarEvento = { id -> navController.navigate(Routes.pickupEventForm(id)) }
+            )
+        }
+
+        // (nuevo) Formulario de punto fijo.
+        composable(Routes.PUNTO_ENTREGA_FORM) { backStackEntry ->
+            val puntoId = backStackEntry.arguments?.getString("puntoId") ?: "new"
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: PuntosRecojoViewModel = viewModel(
+                factory = PuntosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository,
+                    appContainer.campaignFirestoreRepository,
+                    appContainer.geocodingRepository,
+                    uidAdmin
+                )
+            )
+            PuntoEntregaFormScreen(
+                viewModel = vm, puntoId = puntoId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Formulario de evento de recojo.
+        composable(Routes.PICKUP_EVENT_FORM) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: "new"
+            val uidAdmin = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val vm: PuntosRecojoViewModel = viewModel(
+                factory = PuntosRecojoViewModelFactory(
+                    appContainer.puntoRecojoFirestoreRepository,
+                    appContainer.campaignFirestoreRepository,
+                    appContainer.geocodingRepository,
+                    uidAdmin
+                )
+            )
+            PickupEventFormScreen(
+                viewModel = vm, eventId = eventId,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Destino del mapa de puntos de recojo (HU-10).
+        composable(Routes.MAPA_PUNTOS_RECOJO) {
+            val mapaViewModel: MapaViewModel = viewModel(
+                factory = MapaViewModelFactory(appContainer.puntoRecojoFirestoreRepository)
+            )
+            MapaPuntosRecojoScreen(
+                viewModel = mapaViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (nuevo) Destino de pruebas del servidor Node.js.
+        composable(Routes.SERVIDOR_TEST) {
+            val vm: ApiTestViewModel = viewModel(
+                factory = ApiTestViewModelFactory(appContainer.nodeApiRepository)
+            )
+            ApiTestScreen(
+                viewModel = vm,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // (modificado) Destino de gestión de usuarios: usa el rol real de SessionViewModel.
+        composable(Routes.GESTION_USUARIOS) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val rol = sessionViewModel.obtenerRolActual()
+            println(">>> GESTION_USUARIOS: uid=$uid rol='$rol'")
+
+            val vm: GestionUsuariosViewModel = viewModel(
+                factory = GestionUsuariosViewModelFactory(appContainer.authRepository, uid, rol)
+            )
+            GestionUsuariosScreen(
+                viewModel = vm,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+
+    }
+}

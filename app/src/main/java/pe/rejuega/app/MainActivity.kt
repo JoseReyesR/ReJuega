@@ -1,47 +1,40 @@
+// (modificado) Archivo: MainActivity.kt
+// (modificado) Descripción: Activity principal de la app.
+// (modificado) Cambio: Se delega la creación de ViewModels a AppNavigation mediante factories.
 package pe.rejuega.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import pe.rejuega.app.ui.navigation.AppNavigation
 import pe.rejuega.app.ui.theme.ReJuegaTheme
 
+// (modificado) MainActivity simplificada.
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
+            // (modificado) Aplicamos el tema Material 3 de ReJuega.
             ReJuegaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+
+                // (modificado) Obtenemos el contenedor de dependencias desde la Application.
+                val appContainer = (application as ReJuegaApp).container
+
+                // (modificado) Controlador de navegación.
+                val navController = rememberNavController()
+
+                // (modificado) Renderizamos la navegación principal.
+                AppNavigation(
+                    navController = navController,
+                    appContainer = appContainer
+                )
+
+                // (eliminado) Antes se creaba aquí directamente CampaignViewModel.
+                // (eliminado) Ahora cada pantalla crea su ViewModel usando factories en AppNavigation.
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ReJuegaTheme {
-        Greeting("Android")
     }
 }

@@ -1,6 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+
+    // (nuevo) Aplicamos KSP en el módulo de la app
+    // (nuevo) KSP para Room
+    id("com.google.devtools.ksp")
+    // Add the Google services Gradle plugin
+    // (nuevo) Plugin de Firebase/Google Services
+    id("com.google.gms.google-services")
+
+
+
+
 }
 
 android {
@@ -10,6 +21,7 @@ android {
     }
 
     defaultConfig {
+        //  Debe coincidir con el paquete registrado en Firebase
         applicationId = "pe.rejuega.app"
         minSdk = 24
         targetSdk = 37
@@ -43,6 +55,8 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
@@ -52,4 +66,82 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // ==========================================================
+    // (nuevo) DEPENDENCIAS PARA ARQUITECTURA MVVM Y ROOM
+    // ==========================================================
+
+    // (nuevo) Room: Base de datos local (SQLite abstraído)
+    implementation("androidx.room:room-runtime:2.8.5")
+    implementation("androidx.room:room-ktx:2.8.5") // (nuevo) Soporte para Corrutinas en Room
+    ksp("androidx.room:room-compiler:2.8.5")       // (nuevo) Compilador de Room usando KSP
+
+    // (nuevo) Lifecycle & ViewModel: Para manejar el estado de la UI sin bloquear la pantalla
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
+
+    // (nuevo) Navigation Compose: Para movernos entre pantallas (Login -> Home -> Detalle)
+    implementation("androidx.navigation:navigation-compose:2.8.2")
+
+    // (nuevo) Corrutinas: Para operaciones asíncronas (Red y BD) sin congelar la app
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // (nuevo) Coil: Librería para cargar imágenes desde URL en Jetpack Compose
+    // (nuevo) La usaremos para mostrar las fotos de las campañas y juguetes
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // (nuevo) Paquete completo de íconos Material (History, DateRange, VerifiedUser, etc.)
+    // (nuevo) Sin esta dependencia aparece: Unresolved reference: DateRange / History
+    implementation("androidx.compose.material:material-icons-extended:1.7.4")
+
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+
+    // (nuevo) Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
+    // (nuevo) Cloud Firestore
+    implementation("com.google.firebase:firebase-firestore")
+    // (nuevo) Soporte de corrutinas para tareas de Firebase
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+
+
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
+
+
+    // (nuevo) Retrofit: Cliente HTTP para consumir APIs REST
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+    // (nuevo) Converter Gson: Convierte JSON a objetos Kotlin automáticamente
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // (nuevo) OkHttp Logging Interceptor: Muestra las peticiones HTTP en Logcat para depurar
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // ==========================================================
+    // (nuevo) DEPENDENCIAS PARA SUBIR IMÁGENES A CLOUDINARY
+    // ==========================================================
+
+    // (nuevo) OkHttp: Cliente HTTP que usa Retrofit por debajo.
+    // (nuevo) Lo necesitamos para crear el cuerpo "multipart" de la imagen.
+    // (nuevo) Ya viene incluido con Retrofit, pero lo declaramos explícito
+    // (nuevo) para usar las clases MultipartBody y RequestBody.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // (nuevo) Firebase Cloud Messaging: obtiene el token del dispositivo y lo prepara
+// (nuevo) para cuando el servidor Node envíe push (Paso 20).
+
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // (nuevo) osmdroid: mapa gratuito basado en OpenStreetMap (sin API key).
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
+    // (nuevo) Fused Location Provider para obtener la ubicación del usuario.
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
