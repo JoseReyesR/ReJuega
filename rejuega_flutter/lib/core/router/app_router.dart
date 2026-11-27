@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../presentation/layouts/shell_layout.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/test/connectivity_test_screen.dart';
+import '../../presentation/screens/test/data_layer_test_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/login/register_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String test = '/test';
+  static const String dataTest = '/datatest';
 }
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -79,6 +81,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.test,
             name: 'test',
             builder: (context, state) => const ConnectivityTestScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.dataTest,
+            name: 'datatest',
+            builder: (context, state) => const DataLayerTestScreen(),
           ),
         ],
       ),

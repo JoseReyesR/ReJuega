@@ -68,6 +68,7 @@ class AppDrawer extends ConsumerWidget {
                 children: [
                   _item(context, Icons.home, 'Inicio', AppRoutes.home),
                   _item(context, Icons.dns, 'Pruebas del Servidor', AppRoutes.test),
+                  _item(context, Icons.science, 'Pruebas de Capa de Datos', AppRoutes.dataTest),
                   const Divider(),
 
                   // (nuevo) Sección de gestión: solo Gestor y Administrador.
