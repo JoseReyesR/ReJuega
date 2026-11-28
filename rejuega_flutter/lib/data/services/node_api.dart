@@ -12,13 +12,37 @@ class NodeApi {
   }
 
   // ---------- CAMPAÑAS ----------
+  // (modificado) Con logs para ver la respuesta cruda del servidor.
   Future<List<CampaignNodeDto>> getCampaigns({String? estado}) async {
+    print('>>> API: GET /api/campaigns ${estado != null ? "?estado=$estado" : ""}');
+
     final r = await HttpClient.instance.get(
       '/api/campaigns',
       queryParameters: estado == null ? null : {'estado': estado},
     );
-    _check(r.statusCode);
-    return ApiListResponse.fromJson(Map<String, dynamic>.from(r.data), CampaignNodeDto.fromJson).data;
+
+    print('>>> API: Status ${r.statusCode}');
+    print('>>> API: Response type: ${r.data.runtimeType}');
+
+    if (r.statusCode == null || r.statusCode! < 200 || r.statusCode! >= 300) {
+      throw Exception('HTTP ${r.statusCode}');
+    }
+
+    final responseData = r.data;
+    print('>>> API: Response keys: ${responseData is Map ? responseData.keys.toList() : "NOT A MAP"}');
+
+    if (responseData is Map) {
+      print('>>> API: success=${responseData['success']}, count=${responseData['count']}');
+      print('>>> API: data is ${responseData['data']?.runtimeType}, length=${(responseData['data'] as List?)?.length ?? 0}');
+    }
+
+    final result = ApiListResponse.fromJson(
+      Map<String, dynamic>.from(responseData as Map),
+      CampaignNodeDto.fromJson,
+    );
+
+    print('>>> API: Parsed ${result.data.length} campaigns');
+    return result.data;
   }
 
   Future<CampaignNodeDto> getCampaign(String id) async {

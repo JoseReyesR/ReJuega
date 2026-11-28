@@ -1,21 +1,15 @@
-// (nuevo) Constantes de configuración de la API (equivalente a ApiConfig.kt).
+// (modificado) Timeouts más largos para redes móviles con latencia.
 class ApiConfig {
   ApiConfig._();
 
-  // (nuevo) URL base del servidor Node.
-  // (nuevo) Cambia esto según el entorno:
-  //   - Emulador Android: http://10.0.2.2:3000/
-  //   - Celular físico:   http://TU_IP_LOCAL:3000/
-  //   - Producción:       https://tu-dominio.com/
-  static const String nodeBaseUrl = 'http://192.168.100.106:3000/';
+  // (modificado) URL base del servidor Node.
+  static const String nodeBaseUrl = 'http://10.103.185.141:3000/';
 
+  // (modificado) Timeouts aumentados para evitar timeouts en redes lentas.
+  static const int connectTimeoutSeconds = 15;    // antes: 3
+  static const int receiveTimeoutSeconds = 20;    // antes: 5
+  static const int sendTimeoutSeconds = 20;       // antes: 5
 
-  // (nuevo) Cloudinary.
-  static const String cloudName = 'eg8sugwt';   // reemplaza nombre del cloud name:
+  static const String cloudName = 'eg8sugwt';
   static const String uploadPreset = 'rejuega_preset';
-
-  // (nuevo) Timeouts (en segundos) — los mismos que usamos en Kotlin (3s).
-  static const int connectTimeoutSeconds = 3;
-  static const int receiveTimeoutSeconds = 5;
-  static const int sendTimeoutSeconds = 5;
 }

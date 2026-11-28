@@ -1,24 +1,22 @@
-// (nuevo) Logger centralizado.
-// (nuevo) En release se pueden desactivar los logs sin tocar el código.
-import 'dart:developer' as developer;
+// (modificado) Logger simple con print() para que siempre aparezca en la consola.
 import 'package:flutter/foundation.dart';
 
 class AppLogger {
   AppLogger._();
 
   static void d(String message) {
-    if (kDebugMode) developer.log(message, name: 'ReJuega');
+    if (kDebugMode) print('🔵 [ReJuega] $message');
   }
 
   static void i(String message) {
-    if (kDebugMode) developer.log('ℹ️  $message', name: 'ReJuega');
+    if (kDebugMode) print('🟢 [ReJuega] $message');
   }
 
   static void w(String message) {
-    if (kDebugMode) developer.log('⚠️  $message', name: 'ReJuega');
+    if (kDebugMode) print('🟡 [ReJuega] $message');
   }
 
   static void e(String message, [Object? error]) {
-    if (kDebugMode) developer.log('❌ $message $error', name: 'ReJuega');
+    if (kDebugMode) print('🔴 [ReJuega] $message ${error ?? ""}');
   }
 }

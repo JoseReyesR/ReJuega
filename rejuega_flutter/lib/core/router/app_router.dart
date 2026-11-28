@@ -10,6 +10,11 @@ import '../../presentation/screens/test/data_layer_test_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/login/register_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
+import '../../presentation/screens/campaign/campaign_detail_screen.dart';
+import '../../presentation/screens/donation/register_toy_screen.dart';
+import '../../presentation/screens/notification/notification_screen.dart';
+import '../../presentation/screens/impact/mi_huella_ecologica_screen.dart';
+import '../../presentation/screens/impact/impacto_ambiental_screen.dart';
 import '../../state/auth_providers.dart';
 
 class AppRoutes {
@@ -21,6 +26,11 @@ class AppRoutes {
   static const String register = '/register';
   static const String test = '/test';
   static const String dataTest = '/datatest';
+  static const String campaignDetail = '/campaign/:id';
+  static const String donar = '/donar/:campaignId/:campaignTitulo';
+  static const String notificaciones = '/notificaciones';
+  static const String huella = '/huella';
+  static const String impacto = '/impacto';
 }
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -86,6 +96,36 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.dataTest,
             name: 'datatest',
             builder: (context, state) => const DataLayerTestScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.campaignDetail,
+            name: 'campaignDetail',
+            builder: (context, state) => CampaignDetailScreen(
+              campaignId: state.pathParameters['id'] ?? '',
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.donar,
+            name: 'donar',
+            builder: (context, state) => RegisterToyScreen(
+              campaignId: state.pathParameters['campaignId'] ?? '',
+              campaignTitulo: Uri.decodeComponent(state.pathParameters['campaignTitulo'] ?? ''),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.notificaciones,
+            name: 'notificaciones',
+            builder: (context, state) => const NotificationScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.huella,
+            name: 'huella',
+            builder: (context, state) => const MiHuellaEcologicaScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.impacto,
+            name: 'impacto',
+            builder: (context, state) => const ImpactoAmbientalScreen(),
           ),
         ],
       ),

@@ -2,13 +2,10 @@
 // (nuevo) Se expone como un Provider singleton en Riverpod.
 import 'package:dio/dio.dart';
 import '../../core/constants/api_config.dart';
-import '../../core/utils/logger.dart';
 
 class HttpClient {
-  // (nuevo) Instancia única de Dio configurada.
-  static final Dio instance = Dio(
+  static final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: ApiConfig.nodeBaseUrl,
       connectTimeout: Duration(seconds: ApiConfig.connectTimeoutSeconds),
       receiveTimeout: Duration(seconds: ApiConfig.receiveTimeoutSeconds),
       sendTimeout: Duration(seconds: ApiConfig.sendTimeoutSeconds),
@@ -17,29 +14,33 @@ class HttpClient {
         'Accept': 'application/json',
       },
     ),
-  )..interceptors.add(_LoggingInterceptor());   // (nuevo) Logs de todas las peticiones.
+  )..interceptors.add(_LoggingInterceptor());
+
+  // (nuevo) Propiedad getter que siempre actualiza baseUrl desde ApiConfig.nodeBaseUrl.
+  static Dio get instance {
+    _dio.options.baseUrl = ApiConfig.nodeBaseUrl;
+    return _dio;
+  }
 }
 
-// (nuevo) Interceptor que loggea cada request/response (equivalente a println de Kotlin).
+// (modificado) Interceptor con print() directo para garantizar visibilidad.
 class _LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    AppLogger.d('>>> HTTP ${options.method} ${options.uri}');
-    if (options.data != null) {
-      AppLogger.d('>>> BODY: ${options.data}');
-    }
+    print('🔵 >>> HTTP ${options.method} ${options.uri}');
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    AppLogger.d('<<< HTTP ${response.statusCode} ${response.requestOptions.uri}');
+    print('🟢 <<< HTTP ${response.statusCode} ${response.requestOptions.uri}');
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    AppLogger.e('!!! HTTP ERROR ${err.type}: ${err.message}');
+    print('🔴 !!! HTTP ERROR ${err.type}: ${err.message}');
+    print('🔴 !!! URL: ${err.requestOptions.uri}');
     handler.next(err);
   }
 }

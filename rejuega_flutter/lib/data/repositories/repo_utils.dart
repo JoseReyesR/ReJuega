@@ -13,3 +13,10 @@ Future<T> nodeFirst<T>({
     return await respaldo();
   }
 }
+
+// (nuevo) Envoltorio que indica si los datos vinieron de Node o del respaldo.
+class Resultado<T> {
+  final T data;
+  final bool desdeRespaldo;
+  const Resultado(this.data, this.desdeRespaldo);
+}

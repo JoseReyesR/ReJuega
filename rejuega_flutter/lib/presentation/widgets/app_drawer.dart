@@ -103,14 +103,19 @@ class AppDrawer extends ConsumerWidget {
                     child: Text('MI ESPACIO', style: TextStyle(fontSize: 12, color: Colors.grey)),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.person),
-                    title: const Text('Mi Perfil'),
-                    onTap: () => _pendiente(context, 'Fase 4'),
+                    leading: const Icon(Icons.eco),
+                    title: const Text('Mi Huella Ecológica'),
+                    onTap: () { Navigator.pop(context); context.go(AppRoutes.huella); },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.emoji_nature),
+                    title: const Text('Impacto Ambiental'),
+                    onTap: () { Navigator.pop(context); context.go(AppRoutes.impacto); },
                   ),
                   ListTile(
                     leading: const Icon(Icons.notifications),
                     title: const Text('Notificaciones'),
-                    onTap: () => _pendiente(context, 'Fase 4'),
+                    onTap: () { Navigator.pop(context); context.go(AppRoutes.notificaciones); },
                   ),
                   const Divider(),
                   ListTile(
