@@ -4,7 +4,7 @@ import '../models/app_models.dart';
 import '../dtos/node_dtos.dart';
 import '../services/node_api.dart';
 import 'repo_utils.dart';
-
+import '../../core/utils/logger.dart';   // (nuevo) necesario para AppLogger
 class NotificationRepository {
   final NodeApi _api = NodeApi();
   final FirebaseFirestore _fs = FirebaseFirestore.instance;
@@ -35,25 +35,37 @@ class NotificationRepository {
         },
       );
 
+  // (modificado) Con logs visibles en ambos lados.
   Future<void> marcarLeida(String id) async {
     try {
       await _api.markRead(id);
-      try { await _fs.collection('notifications').doc(id).update({'leida': true}); } catch (_) {}
+      AppLogger.i('>>> NOTIF READ OK MySQL: $id');
     } catch (e) {
+      AppLogger.w('>>> NOTIF READ FAIL MySQL: $e');
+    }
+    try {
       await _fs.collection('notifications').doc(id).update({'leida': true});
+      AppLogger.i('>>> NOTIF READ OK Firestore: $id');
+    } catch (e) {
+      AppLogger.e('>>> NOTIF READ FAIL Firestore: $id → $e');
+      rethrow;
     }
   }
 
   Future<void> marcarTodasLeidas(String uid) async {
     try {
       await _api.markAllRead(uid);
+      AppLogger.i('>>> NOTIF READ-ALL OK MySQL: $uid');
     } catch (e) {
+      AppLogger.w('>>> NOTIF READ-ALL FAIL MySQL: $e → Firestore directo');
       final snap = await _fs.collection('notifications')
           .where('uidDestinatario', isEqualTo: uid)
-          .where('leida', isEqualTo: false).get();
+          .where('leida', isEqualTo: false)
+          .get();
       for (final doc in snap.docs) {
         await _fs.collection('notifications').doc(doc.id).update({'leida': true});
       }
+      AppLogger.i('>>> NOTIF READ-ALL OK Firestore: ${snap.size} docs');
     }
   }
 

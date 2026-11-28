@@ -95,9 +95,9 @@ class AuthService {
     });
   }
 
-  // (nuevo) Actualiza perfil: Node (MySQL) + Firestore (fuente de la UI).
+  // (modificado) Con logs visibles y set(merge) en Firestore.
   Future<void> actualizarPerfil(UserModel p) async {
-    // (nuevo) 1) Intenta MySQL vía Node (best-effort).
+    // (nuevo) 1) MySQL vía Node (best-effort).
     try {
       await HttpClient.instance.put('/api/users/${p.uid}', data: {
         'nombre': p.nombre,
@@ -106,19 +106,25 @@ class AuthService {
         'direccion': p.direccion,
         'genero': p.genero,
       });
-      AppLogger.i('>>> PROFILE UPDATE OK (MySQL): ${p.uid}');
+      AppLogger.i('>>> PROFILE UPDATE OK MySQL: ${p.uid}');
     } catch (e) {
-      AppLogger.w('>>> PROFILE UPDATE FAIL MySQL ($e) → solo Firestore');
+      AppLogger.w('>>> PROFILE UPDATE FAIL MySQL: $e → solo Firestore');
     }
 
-    // (nuevo) 2) Firestore siempre (de aquí lee la app en vivo).
-    await _firestore.collection('users').doc(p.uid).update({
-      'nombre': p.nombre,
-      'telefono': p.telefono,
-      'ciudad': p.ciudad,
-      'direccion': p.direccion,
-      'genero': p.genero,
-    });
+    // (nuevo) 2) Firestore siempre, con error visible.
+    try {
+      await _firestore.collection('users').doc(p.uid).set({
+        'nombre': p.nombre,
+        'telefono': p.telefono,
+        'ciudad': p.ciudad,
+        'direccion': p.direccion,
+        'genero': p.genero,
+      }, SetOptions(merge: true));
+      AppLogger.i('>>> PROFILE UPDATE OK Firestore: ${p.uid}');
+    } catch (e) {
+      AppLogger.e('>>> PROFILE UPDATE FAIL Firestore: ${p.uid} → $e');
+      rethrow;
+    }
   }
 
   // ---------- SYNC A NODE ----------

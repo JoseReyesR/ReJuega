@@ -1,4 +1,5 @@
-// (nuevo) Repositorio de donaciones con trazabilidad.
+// (modificado) Todas las escrituras a Firestore ahora registran OK/FAIL visible.
+// (modificado) Editar preserva el historial de trazabilidad de Firestore.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/utils/logger.dart';
 import '../models/app_models.dart';
@@ -9,7 +10,7 @@ class DonationRepository {
   final NodeApi _api = NodeApi();
   final FirebaseFirestore _fs = FirebaseFirestore.instance;
 
-  // (nuevo) Donaciones de un donante (para trazabilidad y huella).
+  // ---------- LECTURAS ----------
   Future<List<DonationModel>> obtenerPorUsuario(String uid) => nodeFirst(
         tag: 'DONATIONS',
         node: () async =>
@@ -20,7 +21,6 @@ class DonationRepository {
         },
       );
 
-  // (nuevo) Todas (para revisión del admin en Fase 5).
   Future<List<DonationModel>> obtenerTodas() => nodeFirst(
         tag: 'DONATIONS_ALL',
         node: () async =>
@@ -31,7 +31,6 @@ class DonationRepository {
         },
       );
 
-  // (nuevo) Detalle con historial: Node primario, Firestore respaldo.
   Future<DonationModel> obtenerPorId(String id) => nodeFirst(
         tag: 'DONATION_DETAIL',
         node: () async => DonationModel.fromDto(await _api.getDonation(id)),
@@ -42,20 +41,67 @@ class DonationRepository {
         },
       );
 
-  // (nuevo) Registrar: Node primario + copia Firestore.
-  Future<void> registrar(DonationModel d) async {
+  // ---------- ESCRITURA FIRESTORE CON LOG (nunca silenciosa) ----------
+  // (nuevo) merge:true para no pisar campos que no manejamos.
+  Future<void> _writeFirestore(String id, Map<String, dynamic> data) async {
     try {
-      await _api.createDonation(d.toDto());
-      try {
-        await _fs.collection('donations').doc(d.id).set(d.toFirestoreMap());
-      } catch (_) {}
+      await _fs.collection('donations').doc(id).set(data, SetOptions(merge: true));
+      AppLogger.i('>>> DONATION FIRESTORE OK: $id');
     } catch (e) {
-      AppLogger.w('>>> DONATION CREATE FAIL: $e → uso Firestore');
-      await _fs.collection('donations').doc(d.id).set(d.toFirestoreMap());
+      // (nuevo) Se ve en consola: aquí aparecía el fallo que antes se tragaba el catch.
+      AppLogger.e('>>> DONATION FIRESTORE FAIL: $id → $e');
+      rethrow;
     }
   }
 
-  // (nuevo) Avanzar/rechazar estado (trazabilidad).
+  // ---------- REGISTRAR ----------
+  Future<void> registrar(DonationModel d) async {
+    try {
+      await _api.createDonation(d.toDto());
+      AppLogger.i('>>> DONATION CREATE OK MySQL: ${d.id}');
+    } catch (e) {
+      AppLogger.w('>>> DONATION CREATE FAIL MySQL: $e → solo Firestore');
+    }
+    await _writeFirestore(d.id, d.toFirestoreMap());
+  }
+
+  // ---------- EDITAR (preserva historial) ----------
+  Future<void> editar(DonationModel d) async {
+    // (nuevo) 1) Recuperar el historial real desde Firestore si el local viene vacío.
+    List<HistorialEstado> historial = d.historial;
+    try {
+      final doc = await _fs.collection('donations').doc(d.id).get();
+      if (doc.exists && historial.isEmpty) {
+        historial = (doc.data()?['historialEstados'] as List<dynamic>? ?? [])
+            .map((e) => HistorialEstado.fromMap(Map<String, dynamic>.from(e as Map)))
+            .toList();
+      }
+    } catch (e) {
+      AppLogger.w('>>> DONATION EDIT: no pude leer historial previo ($e)');
+    }
+
+    final conHistorial = DonationModel(
+      id: d.id, uid: d.uid, campaignFirestoreId: d.campaignFirestoreId,
+      campaignTitulo: d.campaignTitulo, nombre: d.nombre, descripcion: d.descripcion,
+      condicion: d.condicion, fotoUrl: d.fotoUrl,
+      estadoTrazabilidad: d.estadoTrazabilidad, motivoRechazo: d.motivoRechazo,
+      materialTipo: d.materialTipo, co2AhorradoKg: d.co2AhorradoKg,
+      fechaRegistro: d.fechaRegistro, historial: historial,
+    );
+
+    // (nuevo) 2) MySQL vía Node (best-effort).
+    try {
+      await _api.updateDonation(conHistorial.id, conHistorial.toDto());
+      AppLogger.i('>>> DONATION UPDATE OK MySQL: ${d.id}');
+    } catch (e) {
+      AppLogger.w('>>> DONATION UPDATE FAIL MySQL: $e → solo Firestore');
+    }
+
+    // (nuevo) 3) Firestore siempre, con error visible si falla.
+    await _writeFirestore(conHistorial.id, conHistorial.toFirestoreMap());
+  }
+
+  // ---------- CAMBIAR ESTADO (trazabilidad) ----------
   Future<void> actualizarEstado(
     String id,
     String nuevoEstado,
@@ -64,40 +110,49 @@ class DonationRepository {
   }) async {
     try {
       await _api.updateDonationEstado(id, nuevoEstado, cambiadoPor, motivo: motivo);
-      try {
-        await _fs.collection('donations').doc(id).update({
-          'estadoTrazabilidad': nuevoEstado,
-          if (motivo != null) 'motivoRechazo': motivo,
-        });
-      } catch (_) {}
+      AppLogger.i('>>> DONATION STATE OK MySQL: $id → $nuevoEstado');
     } catch (e) {
-      await _fs.collection('donations').doc(id).update({
-        'estadoTrazabilidad': nuevoEstado,
-        if (motivo != null) 'motivoRechazo': motivo,
-      });
+      AppLogger.w('>>> DONATION STATE FAIL MySQL: $e');
     }
-  }
 
-  // (nuevo) Editar/eliminar solo Pendiente (regla del servidor).
-  Future<void> editar(DonationModel d) async {
+    // (nuevo) Agregar el paso al historial de Firestore (paridad con MySQL).
+    List<HistorialEstado> historial = [];
     try {
-      await _api.updateDonation(d.id, d.toDto());
-      try {
-        await _fs.collection('donations').doc(d.id).set(d.toFirestoreMap());
-      } catch (_) {}
-    } catch (e) {
-      await _fs.collection('donations').doc(d.id).set(d.toFirestoreMap());
-    }
+      final doc = await _fs.collection('donations').doc(id).get();
+      if (doc.exists) {
+        historial = (doc.data()?['historialEstados'] as List<dynamic>? ?? [])
+            .map((e) => HistorialEstado.fromMap(Map<String, dynamic>.from(e as Map)))
+            .toList();
+      }
+    } catch (_) {}
+    historial.add(HistorialEstado(
+      estado: nuevoEstado,
+      fecha: DateTime.now().millisecondsSinceEpoch,
+      cambiadoPor: cambiadoPor,
+    ));
+
+    await _fs.collection('donations').doc(id).set({
+      'estadoTrazabilidad': nuevoEstado,
+      if (motivo != null) 'motivoRechazo': motivo,
+      'historialEstados': historial.map((h) => h.toMap()).toList(),
+    }, SetOptions(merge: true));
+    AppLogger.i('>>> DONATION STATE OK Firestore: $id → $nuevoEstado');
   }
 
+  // ---------- ELIMINAR ----------
   Future<void> eliminar(String id) async {
     try {
       await _api.deleteDonation(id);
-      try {
-        await _fs.collection('donations').doc(id).delete();
-      } catch (_) {}
+      AppLogger.i('>>> DONATION DELETE OK MySQL: $id');
     } catch (e) {
+      AppLogger.w('>>> DONATION DELETE FAIL MySQL: $e → solo Firestore');
+    }
+    try {
       await _fs.collection('donations').doc(id).delete();
+      AppLogger.i('>>> DONATION DELETE OK Firestore: $id');
+    } catch (e) {
+      AppLogger.e('>>> DONATION DELETE FAIL Firestore: $id → $e');
+      rethrow;
     }
   }
 }
