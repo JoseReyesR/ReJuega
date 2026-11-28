@@ -67,6 +67,13 @@ class NodeApi {
   }
 
   // ---------- DONACIONES ----------
+  // (nuevo) Detalle de donación CON historial de trazabilidad.
+  Future<DonationNodeDto> getDonation(String id) async {
+    final r = await HttpClient.instance.get('/api/donations/$id');
+    _check(r.statusCode);
+    return DonationNodeDto.fromJson(Map<String, dynamic>.from(r.data['data']));
+  }
+
   Future<List<DonationNodeDto>> getDonations({String? userId, String? campaignId}) async {
     final r = await HttpClient.instance.get('/api/donations', queryParameters: {
       if (userId != null) 'user_id': userId,

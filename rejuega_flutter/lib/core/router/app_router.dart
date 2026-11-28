@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/app_models.dart';
 import '../../presentation/layouts/shell_layout.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/test/connectivity_test_screen.dart';
@@ -12,6 +13,9 @@ import '../../presentation/screens/login/register_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 import '../../presentation/screens/campaign/campaign_detail_screen.dart';
 import '../../presentation/screens/donation/register_toy_screen.dart';
+import '../../presentation/screens/donation/my_donations_screen.dart';
+import '../../presentation/screens/donation/edit_donation_screen.dart';
+import '../../presentation/screens/profile/profile_screen.dart';
 import '../../presentation/screens/notification/notification_screen.dart';
 import '../../presentation/screens/impact/mi_huella_ecologica_screen.dart';
 import '../../presentation/screens/impact/impacto_ambiental_screen.dart';
@@ -28,6 +32,9 @@ class AppRoutes {
   static const String dataTest = '/datatest';
   static const String campaignDetail = '/campaign/:id';
   static const String donar = '/donar/:campaignId';
+  static const String misDonaciones = '/mis-donaciones';
+  static const String editarDonacion = '/editar-donacion/:id';
+  static const String perfil = '/perfil';
   static const String notificaciones = '/notificaciones';
   static const String huella = '/huella';
   static const String impacto = '/impacto';
@@ -115,6 +122,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 campaignTitulo: campaignTitulo,
               );
             },
+          ),
+          GoRoute(
+            path: AppRoutes.misDonaciones,
+            name: 'misDonaciones',
+            builder: (context, state) => const MyDonationsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.editarDonacion,
+            name: 'editarDonacion',
+            builder: (context, state) => EditDonationScreen(
+              donacion: state.extra as DonationModel,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.perfil,
+            name: 'perfil',
+            builder: (context, state) => const ProfileScreen(),
           ),
           GoRoute(
             path: AppRoutes.notificaciones,

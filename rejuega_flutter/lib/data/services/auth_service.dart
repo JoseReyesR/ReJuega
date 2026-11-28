@@ -95,6 +95,32 @@ class AuthService {
     });
   }
 
+  // (nuevo) Actualiza perfil: Node (MySQL) + Firestore (fuente de la UI).
+  Future<void> actualizarPerfil(UserModel p) async {
+    // (nuevo) 1) Intenta MySQL vía Node (best-effort).
+    try {
+      await HttpClient.instance.put('/api/users/${p.uid}', data: {
+        'nombre': p.nombre,
+        'telefono': p.telefono,
+        'ciudad': p.ciudad,
+        'direccion': p.direccion,
+        'genero': p.genero,
+      });
+      AppLogger.i('>>> PROFILE UPDATE OK (MySQL): ${p.uid}');
+    } catch (e) {
+      AppLogger.w('>>> PROFILE UPDATE FAIL MySQL ($e) → solo Firestore');
+    }
+
+    // (nuevo) 2) Firestore siempre (de aquí lee la app en vivo).
+    await _firestore.collection('users').doc(p.uid).update({
+      'nombre': p.nombre,
+      'telefono': p.telefono,
+      'ciudad': p.ciudad,
+      'direccion': p.direccion,
+      'genero': p.genero,
+    });
+  }
+
   // ---------- SYNC A NODE ----------
   // (nuevo) POST /api/users/sync — best-effort, nunca lanza excepción.
   void syncToNode(UserModel profile) {

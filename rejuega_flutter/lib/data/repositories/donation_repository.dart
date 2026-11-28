@@ -31,6 +31,17 @@ class DonationRepository {
         },
       );
 
+  // (nuevo) Detalle con historial: Node primario, Firestore respaldo.
+  Future<DonationModel> obtenerPorId(String id) => nodeFirst(
+        tag: 'DONATION_DETAIL',
+        node: () async => DonationModel.fromDto(await _api.getDonation(id)),
+        respaldo: () async {
+          final doc = await _fs.collection('donations').doc(id).get();
+          if (!doc.exists) throw Exception('Donación no encontrada');
+          return DonationModel.fromFirestore(doc);
+        },
+      );
+
   // (nuevo) Registrar: Node primario + copia Firestore.
   Future<void> registrar(DonationModel d) async {
     try {
