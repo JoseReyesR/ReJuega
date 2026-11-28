@@ -27,7 +27,7 @@ class AppRoutes {
   static const String test = '/test';
   static const String dataTest = '/datatest';
   static const String campaignDetail = '/campaign/:id';
-  static const String donar = '/donar/:campaignId/:campaignTitulo';
+  static const String donar = '/donar/:campaignId';
   static const String notificaciones = '/notificaciones';
   static const String huella = '/huella';
   static const String impacto = '/impacto';
@@ -107,10 +107,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.donar,
             name: 'donar',
-            builder: (context, state) => RegisterToyScreen(
-              campaignId: state.pathParameters['campaignId'] ?? '',
-              campaignTitulo: Uri.decodeComponent(state.pathParameters['campaignTitulo'] ?? ''),
-            ),
+            builder: (context, state) {
+              final campaignId = state.pathParameters['campaignId'] ?? '';
+              final campaignTitulo = (state.extra as String?) ?? '';
+              return RegisterToyScreen(
+                campaignId: campaignId,
+                campaignTitulo: campaignTitulo,
+              );
+            },
           ),
           GoRoute(
             path: AppRoutes.notificaciones,

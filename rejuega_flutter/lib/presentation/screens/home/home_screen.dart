@@ -95,21 +95,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             data: (resultado) {
-              final campanas = resultado.data
-                  .where((c) =>
-                      _filtro == 'Todas' || c.estado == _filtro)
-                  .toList();
+              // (nuevo) Filtrar según el chip seleccionado
+              final campanasFiltradas = resultado.data.where((c) {
+                switch (_filtro) {
+                  case 'Activas':
+                    return c.estado == 'Activa';
+                  case 'Cerradas':
+                    return c.estado == 'Cerrada';
+                  case 'Todas':
+                  default:
+                    return true;
+                }
+              }).toList();
 
-              if (campanas.isEmpty) {
+              if (campanasFiltradas.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.date_range,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      Icon(Icons.event_busy, size: 48, color: Colors.grey),
                       const SizedBox(height: 8),
-                      Text('No hay campañas $_filtro por el momento.\n¡Vuelve pronto!',
+                      Text('No hay campañas $_filtro disponibles',
                           textAlign: TextAlign.center),
                     ],
                   ),
@@ -120,10 +126,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onRefresh: () async => ref.invalidate(campaignsProvider),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  itemCount: campanas.length,
+                  itemCount: campanasFiltradas.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, i) =>
-                      _CampaignCard(campaign: campanas[i]),
+                  itemBuilder: (context, i) => _CampaignCard(
+                    campaign: campanasFiltradas[i],
+                  ),
                 ),
               );
             },
@@ -145,7 +152,7 @@ class _CampaignCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.go(
+        onTap: () => context.push(
           AppRoutes.campaignDetail.replaceFirst(':id', campaign.id),
         ),
         child: Column(

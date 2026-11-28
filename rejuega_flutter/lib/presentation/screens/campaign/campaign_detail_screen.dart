@@ -19,7 +19,13 @@ class CampaignDetailScreen extends ConsumerWidget {
     final perfil = ref.watch(currentUserProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalle de campaña')),
+      appBar: AppBar(
+        title: const Text('Detalle de campaña'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: campaignAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Padding(
@@ -130,13 +136,17 @@ class CampaignDetailScreen extends ConsumerWidget {
                         ],
                       )
                     else ...[
-                      FilledButton(
+                      FilledButton.icon(
                         onPressed: activa
-                            ? () => context.go(
-                                  '/donar/${campaign.id}/${Uri.encodeComponent(campaign.titulo)}',
-                                )
+                            ? () {
+                                context.push(
+                                  AppRoutes.donar.replaceFirst(':campaignId', campaign.id),
+                                  extra: campaign.titulo,
+                                );
+                              }
                             : null,
-                        child: const Text('Donar juguete'),
+                        icon: const Icon(Icons.volunteer_activism),
+                        label: const Text('Donar juguete'),
                       ),
                       if (!activa) ...[
                         const SizedBox(height: 8),

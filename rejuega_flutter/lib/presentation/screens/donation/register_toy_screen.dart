@@ -43,6 +43,7 @@ class _RegisterToyScreenState extends ConsumerState<RegisterToyScreen> {
     if (x != null) setState(() => _imagen = x);
   }
 
+  // (modificado) Método guardar con mejor manejo de errores
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
     if (_imagen == null) {
@@ -53,21 +54,25 @@ class _RegisterToyScreenState extends ConsumerState<RegisterToyScreen> {
     }
     if (_materialTipo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona el material del juguete')),
+        const SnackBar(content: Text('Selecciona el material')),
       );
       return;
     }
 
     setState(() => _isLoading = true);
-    final uid = ref.read(currentUserProvider).value?.uid ?? '';
-    final materiales = ref.read(materialsProvider).value ?? [];
-    final material = materiales.firstWhere((m) => m.tipoMaterial == _materialTipo);
 
     try {
-      // (nuevo) 1) Sube la foto a Cloudinary.
-      final url = await CloudinaryService.subirImagen(File(_imagen!.path));
+      final uid = ref.read(currentUserProvider).value?.uid ?? '';
+      final materiales = ref.read(materialsProvider).value ?? [];
+      final material = materiales.firstWhere(
+        (m) => m.tipoMaterial == _materialTipo,
+        orElse: () => throw Exception('Material no encontrado'),
+      );
 
-      // (nuevo) 2) Construye la donación con historial inicial Pendiente.
+      print('>>> Subiendo imagen a Cloudinary...');
+      final url = await CloudinaryService.subirImagen(File(_imagen!.path));
+      print('>>> Imagen subida: $url');
+
       final now = DateTime.now().millisecondsSinceEpoch;
       final donacion = DonationModel(
         id: const Uuid().v4(),
@@ -86,10 +91,10 @@ class _RegisterToyScreenState extends ConsumerState<RegisterToyScreen> {
         ],
       );
 
-      // (nuevo) 3) Guarda con patrón Node primario / Firestore respaldo.
+      print('>>> Guardando donación...');
       await ref.read(donationRepositoryProvider).registrar(donacion);
+      print('>>> Donación guardada exitosamente');
 
-      // (nuevo) 4) Refresca listas afectadas.
       ref.invalidate(myDonationsProvider);
       ref.invalidate(unreadCountProvider);
 
@@ -98,11 +103,14 @@ class _RegisterToyScreenState extends ConsumerState<RegisterToyScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('¡Donación registrada con éxito! 🧸')),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('>>> ERROR al registrar donación: $e');
+      print('>>> Stack trace: $stackTrace');
+
       if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al registrar: $e')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
   }

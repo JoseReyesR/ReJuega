@@ -32,40 +32,65 @@ class NotificationScreen extends ConsumerWidget {
       body: listaAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
-        data: (lista) {
-          if (lista.isEmpty) {
-            return const Center(child: Text('No tienes notificaciones aún.'));
+        data: (notificaciones) {
+          if (notificaciones.isEmpty) {
+            return const Center(
+              child: Text('No tienes notificaciones'),
+            );
           }
-          // (nuevo) Más recientes primero.
-          final ordenadas = [...lista]
+
+          // (nuevo) Ordenar por fecha descendente
+          final ordenadas = [...notificaciones]
             ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
 
-          return ListView.separated(
+          return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: ordenadas.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, i) {
-              final n = ordenadas[i];
+            itemBuilder: (context, index) {
+              final notif = ordenadas[index];
               return Card(
-                color: n.leida
-                    ? null
-                    : Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
+                margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: Icon(
-                    n.leida ? Icons.notifications_outlined : Icons.notifications_active,
-                    color: n.leida ? Colors.grey : Theme.of(context).colorScheme.primary,
+                    notif.leida
+                        ? Icons.notifications_none
+                        : Icons.notifications_active,
+                    color: notif.leida ? Colors.grey : Colors.blue,
                   ),
-                  title: Text(n.titulo,
-                      style: TextStyle(
-                          fontWeight: n.leida ? FontWeight.normal : FontWeight.bold)),
-                  subtitle: Text(
-                    '${n.mensaje}\n${AppDateUtils.fechaHora(n.fechaCreacion)}',
+                  title: Text(
+                    notif.titulo,
+                    style: TextStyle(
+                      fontWeight: notif.leida ? FontWeight.normal : FontWeight.bold,
+                    ),
                   ),
-                  isThreeLine: true,
-                  onTap: n.leida
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(notif.mensaje),
+                      Text(
+                        AppDateUtils.fechaHora(notif.fechaCreacion),
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  trailing: notif.leida
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.check_circle_outline),
+                          onPressed: () async {
+                            await ref
+                                .read(notificationRepositoryProvider)
+                                .marcarLeida(notif.id);
+                            ref.invalidate(myNotificationsProvider);
+                            ref.invalidate(unreadCountProvider);
+                          },
+                        ),
+                  onTap: notif.leida
                       ? null
                       : () async {
-                          await ref.read(notificationRepositoryProvider).marcarLeida(n.id);
+                          await ref
+                              .read(notificationRepositoryProvider)
+                              .marcarLeida(notif.id);
                           ref.invalidate(myNotificationsProvider);
                           ref.invalidate(unreadCountProvider);
                         },
